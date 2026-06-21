@@ -1,0 +1,48 @@
+server:
+  port: 0  # Porta aleatória para testes
+
+spring:
+  # Desabilitar autoconfiguração de datasource e JPA para usar mocks
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  # Configuração de cache para usar mocks
+  cache:
+    type: simple
+  # Configuração de JPA desabilitada
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+# Configurações de Cache (TTL em segundos)
+cache:
+  redis:
+    ttl:
+      user: 3600     # 1 hora para testes
+      notify: 3600   # 1 hora para testes
+    prefix:
+      user: "test_user_cache:"
+      notify: "test_notify_cache:"
+
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+    org.hibernate: WARN
+    com.keepguard.ms_user: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true

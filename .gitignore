@@ -1,0 +1,13 @@
+# Build artefacts
+/target/
+*.jar
+*.war
+*.class
+# IDE files
+/.idea/
+*.iml
+*.classpath
+*.project
+*.settings/
+# OS files
+.DS_Store

@@ -1,0 +1,147 @@
+# Configurações da Aplicação
+application:
+  timezone: America/Sao_Paulo
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: ms-user
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        default_schema: ms_user
+        jdbc:
+          time_zone: America/Sao_Paulo
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+cache:
+  redis:
+    ttl:
+      user: 2592000     # 30 dias
+      notify: 2592000   # 30 dias
+      register_session: 1200  # 20 minutos
+    prefix:
+      user: "user_cache"
+      notify: "notify_cache:"
+      register: "register_session"
+    max_attempts:
+      register_token: 5  # máximo de tentativas de validação de token
+      register_resend: 5  # máximo de tentativas de reenvio de token
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slowCallDurationThreshold: 5000ms
+        slowCallRateThreshold: 50
+    instances:
+      redisCache:
+        baseConfig: default
+        registerHealthIndicator: true
+        
+  retry:
+    configs:
+      default:
+        maxAttempts: 2
+        waitDuration: 1s
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.sql.SQLException
+          - org.springframework.dao.DataAccessException
+          - org.springframework.data.redis.RedisConnectionFailureException
+    instances:
+      redisCache:
+        baseConfig: default
+      registerCache:
+        maxAttempts: 2                      # Apenas 2 tentativas
+        waitDuration: 500ms                 # 500ms entre tentativas (rápido)
+        retryExceptions:
+          - org.springframework.data.redis.RedisConnectionFailureException
+          - java.net.SocketException
+          - java.io.IOException
+      databaseOperation:
+        baseConfig: default
+        
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 50
+        maxWaitDuration: 0ms
+    instances:
+      databaseOperation:
+        baseConfig: default
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+
+# Configuração de Segurança JWT (lib-security)
+keepguard:
+  security:
+    jwt:
+      enabled: true
+      secret: ${JWT_SECRET}
+      expiration: 3600000
+      issuer: ms-auth
+      validate-issuer: true
+  
+  # Configuração de Validação de Conteúdo (lib-validation)
+  validation:
+    moderation:
+      enabled: true
+      api-key: ${OPENAI_API_KEY}
+      api-url: https://api.openai.com/v1/moderations
+      model: omni-moderation-latest
+      timeout: 5s
+      default-threshold: 0.7
+      cache:
+        enabled: true
+        ttl: 24h
+      circuit-breaker:
+        enabled: true
+        failure-threshold: 5
+        wait-duration: 30s
+      retry:
+        enabled: true
+        max-attempts: 3
+        wait-duration: 500ms

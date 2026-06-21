@@ -1,0 +1,78 @@
+server:
+  port: 8585
+  
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/keepguard_api_db
+    username: keepguard_api_user
+    password: keepguard_api_pass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        default_schema: ms_user
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**
+    livereload:
+      enabled: true
+      port: 35729
+    remote:
+      restart:
+        enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        
+cache:
+  redis:
+    ttl:
+      user: 2592000     # 30 dias
+      notify: 2592000   # 30 dias
+      register_session: 1200  # 20 minutos
+    prefix:
+      user: "user_cache"
+      notify: "notify_cache"
+      register: "register_session"
+    max_attempts:
+      register_token: 5  # máximo de tentativas de validação de token
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
