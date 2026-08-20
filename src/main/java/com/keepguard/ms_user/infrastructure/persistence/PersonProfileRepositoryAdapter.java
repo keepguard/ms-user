@@ -130,19 +130,19 @@ public class PersonProfileRepositoryAdapter implements PersonProfileRepositoryPo
     }
 
     @Override
-    public boolean existsByCpfAndXApplication(String cpf, UUID xApplication) {
-        if (cpf == null || cpf.trim().isEmpty() || xApplication == null) {
+    public boolean existsByCpfAndTenantId(String cpf, UUID tenantId) {
+        if (cpf == null || cpf.trim().isEmpty() || tenantId == null) {
             return false;
         }
-        return springRepository.existsByCpfAndXApplication(cpf, xApplication);
+        return springRepository.existsByCpfAndTenantId(cpf, tenantId);
     }
 
     @Override
-    public Optional<PersonProfile> findByCpfAndXApplication(String cpf, UUID xApplication) {
-        if (cpf == null || cpf.trim().isEmpty() || xApplication == null) {
+    public Optional<PersonProfile> findByCpfAndTenantId(String cpf, UUID tenantId) {
+        if (cpf == null || cpf.trim().isEmpty() || tenantId == null) {
             return Optional.empty();
         }
-        return springRepository.findByCpfAndXApplication(cpf, xApplication)
+        return springRepository.findByCpfAndTenantId(cpf, tenantId)
                 .map(mapper::toDomain);
     }
 }

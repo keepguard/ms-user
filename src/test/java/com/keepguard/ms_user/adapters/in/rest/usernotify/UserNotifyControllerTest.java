@@ -49,16 +49,16 @@ class UserNotifyControllerTest {
     private UUID notifyId;
     private UUID userId;
     private UUID codeUser;
-    private UUID xApplicationUuid;
-    private String xApplicationHeader;
+    private UUID tenantId;
+    private String tenantIdStr;
     
     @BeforeEach
     void setUp() {
         notifyId = UUID.randomUUID();
         userId = UUID.randomUUID();
         codeUser = UUID.randomUUID();
-        xApplicationUuid = UUID.randomUUID();
-        xApplicationHeader = xApplicationUuid.toString();
+        tenantId = UUID.randomUUID();
+        tenantIdStr = tenantId.toString();
         
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(userNotifyController).build();
@@ -92,7 +92,7 @@ class UserNotifyControllerTest {
         
         // When & Then
         mockMvc.perform(post("/api/v1/users/notify")
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -115,7 +115,7 @@ class UserNotifyControllerTest {
                 .withUserId(userId)
                 .buildDetailsView();
         
-        when(mapper.toGetByUserIdQuery(userId, xApplicationUuid)).thenReturn(UserNotifyTestBuilder.builder().buildGetByUserIdQuery());
+        when(mapper.toGetByUserIdQuery(userId, tenantId)).thenReturn(UserNotifyTestBuilder.builder().buildGetByUserIdQuery());
         when(userNotifyPort.getByUserId(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(UserNotifyTestBuilder.builder()
                 .withId(notifyId)
@@ -124,7 +124,7 @@ class UserNotifyControllerTest {
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/notify/{userId}/notify", userId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(notifyId.toString()))
                 .andExpect(jsonPath("$.userId").value(userId.toString()));
@@ -141,7 +141,7 @@ class UserNotifyControllerTest {
                 .withCodeUser(codeUser)
                 .buildDetailsView();
         
-        when(mapper.toGetByCodeUserQuery(codeUser, xApplicationUuid)).thenReturn(UserNotifyTestBuilder.builder().buildGetByCodeUserQuery());
+        when(mapper.toGetByCodeUserQuery(codeUser, tenantId)).thenReturn(UserNotifyTestBuilder.builder().buildGetByCodeUserQuery());
         when(userNotifyPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(UserNotifyTestBuilder.builder()
                 .withId(notifyId)
@@ -150,7 +150,7 @@ class UserNotifyControllerTest {
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/notify/code/{codeUser}/notify", codeUser)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(notifyId.toString()));
     }
@@ -175,7 +175,7 @@ class UserNotifyControllerTest {
                 .withNotifySms(true)
                 .buildDetailsView();
         
-        when(mapper.toPatchCommand(eq(userId), any(), eq(xApplicationUuid), any())).thenReturn(UserNotifyTestBuilder.builder().buildPatchCommand());
+        when(mapper.toPatchCommand(eq(userId), any(), eq(tenantId), any())).thenReturn(UserNotifyTestBuilder.builder().buildPatchCommand());
         when(userNotifyPort.patchByUserId(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(UserNotifyTestBuilder.builder()
                 .withId(notifyId)
@@ -186,7 +186,7 @@ class UserNotifyControllerTest {
         
         // When & Then
         mockMvc.perform(patch("/api/v1/users/notify/{userId}/notify", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -216,7 +216,7 @@ class UserNotifyControllerTest {
                 .withNotifyPush(false)
                 .buildDetailsView();
         
-        when(mapper.toPatchCommand(any(), eq(codeUser), eq(xApplicationUuid), any())).thenReturn(UserNotifyTestBuilder.builder().buildPatchCommand());
+        when(mapper.toPatchCommand(any(), eq(codeUser), eq(tenantId), any())).thenReturn(UserNotifyTestBuilder.builder().buildPatchCommand());
         when(userNotifyPort.patchByCodeUser(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(UserNotifyTestBuilder.builder()
                 .withId(notifyId)
@@ -227,7 +227,7 @@ class UserNotifyControllerTest {
         
         // When & Then
         mockMvc.perform(patch("/api/v1/users/notify/code/{codeUser}/notify", codeUser)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

@@ -18,7 +18,7 @@ public class UserNotifyTestBuilder {
     private UUID id = UUID.randomUUID();
     private UUID userId = UUID.randomUUID();
     private UUID codeUser = UUID.randomUUID();
-    private UUID xApplication = UUID.randomUUID();
+    private UUID tenantId = UUID.randomUUID();
     private Boolean notifyEmail = true;
     private Boolean notifySms = false;
     private Boolean notifyWhatsapp = true;
@@ -52,8 +52,8 @@ public class UserNotifyTestBuilder {
         return this;
     }
     
-    public UserNotifyTestBuilder withXApplication(UUID xApplication) {
-        this.xApplication = xApplication;
+    public UserNotifyTestBuilder withTenantId(UUID tenantId) {
+        this.tenantId = tenantId;
         return this;
     }
     
@@ -108,7 +108,7 @@ public class UserNotifyTestBuilder {
     
     public UserNotifyCreateCommandDTO buildCreateCommand() {
         return new UserNotifyCreateCommandDTO(
-                xApplication,
+                tenantId,
                 userId,
                 notifyEmail,
                 notifySms,
@@ -121,7 +121,7 @@ public class UserNotifyTestBuilder {
         return new UserNotifyPatchCommandDTO(
                 userId,
                 codeUser,
-                xApplication,
+                tenantId,
                 notifyEmail,
                 notifySms,
                 notifyWhatsapp,
@@ -130,11 +130,11 @@ public class UserNotifyTestBuilder {
     }
     
     public UserNotifyGetByUserIdQueryDTO buildGetByUserIdQuery() {
-        return new UserNotifyGetByUserIdQueryDTO(userId, xApplication);
+        return new UserNotifyGetByUserIdQueryDTO(userId, tenantId);
     }
     
     public UserNotifyGetByCodeUserQueryDTO buildGetByCodeUserQuery() {
-        return new UserNotifyGetByCodeUserQueryDTO(codeUser, xApplication);
+        return new UserNotifyGetByCodeUserQueryDTO(codeUser, tenantId);
     }
     
     public NotifyViewDTO buildView() {

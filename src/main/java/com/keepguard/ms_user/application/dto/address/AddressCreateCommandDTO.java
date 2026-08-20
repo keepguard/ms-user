@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public record AddressCreateCommandDTO(
     UUID userId,
-    UUID xApplication,
+    UUID tenantId,
     String street,
     String number,
     String complement,

@@ -5,7 +5,7 @@ import java.util.UUID;
 public record UserNotifyPatchCommandDTO(
     UUID userId,
     UUID codeUser,
-    UUID xApplication,
+    UUID tenantId,
     Boolean notifyEmail,
     Boolean notifySms,
     Boolean notifyWhatsapp,

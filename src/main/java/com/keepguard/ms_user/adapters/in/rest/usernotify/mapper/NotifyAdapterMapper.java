@@ -18,14 +18,14 @@ import java.util.UUID;
 @Component
 public class NotifyAdapterMapper {
 
-    public UserNotifyCreateCommandDTO toCreateCommand(UUID xApplication, UserNotifyCreateRequestDTO request) {
+    public UserNotifyCreateCommandDTO toCreateCommand(UUID tenantId, UserNotifyCreateRequestDTO request) {
         if (request == null) {
             return null;
         }
 
         return new UserNotifyCreateCommandDTO(
             request.userId(),
-            xApplication,
+            tenantId,
             request.notifyEmail(),
             request.notifySms(),
             request.notifyWhatsapp(),
@@ -33,7 +33,7 @@ public class NotifyAdapterMapper {
         );
     }
 
-    public UserNotifyPatchCommandDTO toPatchCommand(UUID userId, UUID codeUser, UUID xApplication, UserNotifyPatchRequestDTO request) {
+    public UserNotifyPatchCommandDTO toPatchCommand(UUID userId, UUID codeUser, UUID tenantId, UserNotifyPatchRequestDTO request) {
         if (request == null) {
             return null;
         }
@@ -41,7 +41,7 @@ public class NotifyAdapterMapper {
         return new UserNotifyPatchCommandDTO(
             userId,
             codeUser,
-            xApplication,
+            tenantId,
             request.notifyEmail(),
             request.notifySms(),
             request.notifyWhatsapp(),
@@ -49,12 +49,12 @@ public class NotifyAdapterMapper {
         );
     }
 
-    public UserNotifyGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID xApplication) {
-        return new UserNotifyGetByUserIdQueryDTO(userId, xApplication);
+    public UserNotifyGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID tenantId) {
+        return new UserNotifyGetByUserIdQueryDTO(userId, tenantId);
     }
 
-    public UserNotifyGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID xApplication) {
-        return new UserNotifyGetByCodeUserQueryDTO(codeUser, xApplication);
+    public UserNotifyGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID tenantId) {
+        return new UserNotifyGetByCodeUserQueryDTO(codeUser, tenantId);
     }
 
     public UserNotifyResponseDTO toResponseDTO(NotifyViewDTO view) {

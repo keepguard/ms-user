@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record ContactGetByIdQueryDTO(
     UUID id,
-    UUID xApplication
+    UUID tenantId
 ) {}
 

@@ -26,7 +26,7 @@ public interface UserRepositoryPort {
 
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByEmailAndXApplication(String email, UUID xApplication);
+    Optional<User> findByEmailAndTenantId(String email, UUID tenantId);
 
     List<User> findAllByCompanyId(UUID companyId);
 
@@ -36,7 +36,7 @@ public interface UserRepositoryPort {
 
     boolean existsByEmail(String email);
 
-    boolean existsByEmailAndXApplication(String email, UUID xApplication);
+    boolean existsByEmailAndTenantId(String email, UUID tenantId);
 
     boolean existsByCodeUser(UUID codeUser);
 

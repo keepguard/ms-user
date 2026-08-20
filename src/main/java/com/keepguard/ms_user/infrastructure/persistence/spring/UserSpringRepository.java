@@ -25,8 +25,8 @@ public interface UserSpringRepository extends JpaRepository<UserJpaEntity, UUID>
     @Query("SELECT u FROM UserJpaEntity u WHERE u.email = :email")
     Optional<UserJpaEntity> findByEmail(@Param("email") String email);
 
-    @Query("SELECT u FROM UserJpaEntity u WHERE u.email = :email AND u.xApplication = :xApplication")
-    Optional<UserJpaEntity> findByEmailAndXApplication(@Param("email") String email, @Param("xApplication") UUID xApplication);
+    @Query("SELECT u FROM UserJpaEntity u WHERE u.email = :email AND u.tenantId = :tenantId")
+    Optional<UserJpaEntity> findByEmailAndTenantId(@Param("email") String email, @Param("tenantId") UUID tenantId);
 
     @Query("SELECT u FROM UserJpaEntity u WHERE u.companyId = :companyId")
     List<UserJpaEntity> findAllByCompanyId(@Param("companyId") UUID companyId);
@@ -39,8 +39,8 @@ public interface UserSpringRepository extends JpaRepository<UserJpaEntity, UUID>
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT COUNT(u) > 0 FROM UserJpaEntity u WHERE u.email = :email AND u.xApplication = :xApplication")
-    boolean existsByEmailAndXApplication(@Param("email") String email, @Param("xApplication") UUID xApplication);
+    @Query("SELECT COUNT(u) > 0 FROM UserJpaEntity u WHERE u.email = :email AND u.tenantId = :tenantId")
+    boolean existsByEmailAndTenantId(@Param("email") String email, @Param("tenantId") UUID tenantId);
 
     boolean existsByCodeUser(UUID codeUser);
 

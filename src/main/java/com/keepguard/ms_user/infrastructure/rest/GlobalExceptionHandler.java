@@ -1,7 +1,7 @@
 package com.keepguard.ms_user.infrastructure.rest;
 
 import com.keepguard.lib_common.exception.ValidationException;
-import com.keepguard.lib_common.exception.InvalidXApplicationException;
+import com.keepguard.lib_common.exception.InvalidTenantIdException;
 import com.keepguard.lib_validation.moderation.application.service.ContentViolationException;
 import com.keepguard.lib_validation.moderation.domain.model.ModerationResult;
 import com.keepguard.ms_user.application.service.exception.AlreadyExistsException;
@@ -113,8 +113,8 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         
-        if (ex.getHeaderName().equals("X-Application")) {
-            body.put("message", "Header X-Application é obrigatório");
+        if (ex.getHeaderName().equals("X-Tenant-Id")) {
+            body.put("message", "Header X-Tenant-Id é obrigatório");
         } else {
             body.put("message", "Header " + ex.getHeaderName() + " é obrigatório");
         }
@@ -123,9 +123,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
-    @ExceptionHandler(InvalidXApplicationException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidXApplicationException(InvalidXApplicationException ex) {
-        log.warn("Header X-Application inválido: {}", ex.getMessage());
+    @ExceptionHandler(InvalidTenantIdException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTenantIdException(InvalidTenantIdException ex) {
+        log.warn("Header X-Tenant-Id inválido: {}", ex.getMessage());
 
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", OffsetDateTime.now());

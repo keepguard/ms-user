@@ -51,15 +51,15 @@ class ContactControllerTest {
     
     private UUID contactId;
     private UUID userId;
-    private UUID xApplicationUuid;
-    private String xApplicationHeader;
+    private UUID tenantId;
+    private String tenantIdStr;
     
     @BeforeEach
     void setUp() {
         contactId = UUID.randomUUID();
         userId = UUID.randomUUID();
-        xApplicationUuid = UUID.randomUUID();
-        xApplicationHeader = xApplicationUuid.toString();
+        tenantId = UUID.randomUUID();
+        tenantIdStr = tenantId.toString();
         
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(contactController).build();
@@ -94,7 +94,7 @@ class ContactControllerTest {
         
         // When & Then
         mockMvc.perform(post("/api/v1/contacts")
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -113,7 +113,7 @@ class ContactControllerTest {
                 .withUserId(userId)
                 .buildDetailsView();
         
-        when(mapper.toGetByIdQuery(contactId, xApplicationUuid)).thenReturn(ContactTestBuilder.builder().buildGetByIdQuery());
+        when(mapper.toGetByIdQuery(contactId, tenantId)).thenReturn(ContactTestBuilder.builder().buildGetByIdQuery());
         when(contactPort.getById(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(ContactRequestDTOBuilder.builder()
                 .id(contactId)
@@ -122,7 +122,7 @@ class ContactControllerTest {
         
         // When & Then
         mockMvc.perform(get("/api/v1/contacts/{id}", contactId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(contactId.toString()))
                 .andExpect(jsonPath("$.user_id").value(userId.toString()));
@@ -139,7 +139,7 @@ class ContactControllerTest {
                 .withUserId(userId)
                 .buildDetailsView();
         
-        when(mapper.toGetByUserIdQuery(userId, xApplicationUuid)).thenReturn(ContactTestBuilder.builder().buildGetByUserIdQuery());
+        when(mapper.toGetByUserIdQuery(userId, tenantId)).thenReturn(ContactTestBuilder.builder().buildGetByUserIdQuery());
         when(contactPort.getByUserId(any())).thenReturn(List.of(view));
         when(mapper.toResponseDTO(any())).thenReturn(ContactRequestDTOBuilder.builder()
                 .id(contactId)
@@ -148,7 +148,7 @@ class ContactControllerTest {
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/contacts", userId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value(contactId.toString()))
@@ -174,7 +174,7 @@ class ContactControllerTest {
                 .withUserId(userId)
                 .buildDetailsView();
         
-        when(mapper.toUpdateCommand(any(), eq(contactId), eq(xApplicationUuid))).thenReturn(ContactTestBuilder.builder().buildUpdateCommand());
+        when(mapper.toUpdateCommand(any(), eq(contactId), eq(tenantId))).thenReturn(ContactTestBuilder.builder().buildUpdateCommand());
         when(contactPort.update(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(ContactRequestDTOBuilder.builder()
                 .id(contactId)
@@ -183,7 +183,7 @@ class ContactControllerTest {
         
         // When & Then
         mockMvc.perform(put("/api/v1/contacts/{id}", contactId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -196,11 +196,11 @@ class ContactControllerTest {
     @DisplayName("Deve deletar contato com sucesso")
     void shouldDeleteContactSuccessfully() throws Exception {
         // Given
-        when(mapper.toDeleteCommand(contactId, xApplicationUuid)).thenReturn(ContactTestBuilder.builder().buildDeleteCommand());
+        when(mapper.toDeleteCommand(contactId, tenantId)).thenReturn(ContactTestBuilder.builder().buildDeleteCommand());
         
         // When & Then
         mockMvc.perform(delete("/api/v1/contacts/{id}", contactId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isNoContent());
     }
     
@@ -219,13 +219,13 @@ class ContactControllerTest {
                 List.of(searchView), 1L, 0, 20
         );
         
-        when(mapper.toSearchQuery(any(), eq(xApplicationUuid), eq(userId))).thenReturn(ContactTestBuilder.builder().buildSearchQuery());
+        when(mapper.toSearchQuery(any(), eq(tenantId), eq(userId))).thenReturn(ContactTestBuilder.builder().buildSearchQuery());
         when(contactPort.search(any())).thenReturn(pageResult);
         when(mapper.toSearchResponseDTO(any())).thenReturn(ContactRequestDTOBuilder.builder().buildResponse());
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/contacts/search", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .param("value", "11999999999")
                         .param("page", "0")
                         .param("size", "20"))
@@ -241,7 +241,7 @@ class ContactControllerTest {
     void shouldReturnBadRequestWhenPageIsNegative() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/contacts/search", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .param("page", "-1")
                         .param("size", "20"))
                 .andExpect(status().isBadRequest());
@@ -252,7 +252,7 @@ class ContactControllerTest {
     void shouldReturnBadRequestWhenPageSizeIsInvalid() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/contacts/search", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .param("page", "0")
                         .param("size", "101"))
                 .andExpect(status().isBadRequest());

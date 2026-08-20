@@ -11,37 +11,37 @@ public interface RegisterCachePort {
      * Salva uma sessão de registro no Redis.
      *
      * @param email Email do usuário
-     * @param xApplication UUID da aplicação
+     * @param tenantId UUID da aplicação
      * @param session Sessão de registro
      * @throws JsonProcessingException se houver erro na serialização
      */
-    void saveRegisterSession(String email, java.util.UUID xApplication, RegisterSession session) throws JsonProcessingException;
+    void saveRegisterSession(String email, java.util.UUID tenantId, RegisterSession session) throws JsonProcessingException;
 
     /**
      * Busca uma sessão de registro no Redis.
      *
      * @param email Email do usuário
-     * @param xApplication UUID da aplicação
+     * @param tenantId UUID da aplicação
      * @return Sessão de registro se encontrada
      * @throws JsonProcessingException se houver erro na deserialização
      */
-    Optional<RegisterSession> getRegisterSession(String email, java.util.UUID xApplication) throws JsonProcessingException;
+    Optional<RegisterSession> getRegisterSession(String email, java.util.UUID tenantId) throws JsonProcessingException;
 
     /**
      * Remove uma sessão de registro do Redis.
      *
      * @param email Email do usuário
-     * @param xApplication UUID da aplicação
+     * @param tenantId UUID da aplicação
      */
-    void removeRegisterSession(String email, java.util.UUID xApplication);
+    void removeRegisterSession(String email, java.util.UUID tenantId);
 
     /**
      * Verifica se existe uma sessão de registro no Redis.
      *
      * @param email Email do usuário
-     * @param xApplication UUID da aplicação
+     * @param tenantId UUID da aplicação
      * @return true se existe, false caso contrário
      */
-    boolean existsRegisterSession(String email, java.util.UUID xApplication);
+    boolean existsRegisterSession(String email, java.util.UUID tenantId);
 }
 

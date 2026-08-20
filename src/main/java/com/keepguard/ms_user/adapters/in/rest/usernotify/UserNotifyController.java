@@ -39,13 +39,13 @@ public class UserNotifyController {
     public ResponseEntity<UserNotifyResponseDTO> create(
             @Valid @RequestBody UserNotifyCreateRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Criando preferências de notificação para usuário: {}, application={}", request.userId(), xApplicationUuid);
+        log.info("Criando preferências de notificação para usuário: {}, application={}", request.userId(), tenantId);
         
-        var command = mapper.toCreateCommand(xApplicationUuid, request);
+        var command = mapper.toCreateCommand(tenantId, request);
         var notifyView = userNotifyPort.create(command);
         var responseDTO = mapper.toResponseDTO(notifyView);
         
@@ -58,13 +58,13 @@ public class UserNotifyController {
     public ResponseEntity<UserNotifyResponseDTO> getByUserId(
             @PathVariable UUID userId,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Buscando preferências de notificação: application={}, userId={}", xApplicationUuid, userId);
+        log.info("Buscando preferências de notificação: application={}, userId={}", tenantId, userId);
         
-        var query = mapper.toGetByUserIdQuery(userId, xApplicationUuid);
+        var query = mapper.toGetByUserIdQuery(userId, tenantId);
         var notifyView = userNotifyPort.getByUserId(query);
         var responseDTO = mapper.toResponseDTO(notifyView);
         return ResponseEntity.ok(responseDTO);
@@ -77,12 +77,12 @@ public class UserNotifyController {
             @PathVariable UUID userId,
             @RequestBody UserNotifyPatchRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Atualizando preferências de notificação: application={}, userId={}", xApplicationUuid, userId);
+        log.info("Atualizando preferências de notificação: application={}, userId={}", tenantId, userId);
         
-        var command = mapper.toPatchCommand(userId, null, xApplicationUuid, request);
+        var command = mapper.toPatchCommand(userId, null, tenantId, request);
         var notifyView = userNotifyPort.patchByUserId(command);
         var responseDTO = mapper.toResponseDTO(notifyView);
         
@@ -95,12 +95,12 @@ public class UserNotifyController {
     public ResponseEntity<UserNotifyResponseDTO> getByCodeUser(
             @PathVariable UUID codeUser,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Buscando preferências de notificação por codeUser: application={}, codeUser={}", xApplicationUuid, codeUser);
+        log.info("Buscando preferências de notificação por codeUser: application={}, codeUser={}", tenantId, codeUser);
         
-        var query = mapper.toGetByCodeUserQuery(codeUser, xApplicationUuid);
+        var query = mapper.toGetByCodeUserQuery(codeUser, tenantId);
         var notifyView = userNotifyPort.getByCodeUser(query);
         var responseDTO = mapper.toResponseDTO(notifyView);
         return ResponseEntity.ok(responseDTO);
@@ -113,12 +113,12 @@ public class UserNotifyController {
             @PathVariable UUID codeUser,
             @RequestBody UserNotifyPatchRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Atualizando preferências de notificação por codeUser: application={}, codeUser={}", xApplicationUuid, codeUser);
+        log.info("Atualizando preferências de notificação por codeUser: application={}, codeUser={}", tenantId, codeUser);
         
-        var command = mapper.toPatchCommand(null, codeUser, xApplicationUuid, request);
+        var command = mapper.toPatchCommand(null, codeUser, tenantId, request);
         var notifyView = userNotifyPort.patchByCodeUser(command);
         var responseDTO = mapper.toResponseDTO(notifyView);
         

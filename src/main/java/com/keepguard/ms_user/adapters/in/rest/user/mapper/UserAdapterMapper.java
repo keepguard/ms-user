@@ -19,11 +19,11 @@ import java.util.UUID;
 @Component
 public class UserAdapterMapper {
 
-    public UserCreateCommandDTO toCreateCommand(UserCreateRequestDTO request, UUID xApplication) {
+    public UserCreateCommandDTO toCreateCommand(UserCreateRequestDTO request, UUID tenantId) {
         String displayHandle = request.personProfile() != null ? request.personProfile().displayHandle() : null;
         return new UserCreateCommandDTO(
             request.companyId(),
-            xApplication,
+            tenantId,
             request.type(),
             request.email(),
             request.phoneE164(),
@@ -36,13 +36,13 @@ public class UserAdapterMapper {
         );
     }
 
-    public UserUpdateCommandDTO toUpdateCommand(UserUpdateRequestDTO request, UUID id, UUID xApplication) {
+    public UserUpdateCommandDTO toUpdateCommand(UserUpdateRequestDTO request, UUID id, UUID tenantId) {
         java.util.Optional<String> displayHandle = request.personProfile() != null && request.personProfile().displayHandle() != null
             ? java.util.Optional.of(request.personProfile().displayHandle())
             : java.util.Optional.empty();
         return new UserUpdateCommandDTO(
             id,
-            xApplication,
+            tenantId,
             java.util.Optional.ofNullable(request.companyId()),
             java.util.Optional.ofNullable(request.codeUser()),
             java.util.Optional.ofNullable(request.type()),
@@ -60,25 +60,25 @@ public class UserAdapterMapper {
 
     // === Query Methods ===
 
-    public UserGetByIdQueryDTO toGetByIdQuery(UUID id, UUID xApplication) {
-        return new UserGetByIdQueryDTO(id, xApplication);
+    public UserGetByIdQueryDTO toGetByIdQuery(UUID id, UUID tenantId) {
+        return new UserGetByIdQueryDTO(id, tenantId);
     }
 
-    public UserGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID xApplication) {
-        return new UserGetByCodeUserQueryDTO(codeUser, xApplication);
+    public UserGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID tenantId) {
+        return new UserGetByCodeUserQueryDTO(codeUser, tenantId);
     }
 
-    public UserGetByEmailQueryDTO toGetByEmailQuery(String email, UUID xApplication) {
-        return new UserGetByEmailQueryDTO(email, xApplication);
+    public UserGetByEmailQueryDTO toGetByEmailQuery(String email, UUID tenantId) {
+        return new UserGetByEmailQueryDTO(email, tenantId);
     }
 
-    public UserSearchQueryDTO toSearchQuery(UserSearchRequestDTO request, UUID xApplication, UUID companyId) {
+    public UserSearchQueryDTO toSearchQuery(UserSearchRequestDTO request, UUID tenantId, UUID companyId) {
         // Parse enum types usando métodos estáticos dos enums
         var userType = UserTypeEnum.fromString(request.getType());
         var userStatus = UserStatusEnum.fromString(request.getStatus());
         
         return new UserSearchQueryDTO(
-            xApplication,
+            tenantId,
             request.getEmail(),
             companyId,
             userType,
@@ -105,16 +105,16 @@ public class UserAdapterMapper {
 
     // === Command Methods ===
 
-    public UserDeleteCommandDTO toDeleteCommand(UUID id, UUID xApplication) {
-        return new UserDeleteCommandDTO(id, xApplication);
+    public UserDeleteCommandDTO toDeleteCommand(UUID id, UUID tenantId) {
+        return new UserDeleteCommandDTO(id, tenantId);
     }
 
-    public UserStatusChangeCommandDTO toStatusChangeCommand(UUID id, String reason, UUID xApplication) {
-        return new UserStatusChangeCommandDTO(id, xApplication, reason);
+    public UserStatusChangeCommandDTO toStatusChangeCommand(UUID id, String reason, UUID tenantId) {
+        return new UserStatusChangeCommandDTO(id, tenantId, reason);
     }
 
-    public UserBatchStatusCommandDTO toBatchStatusCommand(List<UUID> userIds, String reason, UUID xApplication) {
-        return new UserBatchStatusCommandDTO(userIds, xApplication, reason);
+    public UserBatchStatusCommandDTO toBatchStatusCommand(List<UUID> userIds, String reason, UUID tenantId) {
+        return new UserBatchStatusCommandDTO(userIds, tenantId, reason);
     }
 
     public UserResponseDTO toGetByIdResponseDTO(UserDetailsViewDTO view) {

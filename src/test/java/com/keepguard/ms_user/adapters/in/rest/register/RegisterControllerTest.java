@@ -65,13 +65,13 @@ class RegisterControllerTest {
     @InjectMocks
     private RegisterController registerController;
 
-    private UUID xApplication;
+    private UUID tenantId;
     private RegisterInitRequestDTO initRequest;
     private RegisterConfirmRequestDTO confirmRequest;
 
     @BeforeEach
     void setUp() {
-        xApplication = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+        tenantId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
         
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(registerController)
@@ -124,7 +124,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Application", xApplication.toString())
+                        .header("X-Tenant-Id", tenantId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(initRequest)))
                 .andExpect(status().isCreated())
@@ -137,8 +137,8 @@ class RegisterControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar erro 400 quando X-Application está ausente")
-    void deveRetornarErro400QuandoXApplicationEstaAusente() throws Exception {
+    @DisplayName("Deve retornar erro 400 quando X-Tenant-Id está ausente")
+    void deveRetornarErro400QuandoTenantIdEstaAusente() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,11 +149,11 @@ class RegisterControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar erro 400 quando X-Application é inválido")
-    void deveRetornarErro400QuandoXApplicationEInvalido() throws Exception {
+    @DisplayName("Deve retornar erro 400 quando X-Tenant-Id é inválido")
+    void deveRetornarErro400QuandoTenantIdEInvalido() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Application", "invalid-uuid")
+                        .header("X-Tenant-Id", "invalid-uuid")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(initRequest)))
                 .andExpect(status().is5xxServerError()); // O controller lança exceção que resulta em 500
@@ -180,7 +180,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Application", xApplication.toString())
+                        .header("X-Tenant-Id", tenantId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestIncompleto)))
                 .andExpect(status().isBadRequest());
@@ -207,7 +207,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Application", xApplication.toString())
+                        .header("X-Tenant-Id", tenantId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestEmailInvalido)))
                 .andExpect(status().isBadRequest());
@@ -223,7 +223,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Application", xApplication.toString())
+                        .header("X-Tenant-Id", tenantId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(confirmRequest)))
                 .andExpect(status().isOk());
@@ -232,8 +232,8 @@ class RegisterControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar erro 400 quando X-Application está ausente na confirmação")
-    void deveRetornarErro400QuandoXApplicationEstaAusenteNaConfirmacao() throws Exception {
+    @DisplayName("Deve retornar erro 400 quando X-Tenant-Id está ausente na confirmação")
+    void deveRetornarErro400QuandoTenantIdEstaAusenteNaConfirmacao() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -255,7 +255,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Application", xApplication.toString())
+                        .header("X-Tenant-Id", tenantId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestIncompleto)))
                 .andExpect(status().isBadRequest());
@@ -275,7 +275,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Application", xApplication.toString())
+                        .header("X-Tenant-Id", tenantId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestTokenInvalido)))
                 .andExpect(status().isBadRequest());
@@ -295,7 +295,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Application", xApplication.toString())
+                        .header("X-Tenant-Id", tenantId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestEmailInvalido)))
                 .andExpect(status().isBadRequest());

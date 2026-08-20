@@ -15,7 +15,7 @@ public final class User {
     private final UUID id;
     private UUID codeUser;
     private UUID companyId;
-    private UUID xApplication;
+    private UUID tenantId;
     private UserTypeEnum type;
     private UserStatusEnum status;
     private String email;
@@ -27,13 +27,13 @@ public final class User {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
-    private User(UUID id, UUID codeUser, UUID companyId, UUID xApplication, UserTypeEnum type, UserStatusEnum status,
+    private User(UUID id, UUID codeUser, UUID companyId, UUID tenantId, UserTypeEnum type, UserStatusEnum status,
                 String email, String phoneE164, String preferredLocale, String timezone,
                 String avatarUrl, String displayHandle, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.id = id == null ? UUID.randomUUID() : id;
         this.codeUser = codeUser;
         this.companyId = validateCompanyId(companyId);
-        this.xApplication = validateXApplication(xApplication);
+        this.tenantId = validateTenantId(tenantId);
         this.type = Objects.requireNonNullElse(type, UserTypeEnum.PERSON);
         this.status = Objects.requireNonNullElse(status, UserStatusEnum.PENDING);
         this.email = validateEmail(email);
@@ -57,17 +57,17 @@ public final class User {
         return normalized;
     }
 
-    public static User create(UUID codeUser, UUID companyId, UUID xApplication, UserTypeEnum type, String email,
+    public static User create(UUID codeUser, UUID companyId, UUID tenantId, UserTypeEnum type, String email,
                              String phoneE164, String preferredLocale, String timezone, String avatarUrl) {
-        return new User(null, codeUser, companyId, xApplication, type, UserStatusEnum.PENDING,
+        return new User(null, codeUser, companyId, tenantId, type, UserStatusEnum.PENDING,
                        email, phoneE164, preferredLocale, timezone, avatarUrl, null,
                        OffsetDateTime.now(), OffsetDateTime.now());
     }
 
-    public static User of(UUID id, UUID codeUser, UUID companyId, UUID xApplication, UserTypeEnum type, UserStatusEnum status,
+    public static User of(UUID id, UUID codeUser, UUID companyId, UUID tenantId, UserTypeEnum type, UserStatusEnum status,
                          String email, String phoneE164, String preferredLocale, String timezone,
                          String avatarUrl, String displayHandle, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
-        return new User(id, codeUser, companyId, xApplication, type, status, email, phoneE164,
+        return new User(id, codeUser, companyId, tenantId, type, status, email, phoneE164,
                        preferredLocale, timezone, avatarUrl, displayHandle, createdAt, updatedAt);
     }
 
@@ -78,11 +78,11 @@ public final class User {
         return companyId;
     }
 
-    private UUID validateXApplication(UUID xApplication) {
-        if (xApplication == null) {
-            throw new ValidationException("xApplication é obrigatório");
+    private UUID validateTenantId(UUID tenantId) {
+        if (tenantId == null) {
+            throw new ValidationException("tenantId é obrigatório");
         }
-        return xApplication;
+        return tenantId;
     }
 
     private String validateEmail(String email) {
@@ -103,7 +103,7 @@ public final class User {
     public UUID getId() { return id; }
     public UUID getCodeUser() { return codeUser; }
     public UUID getCompanyId() { return companyId; }
-    public UUID getXApplication() { return xApplication; }
+    public UUID getTenantId() { return tenantId; }
     public UserTypeEnum getType() { return type; }
     public UserStatusEnum getStatus() { return status; }
     public String getEmail() { return email; }
@@ -126,8 +126,8 @@ public final class User {
         this.updatedAt = OffsetDateTime.now();
     }
 
-    public void setXApplication(UUID xApplication) {
-        this.xApplication = validateXApplication(xApplication);
+    public void setTenantId(UUID tenantId) {
+        this.tenantId = validateTenantId(tenantId);
         this.updatedAt = OffsetDateTime.now();
     }
 
@@ -252,7 +252,7 @@ public final class User {
                 "id=" + id +
                 ", codeUser=" + codeUser +
                 ", companyId=" + companyId +
-                ", xApplication=" + xApplication +
+                ", tenantId=" + tenantId +
                 ", type=" + type +
                 ", status=" + status +
                 ", email='" + email + '\'' +

@@ -46,8 +46,8 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO create(UserCreateCommandDTO command) {
-        log.info("Criando usuário com email: {}, tipo: {}, companyId: {}, xApplication: {}, tem dados de perfil: {}", 
-                command.email(), command.type(), command.companyId(), command.xApplication(), command.hasProfileData());
+        log.info("Criando usuário com email: {}, tipo: {}, companyId: {}, tenantId: {}, tem dados de perfil: {}", 
+                command.email(), command.type(), command.companyId(), command.tenantId(), command.hasProfileData());
 
         // Validar se email já existe
         if (userRepositoryPort.existsByEmail(command.email())) {
@@ -63,7 +63,7 @@ public class UserCommandService {
                 // Validar CPF
                 if (personProfile.getCpf() != null && !personProfile.getCpf().trim().isEmpty()) {
                     String cleanedCpf = personProfile.getCpf().replaceAll("[^0-9]", "");
-                    if (personProfileRepositoryPort.existsByCpfAndXApplication(cleanedCpf, command.xApplication())) {
+                    if (personProfileRepositoryPort.existsByCpfAndTenantId(cleanedCpf, command.tenantId())) {
                         metricsPort.incrementCounter("user_business_errors_total",
                             Map.of("error_code", "CPF_ALREADY_EXISTS", "operation", "create"));
                         throw new AlreadyExistsException("CPF já está em uso nesta aplicação", "CPF_ALREADY_EXISTS", Map.of("cpf", cleanedCpf));
@@ -122,7 +122,7 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO update(UserUpdateCommandDTO command) {
-        log.info("Atualizando usuário: {}, xApplication: {}", command.id(), command.xApplication());
+        log.info("Atualizando usuário: {}, tenantId: {}", command.id(), command.tenantId());
 
         var before = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -197,7 +197,7 @@ public class UserCommandService {
     )
     @Transactional
     public void delete(UserDeleteCommandDTO command) {
-        log.info("Deletando usuário: {}, xApplication: {}", command.id(), command.xApplication());
+        log.info("Deletando usuário: {}, tenantId: {}", command.id(), command.tenantId());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -227,7 +227,7 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO activate(UserStatusChangeCommandDTO command) {
-        log.info("Ativando usuário: {}, xApplication: {}, motivo: {}", command.id(), command.xApplication(), command.reason());
+        log.info("Ativando usuário: {}, tenantId: {}, motivo: {}", command.id(), command.tenantId(), command.reason());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -256,7 +256,7 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO deactivate(UserStatusChangeCommandDTO command) {
-        log.info("Desativando usuário: {}, xApplication: {}, motivo: {}", command.id(), command.xApplication(), command.reason());
+        log.info("Desativando usuário: {}, tenantId: {}, motivo: {}", command.id(), command.tenantId(), command.reason());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -285,7 +285,7 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO block(UserStatusChangeCommandDTO command) {
-        log.info("Bloqueando usuário: {}, xApplication: {}, motivo: {}", command.id(), command.xApplication(), command.reason());
+        log.info("Bloqueando usuário: {}, tenantId: {}, motivo: {}", command.id(), command.tenantId(), command.reason());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -314,7 +314,7 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO unblock(UserStatusChangeCommandDTO command) {
-        log.info("Desbloqueando usuário: {}, xApplication: {}, motivo: {}", command.id(), command.xApplication(), command.reason());
+        log.info("Desbloqueando usuário: {}, tenantId: {}, motivo: {}", command.id(), command.tenantId(), command.reason());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -347,7 +347,7 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO suspend(UserStatusChangeCommandDTO command) {
-        log.info("Suspendo usuário: {}, xApplication: {}, motivo: {}", command.id(), command.xApplication(), command.reason());
+        log.info("Suspendo usuário: {}, tenantId: {}, motivo: {}", command.id(), command.tenantId(), command.reason());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -376,7 +376,7 @@ public class UserCommandService {
     )
     @Transactional
     public UserDetailsViewDTO unsuspend(UserStatusChangeCommandDTO command) {
-        log.info("Reativando usuário suspenso: {}, xApplication: {}, motivo: {}", command.id(), command.xApplication(), command.reason());
+        log.info("Reativando usuário suspenso: {}, tenantId: {}, motivo: {}", command.id(), command.tenantId(), command.reason());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
@@ -410,7 +410,7 @@ public class UserCommandService {
     )
     @Transactional
     public List<UserDetailsViewDTO> activateBatch(UserBatchStatusCommandDTO command) {
-        log.info("Ativando usuários em lote: {}, xApplication: {}, motivo: {}", command.userIds(), command.xApplication(), command.reason());
+        log.info("Ativando usuários em lote: {}, tenantId: {}, motivo: {}", command.userIds(), command.tenantId(), command.reason());
 
         var users = userRepositoryPort.findAllByIdIn(command.userIds());
         if (users.size() != command.userIds().size()) {
@@ -437,7 +437,7 @@ public class UserCommandService {
     )
     @Transactional
     public List<UserDetailsViewDTO> deactivateBatch(UserBatchStatusCommandDTO command) {
-        log.info("Desativando usuários em lote: {}, xApplication: {}, motivo: {}", command.userIds(), command.xApplication(), command.reason());
+        log.info("Desativando usuários em lote: {}, tenantId: {}, motivo: {}", command.userIds(), command.tenantId(), command.reason());
 
         var users = userRepositoryPort.findAllByIdIn(command.userIds());
         if (users.size() != command.userIds().size()) {
@@ -457,12 +457,12 @@ public class UserCommandService {
 
 
     private void createUserProfile(User user, UserCreateCommandDTO command) {
-        log.info("Criando perfil para usuário: {}, xApplication: {}", user.getId(), command.xApplication());
+        log.info("Criando perfil para usuário: {}, tenantId: {}", user.getId(), command.tenantId());
         createProfileUsingStrategy(user, command, "criar");
     }
 
     private void updateUserProfile(User user, UserUpdateCommandDTO command) {
-        log.info("Atualizando perfil para usuário: {}, xApplication: {}", user.getId(), command.xApplication());
+        log.info("Atualizando perfil para usuário: {}, tenantId: {}", user.getId(), command.tenantId());
         updateProfileUsingStrategy(user, command, "atualizar");
     }
 

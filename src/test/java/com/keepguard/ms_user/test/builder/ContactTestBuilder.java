@@ -17,7 +17,7 @@ public class ContactTestBuilder {
     
     private UUID id = UUID.randomUUID();
     private UUID userId = UUID.randomUUID();
-    private UUID xApplication = UUID.randomUUID();
+    private UUID tenantId = UUID.randomUUID();
     private String value = "11999999999";
     private ContactTypeEnum type = ContactTypeEnum.MOBILE;
     private String description = "Celular pessoal";
@@ -46,8 +46,8 @@ public class ContactTestBuilder {
         return this;
     }
     
-    public ContactTestBuilder withXApplication(UUID xApplication) {
-        this.xApplication = xApplication;
+    public ContactTestBuilder withTenantId(UUID tenantId) {
+        this.tenantId = tenantId;
         return this;
     }
     
@@ -143,7 +143,7 @@ public class ContactTestBuilder {
     public ContactCreateCommandDTO buildCreateCommand() {
         return new ContactCreateCommandDTO(
                 userId,
-                xApplication,
+                tenantId,
                 value,
                 type,
                 description,
@@ -155,7 +155,7 @@ public class ContactTestBuilder {
     public ContactUpdateCommandDTO buildUpdateCommand() {
         return new ContactUpdateCommandDTO(
                 id,
-                xApplication,
+                tenantId,
                 Optional.of(value),
                 Optional.of(type),
                 Optional.of(description),
@@ -165,20 +165,20 @@ public class ContactTestBuilder {
     }
     
     public ContactDeleteCommandDTO buildDeleteCommand() {
-        return new ContactDeleteCommandDTO(id, xApplication);
+        return new ContactDeleteCommandDTO(id, tenantId);
     }
     
     public ContactGetByIdQueryDTO buildGetByIdQuery() {
-        return new ContactGetByIdQueryDTO(id, xApplication);
+        return new ContactGetByIdQueryDTO(id, tenantId);
     }
     
     public ContactGetByUserIdQueryDTO buildGetByUserIdQuery() {
-        return new ContactGetByUserIdQueryDTO(userId, xApplication);
+        return new ContactGetByUserIdQueryDTO(userId, tenantId);
     }
     
     public ContactSearchQueryDTO buildSearchQuery() {
         return new ContactSearchQueryDTO(
-                xApplication,
+                tenantId,
                 userId,
                 value,
                 type,

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.keepguard.lib_security.annotation.PublicEndpoint;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -53,6 +54,7 @@ public class HealthController implements HealthIndicator {
      * @return ResponseEntity com informações de saúde do serviço
      */
     @GetMapping
+    @PublicEndpoint(value = "Health Check Público")
     @Operation(
         summary = "Health check do ms-user",
         description = "Verifica se o serviço ms-user está funcionando corretamente, incluindo conexão com banco de dados."

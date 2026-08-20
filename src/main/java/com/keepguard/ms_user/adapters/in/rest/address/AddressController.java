@@ -38,13 +38,13 @@ public class AddressController {
     public ResponseEntity<AddressDetailsResponseDTO> create(
             @Valid @RequestBody AddressCreateRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
 
-        log.info("Criando novo endereço para usuário: {}, application={}", request.userId(), xApplicationUuid);
+        log.info("Criando novo endereço para usuário: {}, application={}", request.userId(), tenantId);
 
-        var command = mapper.toCreateCommand(request, xApplicationUuid);
+        var command = mapper.toCreateCommand(request, tenantId);
         var view = addressPort.create(command);
         var response = mapper.toResponseDTO(view);
         
@@ -57,12 +57,12 @@ public class AddressController {
     public ResponseEntity<AddressDetailsResponseDTO> getById(
             @PathVariable UUID id,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Buscando endereço por ID: application={}, id={}", xApplicationUuid, id);
+        log.info("Buscando endereço por ID: application={}, id={}", tenantId, id);
 
-        var query = mapper.toGetByIdQuery(id, xApplicationUuid);
+        var query = mapper.toGetByIdQuery(id, tenantId);
         var view = addressPort.getById(query);
         var response = mapper.toResponseDTO(view);
         
@@ -75,12 +75,12 @@ public class AddressController {
     public ResponseEntity<List<AddressDetailsResponseDTO>> getByUserId(
             @PathVariable UUID userId,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Buscando endereços do usuário: application={}, userId={}", xApplicationUuid, userId);
+        log.info("Buscando endereços do usuário: application={}, userId={}", tenantId, userId);
 
-        var query = mapper.toGetByUserIdQuery(userId, xApplicationUuid);
+        var query = mapper.toGetByUserIdQuery(userId, tenantId);
         var views = addressPort.getByUserId(query);
         var responses = views.stream()
                 .map(mapper::toResponseDTO)
@@ -96,12 +96,12 @@ public class AddressController {
             @PathVariable UUID id,
             @Valid @RequestBody AddressUpdateRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Atualizando endereço: application={}, id={}", xApplicationUuid, id);
+        log.info("Atualizando endereço: application={}, id={}", tenantId, id);
         
-        var command = mapper.toUpdateCommand(request, id, xApplicationUuid);
+        var command = mapper.toUpdateCommand(request, id, tenantId);
         var view = addressPort.update(command);
         var response = mapper.toResponseDTO(view);
         
@@ -114,12 +114,12 @@ public class AddressController {
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Deletando endereço: application={}, id={}", xApplicationUuid, id);
+        log.info("Deletando endereço: application={}, id={}", tenantId, id);
         
-        var command = mapper.toDeleteCommand(id, xApplicationUuid);
+        var command = mapper.toDeleteCommand(id, tenantId);
         addressPort.delete(command);
         
         return ResponseEntity.noContent().build();
@@ -132,11 +132,11 @@ public class AddressController {
             @PathVariable UUID userId,
             @Valid @ModelAttribute AddressSearchRequestDTO searchRequest,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
 
         log.info("Buscando endereços do usuário: application={}, userId={}, city={}, state={}, type={}",
-                xApplicationUuid, userId, searchRequest.getCity(), searchRequest.getState(), searchRequest.getType());
+                tenantId, userId, searchRequest.getCity(), searchRequest.getState(), searchRequest.getType());
 
         if (searchRequest.getPage() < 0) {
             throw new IllegalArgumentException("Página deve ser maior ou igual a 0");
@@ -145,7 +145,7 @@ public class AddressController {
             throw new IllegalArgumentException("Tamanho da página deve estar entre 1 e 100");
         }
 
-        var query = mapper.toSearchQuery(searchRequest, xApplicationUuid, userId);
+        var query = mapper.toSearchQuery(searchRequest, tenantId, userId);
         var result = addressPort.search(query);
 
         var responseData = result.content().stream()

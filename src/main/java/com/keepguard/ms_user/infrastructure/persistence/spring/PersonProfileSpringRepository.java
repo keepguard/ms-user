@@ -39,9 +39,9 @@ public interface PersonProfileSpringRepository extends JpaRepository<PersonProfi
     @Query("SELECT p FROM PersonProfileJpaEntity p WHERE LOWER(p.occupation) LIKE LOWER(CONCAT('%', :occupation, '%'))")
     List<PersonProfileJpaEntity> findByOccupationContainingIgnoreCase(@Param("occupation") String occupation);
 
-    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM PersonProfileJpaEntity p JOIN p.user u WHERE p.cpf = :cpf AND u.xApplication = :xApplication")
-    boolean existsByCpfAndXApplication(@Param("cpf") String cpf, @Param("xApplication") UUID xApplication);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM PersonProfileJpaEntity p JOIN p.user u WHERE p.cpf = :cpf AND u.tenantId = :tenantId")
+    boolean existsByCpfAndTenantId(@Param("cpf") String cpf, @Param("tenantId") UUID tenantId);
 
-    @Query("SELECT p FROM PersonProfileJpaEntity p JOIN p.user u WHERE p.cpf = :cpf AND u.xApplication = :xApplication")
-    Optional<PersonProfileJpaEntity> findByCpfAndXApplication(@Param("cpf") String cpf, @Param("xApplication") UUID xApplication);
+    @Query("SELECT p FROM PersonProfileJpaEntity p JOIN p.user u WHERE p.cpf = :cpf AND u.tenantId = :tenantId")
+    Optional<PersonProfileJpaEntity> findByCpfAndTenantId(@Param("cpf") String cpf, @Param("tenantId") UUID tenantId);
 }

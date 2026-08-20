@@ -9,8 +9,8 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record RegisterInitCommandDTO(
-    @NotNull(message = "xApplication é obrigatório")
-    UUID xApplication,
+    @NotNull(message = "tenantId é obrigatório")
+    UUID tenantId,
 
     @NotBlank(message = "email é obrigatório")
     @Email(message = "email deve ser válido")

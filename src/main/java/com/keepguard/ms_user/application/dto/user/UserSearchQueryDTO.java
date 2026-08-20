@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public record UserSearchQueryDTO(
-    @NotNull(message = "xApplication é obrigatório")
-    UUID xApplication,
+    @NotNull(message = "tenantId é obrigatório")
+    UUID tenantId,
     
     String email,
     UUID companyId,

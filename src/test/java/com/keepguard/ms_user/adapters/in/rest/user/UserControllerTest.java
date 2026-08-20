@@ -54,16 +54,16 @@ class UserControllerTest {
     private UUID userId;
     private UUID codeUser;
     private UUID companyId;
-    private UUID xApplicationUuid;
-    private String xApplicationHeader;
+    private UUID tenantId;
+    private String tenantIdStr;
     
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
         codeUser = UUID.randomUUID();
         companyId = UUID.randomUUID();
-        xApplicationUuid = UUID.randomUUID();
-        xApplicationHeader = xApplicationUuid.toString();
+        tenantId = UUID.randomUUID();
+        tenantIdStr = tenantId.toString();
         
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
@@ -99,7 +99,7 @@ class UserControllerTest {
         
         // When & Then
         mockMvc.perform(post("/api/v1/users")
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -119,7 +119,7 @@ class UserControllerTest {
                 .buildDetailsView();
         
         var query = UserTestBuilder.builder().buildGetByIdQuery();
-        when(mapper.toGetByIdQuery(userId, xApplicationUuid)).thenReturn(query);
+        when(mapper.toGetByIdQuery(userId, tenantId)).thenReturn(query);
         when(userPort.getById(any())).thenReturn(view);
         when(mapper.toGetByIdResponseDTO(view)).thenReturn(UserTestBuilder.builder()
                 .withId(userId)
@@ -128,7 +128,7 @@ class UserControllerTest {
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/{id}", userId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()));
     }
@@ -145,7 +145,7 @@ class UserControllerTest {
                 .buildDetailsView();
         
         var query = UserTestBuilder.builder().buildGetByCodeUserQuery();
-        when(mapper.toGetByCodeUserQuery(codeUser, xApplicationUuid)).thenReturn(query);
+        when(mapper.toGetByCodeUserQuery(codeUser, tenantId)).thenReturn(query);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(view)).thenReturn(UserTestBuilder.builder()
                 .withId(userId)
@@ -154,7 +154,7 @@ class UserControllerTest {
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/code/{codeUser}", codeUser)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.codeUser").value(codeUser.toString()));
     }
@@ -172,13 +172,13 @@ class UserControllerTest {
                 .buildDetailsView();
         
         var query = UserTestBuilder.builder().buildGetByEmailQuery();
-        when(mapper.toGetByEmailQuery(email, xApplicationUuid)).thenReturn(query);
+        when(mapper.toGetByEmailQuery(email, tenantId)).thenReturn(query);
         when(userPort.getByEmail(any())).thenReturn(view);
         when(mapper.toGetByEmail(view)).thenReturn(UserTestBuilder.builder().buildResponseDTO());
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/email/{email}", email)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email));
     }
@@ -208,7 +208,7 @@ class UserControllerTest {
                 .withEmail("updated@example.com")
                 .buildDetailsView();
         
-        when(mapper.toUpdateCommand(any(), eq(userId), eq(xApplicationUuid))).thenReturn(UserTestBuilder.builder().buildUpdateCommand());
+        when(mapper.toUpdateCommand(any(), eq(userId), eq(tenantId))).thenReturn(UserTestBuilder.builder().buildUpdateCommand());
         when(userPort.update(any())).thenReturn(view);
         when(mapper.toResponseDTO((UserDetailsViewDTO) view)).thenReturn(UserTestBuilder.builder()
                 .withId(userId)
@@ -217,7 +217,7 @@ class UserControllerTest {
         
         // When & Then
         mockMvc.perform(put("/api/v1/users/{id}", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -231,11 +231,11 @@ class UserControllerTest {
     @DisplayName("Deve deletar usuário com sucesso")
     void shouldDeleteUserSuccessfully() throws Exception {
         // Given
-        when(mapper.toDeleteCommand(userId, xApplicationUuid)).thenReturn(UserTestBuilder.builder().buildDeleteCommand());
+        when(mapper.toDeleteCommand(userId, tenantId)).thenReturn(UserTestBuilder.builder().buildDeleteCommand());
         
         // When & Then
         mockMvc.perform(delete("/api/v1/users/{id}", userId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isNoContent());
     }
     
@@ -255,13 +255,13 @@ class UserControllerTest {
         );
         
         var searchQuery = UserTestBuilder.builder().buildSearchQuery();
-        when(mapper.toSearchQuery(any(), eq(xApplicationUuid), eq(companyId))).thenReturn(searchQuery);
+        when(mapper.toSearchQuery(any(), eq(tenantId), eq(companyId))).thenReturn(searchQuery);
         when(userPort.search(any())).thenReturn(pageResult);
         when(mapper.toResponseDTO(any(UserSearchViewDTO.class))).thenReturn(UserTestBuilder.builder().buildResponseDTO());
         
         // When & Then
         mockMvc.perform(get("/api/v1/companies/{companyId}/users", companyId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .param("email", "test@example.com")
                         .param("page", "0")
                         .param("size", "20"))
@@ -286,7 +286,7 @@ class UserControllerTest {
                 .buildDetailsView();
         
         var statusCommand = UserTestBuilder.builder().buildStatusChangeCommand();
-        when(mapper.toStatusChangeCommand(eq(userId), any(), eq(xApplicationUuid))).thenReturn(statusCommand);
+        when(mapper.toStatusChangeCommand(eq(userId), any(), eq(tenantId))).thenReturn(statusCommand);
         when(userPort.activate(any())).thenReturn(view);
         when(mapper.toResponseDTO((UserDetailsViewDTO) view)).thenReturn(UserTestBuilder.builder()
                 .withId(userId)
@@ -295,7 +295,7 @@ class UserControllerTest {
         
         // When & Then
         mockMvc.perform(patch("/api/v1/users/{id}/activate", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -317,7 +317,7 @@ class UserControllerTest {
                 .buildDetailsView();
         
         var statusCommand = UserTestBuilder.builder().buildStatusChangeCommand();
-        when(mapper.toStatusChangeCommand(eq(userId), any(), eq(xApplicationUuid))).thenReturn(statusCommand);
+        when(mapper.toStatusChangeCommand(eq(userId), any(), eq(tenantId))).thenReturn(statusCommand);
         when(userPort.deactivate(any())).thenReturn(view);
         when(mapper.toResponseDTO((UserDetailsViewDTO) view)).thenReturn(UserTestBuilder.builder()
                 .withId(userId)
@@ -326,7 +326,7 @@ class UserControllerTest {
         
         // When & Then
         mockMvc.perform(patch("/api/v1/users/{id}/deactivate", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -349,13 +349,13 @@ class UserControllerTest {
         );
         
         var batchCommand = UserTestBuilder.builder().buildBatchStatusCommand();
-        when(mapper.toBatchStatusCommand(eq(userIds), any(), eq(xApplicationUuid))).thenReturn(batchCommand);
+        when(mapper.toBatchStatusCommand(eq(userIds), any(), eq(tenantId))).thenReturn(batchCommand);
         when(userPort.activateBatch(any())).thenReturn(views);
         when(mapper.toResponseDTO(any(UserDetailsViewDTO.class))).thenReturn(UserTestBuilder.builder().asActive().buildResponseDTO());
         
         // When & Then
         mockMvc.perform(patch("/api/v1/users/batch/activate")
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

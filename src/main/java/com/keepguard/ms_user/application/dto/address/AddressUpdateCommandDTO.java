@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record AddressUpdateCommandDTO(
     UUID id,
-    UUID xApplication,
+    UUID tenantId,
     Optional<String> street,
     Optional<String> number,
     Optional<String> complement,

@@ -50,15 +50,15 @@ class AddressControllerTest {
     
     private UUID addressId;
     private UUID userId;
-    private UUID xApplicationUuid;
-    private String xApplicationHeader;
+    private UUID tenantId;
+    private String tenantIdStr;
     
     @BeforeEach
     void setUp() {
         addressId = UUID.randomUUID();
         userId = UUID.randomUUID();
-        xApplicationUuid = UUID.randomUUID();
-        xApplicationHeader = xApplicationUuid.toString();
+        tenantId = UUID.randomUUID();
+        tenantIdStr = tenantId.toString();
         
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(addressController).build();
@@ -96,7 +96,7 @@ class AddressControllerTest {
         
         // When & Then
         mockMvc.perform(post("/api/v1/addresses")
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -115,13 +115,13 @@ class AddressControllerTest {
                 .withUserId(userId)
                 .buildDetailsView();
         
-        when(mapper.toGetByIdQuery(addressId, xApplicationUuid)).thenReturn(AddressTestBuilder.builder().buildGetByIdQuery());
+        when(mapper.toGetByIdQuery(addressId, tenantId)).thenReturn(AddressTestBuilder.builder().buildGetByIdQuery());
         when(addressPort.getById(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(AddressTestBuilder.builder().withId(addressId).withUserId(userId).buildResponseDTO());
         
         // When & Then
         mockMvc.perform(get("/api/v1/addresses/{id}", addressId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(addressId.toString()))
                 .andExpect(jsonPath("$.user_id").value(userId.toString()));
@@ -138,13 +138,13 @@ class AddressControllerTest {
                 .withUserId(userId)
                 .buildDetailsView();
         
-        when(mapper.toGetByUserIdQuery(userId, xApplicationUuid)).thenReturn(AddressTestBuilder.builder().buildGetByUserIdQuery());
+        when(mapper.toGetByUserIdQuery(userId, tenantId)).thenReturn(AddressTestBuilder.builder().buildGetByUserIdQuery());
         when(addressPort.getByUserId(any())).thenReturn(List.of(view));
         when(mapper.toResponseDTO(any())).thenReturn(AddressTestBuilder.builder().withId(addressId).withUserId(userId).buildResponseDTO());
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/addresses", userId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value(addressId.toString()))
@@ -176,13 +176,13 @@ class AddressControllerTest {
                 .withUserId(userId)
                 .buildDetailsView();
         
-        when(mapper.toUpdateCommand(any(), eq(addressId), eq(xApplicationUuid))).thenReturn(AddressTestBuilder.builder().buildUpdateCommand());
+        when(mapper.toUpdateCommand(any(), eq(addressId), eq(tenantId))).thenReturn(AddressTestBuilder.builder().buildUpdateCommand());
         when(addressPort.update(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(AddressTestBuilder.builder().withId(addressId).withUserId(userId).buildResponseDTO());
         
         // When & Then
         mockMvc.perform(put("/api/v1/addresses/{id}", addressId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -195,11 +195,11 @@ class AddressControllerTest {
     @DisplayName("Deve deletar endereço com sucesso")
     void shouldDeleteAddressSuccessfully() throws Exception {
         // Given
-        when(mapper.toDeleteCommand(addressId, xApplicationUuid)).thenReturn(AddressTestBuilder.builder().buildDeleteCommand());
+        when(mapper.toDeleteCommand(addressId, tenantId)).thenReturn(AddressTestBuilder.builder().buildDeleteCommand());
         
         // When & Then
         mockMvc.perform(delete("/api/v1/addresses/{id}", addressId)
-                        .header("X-Application", xApplicationHeader))
+                        .header("X-Tenant-Id", tenantIdStr))
                 .andExpect(status().isNoContent());
     }
     
@@ -218,13 +218,13 @@ class AddressControllerTest {
                 List.of(searchView), 1L, 0, 20
         );
         
-        when(mapper.toSearchQuery(any(), eq(xApplicationUuid), eq(userId))).thenReturn(AddressTestBuilder.builder().buildSearchQuery());
+        when(mapper.toSearchQuery(any(), eq(tenantId), eq(userId))).thenReturn(AddressTestBuilder.builder().buildSearchQuery());
         when(addressPort.search(any())).thenReturn(pageResult);
         when(mapper.toSearchResponseDTO(any())).thenReturn(AddressTestBuilder.builder().withId(addressId).withUserId(userId).buildResponseDTO());
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/addresses/search", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .param("city", "São Paulo")
                         .param("state", "SP")
                         .param("page", "0")
@@ -241,7 +241,7 @@ class AddressControllerTest {
     void shouldReturnBadRequestWhenPageIsNegative() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/addresses/search", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .param("page", "-1")
                         .param("size", "20"))
                 .andExpect(status().isBadRequest());
@@ -252,7 +252,7 @@ class AddressControllerTest {
     void shouldReturnBadRequestWhenPageSizeIsInvalid() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/users/{userId}/addresses/search", userId)
-                        .header("X-Application", xApplicationHeader)
+                        .header("X-Tenant-Id", tenantIdStr)
                         .param("page", "0")
                         .param("size", "101"))
                 .andExpect(status().isBadRequest());

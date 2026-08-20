@@ -16,7 +16,7 @@ public class UserJpaMapper {
             entity.getId(),
             entity.getCodeUser(),
             entity.getCompanyId(),
-            entity.getXApplication(),
+            entity.getTenantId(),
             entity.getType(),
             entity.getStatus(),
             entity.getEmail(),
@@ -39,7 +39,7 @@ public class UserJpaMapper {
             .id(domain.getId())
             .codeUser(domain.getCodeUser())
             .companyId(domain.getCompanyId())
-            .xApplication(domain.getXApplication())
+            .tenantId(domain.getTenantId())
             .type(domain.getType())
             .status(domain.getStatus())
             .email(domain.getEmail())

@@ -21,24 +21,24 @@ public class RegisterUseCaseService implements RegisterPort {
 
     @Override
     public RegisterInitViewDTO init(RegisterInitCommandDTO command) {
-        log.info("Iniciando caso de uso de registro: email={}, xApplication={}", 
-                command.email(), command.xApplication());
+        log.info("Iniciando caso de uso de registro: email={}, tenantId={}", 
+                command.email(), command.tenantId());
         
         return registerCommandService.init(command);
     }
 
     @Override
     public RegisterSession confirm(RegisterConfirmCommandDTO command) {
-        log.info("Iniciando caso de uso de confirmação de registro: email={}, xApplication={}", 
-                command.email(), command.xApplication());
+        log.info("Iniciando caso de uso de confirmação de registro: email={}, tenantId={}", 
+                command.email(), command.tenantId());
         
         return registerCommandService.confirm(command);
     }
 
     @Override
     public RegisterSession resend(RegisterResendCommandDTO command) {
-        log.info("Iniciando caso de uso de reenvio de token: email={}, xApplication={}", 
-                command.email(), command.xApplication());
+        log.info("Iniciando caso de uso de reenvio de token: email={}, tenantId={}", 
+                command.email(), command.tenantId());
         
         return registerCommandService.resend(command);
     }

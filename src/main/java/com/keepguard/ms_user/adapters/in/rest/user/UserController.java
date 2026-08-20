@@ -38,13 +38,13 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> create(
             @Valid @RequestBody UserCreateRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
         
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Criando novo usuário: {}, application={} (endpoint público)", request.email(), xApplicationUuid);
+        log.info("Criando novo usuário: {}, application={} (endpoint público)", request.email(), tenantId);
 
-        var command = mapper.toCreateCommand(request, xApplicationUuid);
+        var command = mapper.toCreateCommand(request, tenantId);
         var view = userPort.create(command);
         var response = mapper.toResponseDTO(view);
         
@@ -57,13 +57,13 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getById(
             @PathVariable UUID id,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
         
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Buscando usuário por ID: application={}, id={}", xApplicationUuid, id);
+        log.info("Buscando usuário por ID: application={}, id={}", tenantId, id);
 
-        var query = mapper.toGetByIdQuery(id, xApplicationUuid);
+        var query = mapper.toGetByIdQuery(id, tenantId);
         var view = userPort.getById(query);
 
         var response = mapper.toGetByIdResponseDTO(view);
@@ -76,12 +76,12 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getByCodeUser(
             @PathVariable UUID codeUser,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Buscando usuário por codeUser: application={}, codeUser={}", xApplicationUuid, codeUser);
-        var query = mapper.toGetByCodeUserQuery(codeUser, xApplicationUuid);
+        log.info("Buscando usuário por codeUser: application={}, codeUser={}", tenantId, codeUser);
+        var query = mapper.toGetByCodeUserQuery(codeUser, tenantId);
         var view = userPort.getByCodeUser(query);
         var response = mapper.toGetByCodeUserResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -93,12 +93,12 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getByEmail(
             @PathVariable String email,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Buscando usuário por email: application={}, email={}", xApplicationUuid, email);
-        var query = mapper.toGetByEmailQuery(email, xApplicationUuid);
+        log.info("Buscando usuário por email: application={}, email={}", tenantId, email);
+        var query = mapper.toGetByEmailQuery(email, tenantId);
         var view = userPort.getByEmail(query);
         var response = mapper.toGetByEmail(view);
         return ResponseEntity.ok(response);
@@ -111,12 +111,12 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserUpdateRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Atualizando usuário: application={}, id={}", xApplicationUuid, id);
-        var command = mapper.toUpdateCommand(request, id, xApplicationUuid);
+        log.info("Atualizando usuário: application={}, id={}", tenantId, id);
+        var command = mapper.toUpdateCommand(request, id, tenantId);
         var view = userPort.update(command);
         var response = mapper.toResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -129,13 +129,13 @@ public class UserController {
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Deletando usuário: application={}, id={}", xApplicationUuid, id);
+        log.info("Deletando usuário: application={}, id={}", tenantId, id);
 
-        var command = mapper.toDeleteCommand(id, xApplicationUuid);
+        var command = mapper.toDeleteCommand(id, tenantId);
         userPort.delete(command);
         return ResponseEntity.noContent().build();
     }
@@ -146,12 +146,12 @@ public class UserController {
             @PathVariable String companyId,
             @Valid @ModelAttribute UserSearchRequestDTO searchRequest,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
         
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
 
         log.info("Buscando usuários da empresa: application={}, companyId={}, email={}, type={}, status={}",
-                xApplicationUuid, companyId, searchRequest.getEmail(), searchRequest.getType(), searchRequest.getStatus());
+                tenantId, companyId, searchRequest.getEmail(), searchRequest.getType(), searchRequest.getStatus());
         
         UUID companyIdUuid = UUID.fromString(companyId);
 
@@ -162,7 +162,7 @@ public class UserController {
             throw new IllegalArgumentException("Tamanho da página deve estar entre 1 e 100");
         }
 
-        var query = mapper.toSearchQuery(searchRequest, xApplicationUuid, companyIdUuid);
+        var query = mapper.toSearchQuery(searchRequest, tenantId, companyIdUuid);
         var result = userPort.search(query);
 
         var responseData = result.content().stream()
@@ -186,13 +186,13 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserStatusChangeRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Ativando usuário: application={}, id={}, motivo={}", xApplicationUuid, id, request.reason());
+        log.info("Ativando usuário: application={}, id={}, motivo={}", tenantId, id, request.reason());
 
-        var command = mapper.toStatusChangeCommand(id, request.reason(), xApplicationUuid);
+        var command = mapper.toStatusChangeCommand(id, request.reason(), tenantId);
         var view = userPort.activate(command);
         var response = mapper.toResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -206,13 +206,13 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserStatusChangeRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
 
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Desativando usuário: application={}, id={}, motivo={}", xApplicationUuid, id, request.reason());
+        log.info("Desativando usuário: application={}, id={}, motivo={}", tenantId, id, request.reason());
 
-        var command = mapper.toStatusChangeCommand(id, request.reason(), xApplicationUuid);
+        var command = mapper.toStatusChangeCommand(id, request.reason(), tenantId);
         var view = userPort.deactivate(command);
         var response = mapper.toResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -226,11 +226,11 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserStatusChangeRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Bloqueando usuário: application={}, id={}, motivo={}", xApplicationUuid, id, request.reason());
-        var command = mapper.toStatusChangeCommand(id, request.reason(), xApplicationUuid);
+        log.info("Bloqueando usuário: application={}, id={}, motivo={}", tenantId, id, request.reason());
+        var command = mapper.toStatusChangeCommand(id, request.reason(), tenantId);
         var view = userPort.block(command);
         var response = mapper.toResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -244,11 +244,11 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserStatusChangeRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Desbloqueando usuário: application={}, id={}, motivo={}", xApplicationUuid, id, request.reason());
-        var command = mapper.toStatusChangeCommand(id, request.reason(), xApplicationUuid);
+        log.info("Desbloqueando usuário: application={}, id={}, motivo={}", tenantId, id, request.reason());
+        var command = mapper.toStatusChangeCommand(id, request.reason(), tenantId);
         var view = userPort.unblock(command);
         var response = mapper.toResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -262,11 +262,11 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserStatusChangeRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Suspendendo usuário: application={}, id={}, motivo={}", xApplicationUuid, id, request.reason());
-        var command = mapper.toStatusChangeCommand(id, request.reason(), xApplicationUuid);
+        log.info("Suspendendo usuário: application={}, id={}, motivo={}", tenantId, id, request.reason());
+        var command = mapper.toStatusChangeCommand(id, request.reason(), tenantId);
         var view = userPort.suspend(command);
         var response = mapper.toResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -280,11 +280,11 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserStatusChangeRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Reativando usuário suspenso: application={}, id={}, motivo={}", xApplicationUuid, id, request.reason());
-        var command = mapper.toStatusChangeCommand(id, request.reason(), xApplicationUuid);
+        log.info("Reativando usuário suspenso: application={}, id={}, motivo={}", tenantId, id, request.reason());
+        var command = mapper.toStatusChangeCommand(id, request.reason(), tenantId);
         var view = userPort.unsuspend(command);
         var response = mapper.toResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -297,11 +297,11 @@ public class UserController {
     public ResponseEntity<List<UserResponseDTO>> activateBatch(
             @Valid @RequestBody UserBatchStatusRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Ativando usuários em lote: application={}, userIds={}, motivo={}", xApplicationUuid, request.userIds(), request.reason());
-        var command = mapper.toBatchStatusCommand(request.userIds(), request.reason(), xApplicationUuid);
+        log.info("Ativando usuários em lote: application={}, userIds={}, motivo={}", tenantId, request.userIds(), request.reason());
+        var command = mapper.toBatchStatusCommand(request.userIds(), request.reason(), tenantId);
         var views = userPort.activateBatch(command);
         var responses = views.stream()
                 .map(mapper::toResponseDTO)
@@ -315,11 +315,11 @@ public class UserController {
     public ResponseEntity<List<UserResponseDTO>> deactivateBatch(
             @Valid @RequestBody UserBatchStatusRequestDTO request,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Desativando usuários em lote: application={}, userIds={}, motivo={}", xApplicationUuid, request.userIds(), request.reason());
-        var command = mapper.toBatchStatusCommand(request.userIds(), request.reason(), xApplicationUuid);
+        log.info("Desativando usuários em lote: application={}, userIds={}, motivo={}", tenantId, request.userIds(), request.reason());
+        var command = mapper.toBatchStatusCommand(request.userIds(), request.reason(), tenantId);
         var views = userPort.deactivateBatch(command);
         var responses = views.stream()
                 .map(mapper::toResponseDTO)

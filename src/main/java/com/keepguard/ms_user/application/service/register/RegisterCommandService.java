@@ -52,15 +52,15 @@ public class RegisterCommandService {
         auditEntityType = "REGISTER_SESSION"
     )
     public RegisterInitViewDTO init(RegisterInitCommandDTO command) {
-        log.info("Iniciando registro de usuário: email={}, xApplication={}, type={}", 
-                command.email(), command.xApplication(), command.type());
+        log.info("Iniciando registro de usuário: email={}, tenantId={}, type={}", 
+                command.email(), command.tenantId(), command.type());
 
         // 0 - Validar palavras proibidas no nome (já validado pelo @ModeratedContent)
-        // 1 - Consultar se o email com X-Application já existe
-        validateEmailNotExists(command.email(), command.xApplication());
+        // 1 - Consultar se o email com X-Tenant-Id já existe
+        validateEmailNotExists(command.email(), command.tenantId());
         
         // 2 - Verificar se já existe sessão de registro no Redis
-        validateNoActiveSession(command.email(), command.xApplication());
+        validateNoActiveSession(command.email(), command.tenantId());
         
         // 3 - Validar aceite de termos
         validateTermsAccepted(command.hasAcceptedTermsAndPrivacy());
@@ -76,10 +76,10 @@ public class RegisterCommandService {
         
         // 8 - Salvar no Redis
         try {
-            registerCachePort.saveRegisterSession(command.email(), command.xApplication(), session);
+            registerCachePort.saveRegisterSession(command.email(), command.tenantId(), session);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            log.error("Falha ao serializar sessão de registro: email={}, xApplication={}", 
-                    command.email(), command.xApplication(), e);
+            log.error("Falha ao serializar sessão de registro: email={}, tenantId={}", 
+                    command.email(), command.tenantId(), e);
             throw new RuntimeException("Falha ao salvar sessão de registro no cache", e);
         }
         
@@ -88,26 +88,26 @@ public class RegisterCommandService {
         
         // Métricas
         metricsPort.incrementCounter("register_init_total",
-                Map.of("x_application", command.xApplication().toString(), "type", command.type().name()));
+                Map.of("tenant_id", command.tenantId().toString(), "type", command.type().name()));
         
         // Retornar view
         return registerApplicationMapper.toView(session, "Token de verificação enviado.", (int) registerSessionTtlSeconds);
     }
 
-    private void validateEmailNotExists(String email, java.util.UUID xApplication) {
-        if (userRepositoryPort.existsByEmailAndXApplication(email, xApplication)) {
+    private void validateEmailNotExists(String email, java.util.UUID tenantId) {
+        if (userRepositoryPort.existsByEmailAndTenantId(email, tenantId)) {
             metricsPort.incrementCounter("register_business_errors_total",
                     Map.of("error_code", "EMAIL_ALREADY_EXISTS", "operation", "init"));
             throw new AlreadyExistsException(
                     "Email já está em uso nesta aplicação: " + email, 
                     "EMAIL_ALREADY_EXISTS", 
-                    Map.of("email", email, "xApplication", xApplication.toString())
+                    Map.of("email", email, "tenantId", tenantId.toString())
             );
         }
     }
 
-    private void validateNoActiveSession(String email, java.util.UUID xApplication) {
-        if (registerCachePort.existsRegisterSession(email, xApplication)) {
+    private void validateNoActiveSession(String email, java.util.UUID tenantId) {
+        if (registerCachePort.existsRegisterSession(email, tenantId)) {
             metricsPort.incrementCounter("register_business_errors_total",
                     Map.of("error_code", "ACTIVE_SESSION_EXISTS", "operation", "init"));
             throw new AlreadyExistsException(
@@ -134,13 +134,13 @@ public class RegisterCommandService {
         auditEntityType = "REGISTER_SESSION"
     )
     public RegisterSession confirm(RegisterConfirmCommandDTO command) {
-        log.info("Confirmando registro de usuário: email={}, registrationSessionId={}, xApplication={}", 
-                command.email(), command.registrationSessionId(), command.xApplication());
+        log.info("Confirmando registro de usuário: email={}, registrationSessionId={}, tenantId={}", 
+                command.email(), command.registrationSessionId(), command.tenantId());
 
         // 1 - Buscar sessão no Redis
         RegisterSession session;
         try {
-            session = registerCachePort.getRegisterSession(command.email(), command.xApplication())
+            session = registerCachePort.getRegisterSession(command.email(), command.tenantId())
                     .orElseThrow(() -> {
                         metricsPort.incrementCounter("register_business_errors_total",
                                 Map.of("error_code", "SESSION_NOT_FOUND", "operation", "confirm"));
@@ -151,8 +151,8 @@ public class RegisterCommandService {
                         );
                     });
         } catch (JsonProcessingException e) {
-            log.error("Falha ao deserializar sessão de registro: email={}, xApplication={}", 
-                    command.email(), command.xApplication(), e);
+            log.error("Falha ao deserializar sessão de registro: email={}, tenantId={}", 
+                    command.email(), command.tenantId(), e);
             throw new RuntimeException("Falha ao buscar sessão de registro no cache", e);
         }
 
@@ -172,10 +172,10 @@ public class RegisterCommandService {
             
             // Salvar no Redis
             try {
-                registerCachePort.saveRegisterSession(command.email(), command.xApplication(), session);
+                registerCachePort.saveRegisterSession(command.email(), command.tenantId(), session);
             } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-                log.error("Falha ao serializar sessão de registro atualizada: email={}, xApplication={}", 
-                        command.email(), command.xApplication(), e);
+                log.error("Falha ao serializar sessão de registro atualizada: email={}, tenantId={}", 
+                        command.email(), command.tenantId(), e);
                 throw new RuntimeException("Falha ao salvar sessão de registro no cache", e);
             }
             
@@ -184,7 +184,7 @@ public class RegisterCommandService {
                 log.warn("Limite de tentativas atingido para email={}, removendo sessão", command.email());
                 
                 // Remover do Redis
-                registerCachePort.removeRegisterSession(command.email(), command.xApplication());
+                registerCachePort.removeRegisterSession(command.email(), command.tenantId());
                 
                 metricsPort.incrementCounter("register_business_errors_total",
                         Map.of("error_code", "MAX_ATTEMPTS_EXCEEDED", "operation", "confirm"));
@@ -204,23 +204,23 @@ public class RegisterCommandService {
 
         // 4 - Token válido! Remover sessão do Redis
         log.info("Token validado com sucesso para email={}, removendo sessão", command.email());
-        registerCachePort.removeRegisterSession(command.email(), command.xApplication());
+        registerCachePort.removeRegisterSession(command.email(), command.tenantId());
 
 
         metricsPort.incrementCounter("register_confirm_total",
-                Map.of("x_application", command.xApplication().toString(), "status", "success"));
+                Map.of("tenant_id", command.tenantId().toString(), "status", "success"));
         return session;
     }
 
     @LogOperation(operation = "REGISTER_RESEND", description = "Reenviando token de registro: {command.email}")
     public RegisterSession resend(RegisterResendCommandDTO command) {
-        log.info("Reenviando token de registro: email={}, xApplication={}", 
-                command.email(), command.xApplication());
+        log.info("Reenviando token de registro: email={}, tenantId={}", 
+                command.email(), command.tenantId());
         
         // 1. Buscar sessão no Redis
         RegisterSession session;
         try {
-            session = registerCachePort.getRegisterSession(command.email(), command.xApplication())
+            session = registerCachePort.getRegisterSession(command.email(), command.tenantId())
                 .orElseThrow(() -> {
                     metricsPort.incrementCounter("register_business_errors_total",
                             Map.of("error_code", "SESSION_NOT_FOUND", "operation", "resend"));
@@ -231,8 +231,8 @@ public class RegisterCommandService {
                     );
                 });
         } catch (JsonProcessingException e) {
-            log.error("Falha ao deserializar sessão de registro: email={}, xApplication={}", 
-                    command.email(), command.xApplication(), e);
+            log.error("Falha ao deserializar sessão de registro: email={}, tenantId={}", 
+                    command.email(), command.tenantId(), e);
             throw new RuntimeException("Falha ao buscar sessão de registro no cache", e);
         }
         
@@ -246,7 +246,7 @@ public class RegisterCommandService {
         // 3. Verificar limite de reenvios
         if (session.getResendAttempts() >= maxResendAttempts) {
             log.warn("Limite de reenvios atingido para email={}, removendo sessão", command.email());
-            registerCachePort.removeRegisterSession(command.email(), command.xApplication());
+            registerCachePort.removeRegisterSession(command.email(), command.tenantId());
             
             metricsPort.incrementCounter("register_business_errors_total",
                     Map.of("error_code", "MAX_RESEND_ATTEMPTS_EXCEEDED", "operation", "resend"));
@@ -261,10 +261,10 @@ public class RegisterCommandService {
         
         // 5. Salvar no Redis
         try {
-            registerCachePort.saveRegisterSession(command.email(), command.xApplication(), session);
+            registerCachePort.saveRegisterSession(command.email(), command.tenantId(), session);
         } catch (JsonProcessingException e) {
-            log.error("Falha ao serializar sessão de registro atualizada: email={}, xApplication={}", 
-                    command.email(), command.xApplication(), e);
+            log.error("Falha ao serializar sessão de registro atualizada: email={}, tenantId={}", 
+                    command.email(), command.tenantId(), e);
             throw new RuntimeException("Falha ao salvar sessão de registro no cache", e);
         }
         
@@ -274,7 +274,7 @@ public class RegisterCommandService {
         
         // 7. Métricas
         metricsPort.incrementCounter("register_resend_total",
-            Map.of("x_application", command.xApplication().toString()));
+            Map.of("tenant_id", command.tenantId().toString()));
         
         return session;
     }

@@ -102,14 +102,14 @@ public class RegisterController {
                 required = true,
                 example = "550e8400-e29b-41d4-a716-446655440000"
             )
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
         
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
         log.info("Iniciando registro de usuário: email={}, application={} (endpoint público)", 
-                request.email(), xApplicationUuid);
+                request.email(), tenantId);
 
-        var command = mapper.toInitCommand(request, xApplicationUuid);
+        var command = mapper.toInitCommand(request, tenantId);
         var view = registerPort.init(command);
         var response = mapper.toResponseDTO(view);
         
@@ -182,14 +182,14 @@ public class RegisterController {
                 required = true,
                 example = "550e8400-e29b-41d4-a716-446655440000"
             )
-            @RequestHeader(value = "X-Application", required = true) String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
         
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
         log.info("Confirmando registro de usuário: email={}, application={} (endpoint público)", 
-                request.email(), xApplicationUuid);
+                request.email(), tenantId);
 
-        var command = mapper.toConfirmCommand(request, xApplicationUuid);
+        var command = mapper.toConfirmCommand(request, tenantId);
         var session = registerPort.confirm(command);
         var response = mapper.toConfirmResponseDTO(session);
         
@@ -226,14 +226,14 @@ public class RegisterController {
     @MetricsEndpoint(endpoint = "register_resend")
     public ResponseEntity<RegisterResendResponseDTO> resend(
         @Valid @RequestBody RegisterResendRequestDTO request,
-        @RequestHeader(value = "X-Application", required = true) String xApplication) {
+        @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
         
-        var xApplicationUuid = ValidationUtils.validateXApplication(xApplication);
+        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
         log.info("Reenviando token de registro: email={}, application={} (endpoint público)", 
-                request.email(), xApplicationUuid);
+                request.email(), tenantId);
         
-        var command = mapper.toResendCommand(request, xApplicationUuid);
+        var command = mapper.toResendCommand(request, tenantId);
         var session = registerPort.resend(command);
         var response = mapper.toResendResponseDTO(session, maxResendAttempts, registerSessionTtlSeconds);
         

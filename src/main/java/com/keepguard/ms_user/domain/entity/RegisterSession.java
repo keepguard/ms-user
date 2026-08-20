@@ -20,8 +20,8 @@ public final class RegisterSession {
 
     private final UUID registrationSessionId;
     
-    @JsonProperty("xApplication")
-    private final UUID xApplication;
+    @JsonProperty("tenantId")
+    private final UUID tenantId;
     private final String email;
     private final String token;
     private final String passwordHash;
@@ -40,7 +40,7 @@ public final class RegisterSession {
     @JsonCreator
     private RegisterSession(
             @JsonProperty("registrationSessionId") UUID registrationSessionId, 
-            @JsonProperty("xApplication") UUID xApplication, 
+            @JsonProperty("tenantId") UUID tenantId, 
             @JsonProperty("email") String email, 
             @JsonProperty("token") String token,
             @JsonProperty("passwordHash") String passwordHash, 
@@ -56,7 +56,7 @@ public final class RegisterSession {
             @JsonProperty("attempts") Integer attempts,
             @JsonProperty("resendAttempts") Integer resendAttempts) {
         this.registrationSessionId = registrationSessionId;
-        this.xApplication = validateXApplication(xApplication);
+        this.tenantId = validateTenantId(tenantId);
         this.email = validateEmail(email);
         this.token = token;
         this.passwordHash = passwordHash;
@@ -73,14 +73,14 @@ public final class RegisterSession {
         this.resendAttempts = resendAttempts != null ? resendAttempts : 0;
     }
 
-    public static RegisterSession create(UUID registrationSessionId, UUID xApplication, String email, String token,
+    public static RegisterSession create(UUID registrationSessionId, UUID tenantId, String email, String token,
                                         String passwordHash, String nameFull, String phone,
                                         Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
                                         String ipAddress, String userAgent, String geolocation,
                                         UserTypeEnum type) {
         return new RegisterSession(
                 registrationSessionId,
-                xApplication,
+                tenantId,
                 email,
                 token,
                 passwordHash,
@@ -98,14 +98,14 @@ public final class RegisterSession {
         );
     }
 
-    public static RegisterSession of(UUID registrationSessionId, UUID xApplication, String email, String token,
+    public static RegisterSession of(UUID registrationSessionId, UUID tenantId, String email, String token,
                                     String passwordHash, String nameFull, String phone,
                                     Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
                                     String ipAddress, String userAgent, String geolocation,
                                     UserTypeEnum type, OffsetDateTime createdAt, Integer attempts, Integer resendAttempts) {
         return new RegisterSession(
                 registrationSessionId,
-                xApplication,
+                tenantId,
                 email,
                 token,
                 passwordHash,
@@ -123,11 +123,11 @@ public final class RegisterSession {
         );
     }
 
-    private UUID validateXApplication(UUID xApplication) {
-        if (xApplication == null) {
-            throw new ValidationException("xApplication é obrigatório");
+    private UUID validateTenantId(UUID tenantId) {
+        if (tenantId == null) {
+            throw new ValidationException("tenantId é obrigatório");
         }
-        return xApplication;
+        return tenantId;
     }
 
     private String validateEmail(String email) {

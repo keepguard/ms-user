@@ -43,12 +43,12 @@ public class InternalUserController {
     public ResponseEntity<UserResponseDTO> getById(
             @PathVariable UUID id,
             @Parameter(description = "UUID da aplicação (CineAI)", required = false)
-            @RequestHeader(value = "X-Application", required = false, defaultValue = "4f74e125-c90d-442d-910b-5ea70b02e5e9") String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = false, defaultValue = "4f74e125-c90d-442d-910b-5ea70b02e5e9") String tenantIdHeader) {
         
         log.debug("[INTERNAL] Buscando usuário por ID: id={}", id);
         
-        UUID xApplicationUuid = parseXApplication(xApplication);
-        var query = mapper.toGetByIdQuery(id, xApplicationUuid);
+        UUID tenantId = parseTenantId(tenantIdHeader);
+        var query = mapper.toGetByIdQuery(id, tenantId);
         var view = userPort.getById(query);
         var response = mapper.toGetByIdResponseDTO(view);
         
@@ -63,21 +63,21 @@ public class InternalUserController {
     public ResponseEntity<UserResponseDTO> getByCodeUser(
             @PathVariable UUID codeUser,
             @Parameter(description = "UUID da aplicação (CineAI)", required = false)
-            @RequestHeader(value = "X-Application", required = false, defaultValue = "4f74e125-c90d-442d-910b-5ea70b02e5e9") String xApplication) {
+            @RequestHeader(value = "X-Tenant-Id", required = false, defaultValue = "4f74e125-c90d-442d-910b-5ea70b02e5e9") String tenantIdHeader) {
         
         log.debug("[INTERNAL] Buscando usuário por codeUser: codeUser={}", codeUser);
         
-        UUID xApplicationUuid = parseXApplication(xApplication);
-        var query = mapper.toGetByCodeUserQuery(codeUser, xApplicationUuid);
+        UUID tenantId = parseTenantId(tenantIdHeader);
+        var query = mapper.toGetByCodeUserQuery(codeUser, tenantId);
         var view = userPort.getByCodeUser(query);
         var response = mapper.toGetByCodeUserResponseDTO(view);
         
         return ResponseEntity.ok(response);
     }
     
-    private UUID parseXApplication(String xApplication) {
+    private UUID parseTenantId(String tenantId) {
         try {
-            return UUID.fromString(xApplication);
+            return UUID.fromString(tenantId);
         } catch (Exception e) {
             return UUID.fromString("4f74e125-c90d-442d-910b-5ea70b02e5e9");
         }

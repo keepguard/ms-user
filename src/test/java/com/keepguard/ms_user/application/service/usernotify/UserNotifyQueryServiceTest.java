@@ -110,7 +110,7 @@ class UserNotifyQueryServiceTest {
             userId,
             codeUser,
             companyId,
-            UUID.randomUUID(), // xApplication
+            UUID.randomUUID(), // tenantId
             UserTypeEnum.PERSON,
             UserStatusEnum.ACTIVE,
             "test@example.com",

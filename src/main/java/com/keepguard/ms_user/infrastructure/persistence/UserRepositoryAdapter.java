@@ -89,8 +89,8 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
-    public Optional<User> findByEmailAndXApplication(String email, UUID xApplication) {
-        return springRepository.findByEmailAndXApplication(email, xApplication)
+    public Optional<User> findByEmailAndTenantId(String email, UUID tenantId) {
+        return springRepository.findByEmailAndTenantId(email, tenantId)
                 .map(mapper::toDomain);
     }
 
@@ -121,8 +121,8 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
-    public boolean existsByEmailAndXApplication(String email, UUID xApplication) {
-        return springRepository.existsByEmailAndXApplication(email, xApplication);
+    public boolean existsByEmailAndTenantId(String email, UUID tenantId) {
+        return springRepository.existsByEmailAndTenantId(email, tenantId);
     }
 
     @Override

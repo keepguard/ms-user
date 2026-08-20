@@ -31,7 +31,7 @@ public class UserQueryService {
 
     @Transactional(readOnly = true)
     public UserDetailsViewDTO getById(UserGetByIdQueryDTO query) {
-        log.info("xApplication: {} - Buscando usuário por ID: {}", query.xApplication(), query.id());
+        log.info("tenantId: {} - Buscando usuário por ID: {}", query.tenantId(), query.id());
 
         var cachedUser = userCachePort.getUserByIdFromCache(query.id().toString());
         if (cachedUser != null) {
@@ -58,7 +58,7 @@ public class UserQueryService {
 
     @Transactional(readOnly = true)
     public UserDetailsViewDTO getByCodeUser(UserGetByCodeUserQueryDTO query) {
-        log.info("xApplication: {} - Buscando usuário por codeUser: {}", query.xApplication(), query.codeUser());
+        log.info("tenantId: {} - Buscando usuário por codeUser: {}", query.tenantId(), query.codeUser());
 
         var cachedUser = userCachePort.getUserByCodeFromCache(query.codeUser().toString());
         if (cachedUser != null) {
@@ -85,7 +85,7 @@ public class UserQueryService {
 
     @Transactional(readOnly = true)
     public UserDetailsViewDTO getByEmail(UserGetByEmailQueryDTO query) {
-        log.info("xApplication: {} - Buscando usuário por email: {}", query.xApplication(), query.email());
+        log.info("tenantId: {} - Buscando usuário por email: {}", query.tenantId(), query.email());
 
         var cachedUser = userCachePort.getUserByEmailFromCache(query.email());
         if (cachedUser != null) {
@@ -112,8 +112,8 @@ public class UserQueryService {
 
     @Transactional(readOnly = true)
     public PageResultDTO<UserSearchViewDTO> search(UserSearchQueryDTO query) {
-        log.info("xApplication: {} - Buscando usuários com critérios: email={}, companyId={}, type={}, status={}, page={}, size={}", 
-                query.xApplication(), query.email(), query.companyId(), query.type(), query.status(), query.page(), query.size());
+        log.info("tenantId: {} - Buscando usuários com critérios: email={}, companyId={}, type={}, status={}, page={}, size={}", 
+                query.tenantId(), query.email(), query.companyId(), query.type(), query.status(), query.page(), query.size());
         
         var criteria = userApplicationMapper.toSearchCriteria(query);
         var pageResult = userRepositoryPort.search(criteria);

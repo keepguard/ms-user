@@ -40,19 +40,19 @@ class RegisterCacheServiceTest {
     private RegisterCacheService registerCacheService;
 
     private RegisterSession session;
-    private UUID xApplication;
+    private UUID tenantId;
     private String email;
     private String key;
 
     @BeforeEach
     void setUp() throws Exception {
-        xApplication = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+        tenantId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
         email = "teste@example.com";
         key = "register_session:teste@example.com:550e8400-e29b-41d4-a716-446655440000";
 
         session = RegisterSession.create(
                 UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
-                xApplication,
+                tenantId,
                 email,
                 "123456",
                 "$2a$10$hashed",
@@ -79,7 +79,7 @@ class RegisterCacheServiceTest {
         when(objectMapper.writeValueAsString(session)).thenReturn(sessionJson);
 
         // When
-        registerCacheService.saveRegisterSession(email, xApplication, session);
+        registerCacheService.saveRegisterSession(email, tenantId, session);
 
         // Then
         verify(objectMapper).writeValueAsString(session);
@@ -96,7 +96,7 @@ class RegisterCacheServiceTest {
         when(objectMapper.readValue(sessionJson, RegisterSession.class)).thenReturn(session);
 
         // When
-        Optional<RegisterSession> result = registerCacheService.getRegisterSession(email, xApplication);
+        Optional<RegisterSession> result = registerCacheService.getRegisterSession(email, tenantId);
 
         // Then
         assertThat(result).isPresent();
@@ -113,7 +113,7 @@ class RegisterCacheServiceTest {
         when(valueOperations.get(key)).thenReturn(null);
 
         // When
-        Optional<RegisterSession> result = registerCacheService.getRegisterSession(email, xApplication);
+        Optional<RegisterSession> result = registerCacheService.getRegisterSession(email, tenantId);
 
         // Then
         assertThat(result).isEmpty();
@@ -129,7 +129,7 @@ class RegisterCacheServiceTest {
         when(valueOperations.get(key)).thenReturn("");
 
         // When
-        Optional<RegisterSession> result = registerCacheService.getRegisterSession(email, xApplication);
+        Optional<RegisterSession> result = registerCacheService.getRegisterSession(email, tenantId);
 
         // Then
         assertThat(result).isEmpty();
@@ -141,7 +141,7 @@ class RegisterCacheServiceTest {
     @DisplayName("Deve remover sessão do Redis com sucesso")
     void deveRemoverSessaoDoRedisComSucesso() {
         // When
-        registerCacheService.removeRegisterSession(email, xApplication);
+        registerCacheService.removeRegisterSession(email, tenantId);
 
         // Then
         verify(redisTemplate).delete(key);
@@ -154,7 +154,7 @@ class RegisterCacheServiceTest {
         when(redisTemplate.hasKey(key)).thenReturn(true);
 
         // When
-        boolean result = registerCacheService.existsRegisterSession(email, xApplication);
+        boolean result = registerCacheService.existsRegisterSession(email, tenantId);
 
         // Then
         assertThat(result).isTrue();
@@ -168,7 +168,7 @@ class RegisterCacheServiceTest {
         when(redisTemplate.hasKey(key)).thenReturn(false);
 
         // When
-        boolean result = registerCacheService.existsRegisterSession(email, xApplication);
+        boolean result = registerCacheService.existsRegisterSession(email, tenantId);
 
         // Then
         assertThat(result).isFalse();
@@ -188,7 +188,7 @@ class RegisterCacheServiceTest {
         when(objectMapper.readValue(sessionJson, RegisterSession.class)).thenReturn(session);
 
         // When
-        Optional<RegisterSession> result = registerCacheService.getRegisterSession(emailMaiusculo, xApplication);
+        Optional<RegisterSession> result = registerCacheService.getRegisterSession(emailMaiusculo, tenantId);
 
         // Then
         assertThat(result).isPresent();
@@ -202,7 +202,7 @@ class RegisterCacheServiceTest {
         when(objectMapper.writeValueAsString(session)).thenThrow(new com.fasterxml.jackson.core.JsonProcessingException("Erro de serialização") {});
 
         // When & Then
-        assertThatThrownBy(() -> registerCacheService.saveRegisterSession(email, xApplication, session))
+        assertThatThrownBy(() -> registerCacheService.saveRegisterSession(email, tenantId, session))
                 .isInstanceOf(com.fasterxml.jackson.core.JsonProcessingException.class)
                 .hasMessageContaining("Erro de serialização");
         
@@ -218,7 +218,7 @@ class RegisterCacheServiceTest {
         when(objectMapper.readValue(anyString(), eq(RegisterSession.class))).thenThrow(new com.fasterxml.jackson.core.JsonProcessingException("Erro de deserialização") {});
 
         // When & Then
-        assertThatThrownBy(() -> registerCacheService.getRegisterSession(email, xApplication))
+        assertThatThrownBy(() -> registerCacheService.getRegisterSession(email, tenantId))
                 .isInstanceOf(com.fasterxml.jackson.core.JsonProcessingException.class)
                 .hasMessageContaining("Erro de deserialização");
     }
@@ -230,7 +230,7 @@ class RegisterCacheServiceTest {
         doThrow(new RuntimeException("Erro ao deletar")).when(redisTemplate).delete(key);
 
         // When & Then
-        assertThatThrownBy(() -> registerCacheService.removeRegisterSession(email, xApplication))
+        assertThatThrownBy(() -> registerCacheService.removeRegisterSession(email, tenantId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Erro ao deletar");
         
@@ -244,7 +244,7 @@ class RegisterCacheServiceTest {
         when(redisTemplate.hasKey(key)).thenThrow(new RuntimeException("Erro ao verificar"));
 
         // When & Then
-        assertThatThrownBy(() -> registerCacheService.existsRegisterSession(email, xApplication))
+        assertThatThrownBy(() -> registerCacheService.existsRegisterSession(email, tenantId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Erro ao verificar");
     }

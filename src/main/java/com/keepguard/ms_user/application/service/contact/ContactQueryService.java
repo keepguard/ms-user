@@ -24,7 +24,7 @@ public class ContactQueryService {
 
     @Transactional(readOnly = true)
     public ContactDetailsViewDTO getById(ContactGetByIdQueryDTO query) {
-        log.info("Buscando contato por ID: {}, xApplication: {}", query.id(), query.xApplication());
+        log.info("Buscando contato por ID: {}, tenantId: {}", query.id(), query.tenantId());
 
         var contact = contactRepositoryPort.findById(query.id())
                 .orElseThrow(() -> new NotFoundException("Contato não encontrado: " + query.id(),
@@ -35,7 +35,7 @@ public class ContactQueryService {
 
     @Transactional(readOnly = true)
     public List<ContactDetailsViewDTO> getByUserId(ContactGetByUserIdQueryDTO query) {
-        log.info("Buscando contatos do usuário: {}, xApplication: {}", query.userId(), query.xApplication());
+        log.info("Buscando contatos do usuário: {}, tenantId: {}", query.userId(), query.tenantId());
 
         var contacts = contactRepositoryPort.findByUserId(query.userId());
 

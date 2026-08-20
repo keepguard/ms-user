@@ -25,7 +25,7 @@ public class UserApplicationMapper {
         return User.create(
             UUID.randomUUID(), // codeUser será gerado na regra de negócio
             command.companyId(),
-            command.xApplication(),
+            command.tenantId(),
             command.type(),
             command.email(),
             command.phoneE164(),

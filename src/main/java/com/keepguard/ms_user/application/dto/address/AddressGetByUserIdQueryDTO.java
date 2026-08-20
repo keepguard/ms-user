@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record AddressGetByUserIdQueryDTO(
     UUID userId,
-    UUID xApplication
+    UUID tenantId
 ) {}
 

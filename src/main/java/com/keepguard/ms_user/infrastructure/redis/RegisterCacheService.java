@@ -30,54 +30,54 @@ public class RegisterCacheService implements RegisterCachePort {
 
     @Override
     @Retry(name = "registerCache")
-    public void saveRegisterSession(String email, UUID xApplication, RegisterSession session) throws com.fasterxml.jackson.core.JsonProcessingException {
-        String key = buildKey(email, xApplication);
+    public void saveRegisterSession(String email, UUID tenantId, RegisterSession session) throws com.fasterxml.jackson.core.JsonProcessingException {
+        String key = buildKey(email, tenantId);
         String value = objectMapper.writeValueAsString(session);
         
         redisTemplate.opsForValue().set(key, value, registerSessionTtlSeconds, java.util.concurrent.TimeUnit.SECONDS);
-        log.info("Sessão de registro salva no cache: key={}, email={}, xApplication={}, ttl={}s", 
-                key, email, xApplication, registerSessionTtlSeconds);
+        log.info("Sessão de registro salva no cache: key={}, email={}, tenantId={}, ttl={}s", 
+                key, email, tenantId, registerSessionTtlSeconds);
     }
 
     @Override
     @Retry(name = "registerCache")
-    public Optional<RegisterSession> getRegisterSession(String email, UUID xApplication) throws com.fasterxml.jackson.core.JsonProcessingException {
-        String key = buildKey(email, xApplication);
+    public Optional<RegisterSession> getRegisterSession(String email, UUID tenantId) throws com.fasterxml.jackson.core.JsonProcessingException {
+        String key = buildKey(email, tenantId);
         String value = redisTemplate.opsForValue().get(key);
         
         if (value == null || value.isBlank()) {
-            log.debug("Sessão de registro não encontrada no cache: key={}, email={}, xApplication={}", 
-                    key, email, xApplication);
+            log.debug("Sessão de registro não encontrada no cache: key={}, email={}, tenantId={}", 
+                    key, email, tenantId);
             return Optional.empty();
         }
         
         RegisterSession session = objectMapper.readValue(value, RegisterSession.class);
-        log.debug("Sessão de registro encontrada no cache: key={}, email={}, xApplication={}", 
-                key, email, xApplication);
+        log.debug("Sessão de registro encontrada no cache: key={}, email={}, tenantId={}", 
+                key, email, tenantId);
         return Optional.of(session);
     }
 
     @Override
     @Retry(name = "registerCache")
-    public void removeRegisterSession(String email, UUID xApplication) {
-        String key = buildKey(email, xApplication);
+    public void removeRegisterSession(String email, UUID tenantId) {
+        String key = buildKey(email, tenantId);
         redisTemplate.delete(key);
-        log.info("Sessão de registro removida do cache: key={}, email={}, xApplication={}", 
-                key, email, xApplication);
+        log.info("Sessão de registro removida do cache: key={}, email={}, tenantId={}", 
+                key, email, tenantId);
     }
 
     @Override
     @Retry(name = "registerCache")
-    public boolean existsRegisterSession(String email, UUID xApplication) {
-        String key = buildKey(email, xApplication);
+    public boolean existsRegisterSession(String email, UUID tenantId) {
+        String key = buildKey(email, tenantId);
         boolean exists = Boolean.TRUE.equals(redisTemplate.hasKey(key));
-        log.debug("Verificação de existência de sessão no cache: key={}, email={}, xApplication={}, exists={}", 
-                key, email, xApplication, exists);
+        log.debug("Verificação de existência de sessão no cache: key={}, email={}, tenantId={}, exists={}", 
+                key, email, tenantId, exists);
         return exists;
     }
 
-    private String buildKey(String email, UUID xApplication) {
-        return String.format("%s:%s:%s", registerCachePrefix, email.toLowerCase().trim(), xApplication);
+    private String buildKey(String email, UUID tenantId) {
+        return String.format("%s:%s:%s", registerCachePrefix, email.toLowerCase().trim(), tenantId);
     }
 
 }

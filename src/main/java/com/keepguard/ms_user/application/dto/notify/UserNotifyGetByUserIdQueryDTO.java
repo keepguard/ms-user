@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public record UserNotifyGetByUserIdQueryDTO(
     UUID userId,
-    UUID xApplication
+    UUID tenantId
 ) {}

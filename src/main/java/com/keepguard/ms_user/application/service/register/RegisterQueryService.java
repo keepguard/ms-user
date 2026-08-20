@@ -18,17 +18,17 @@ public class RegisterQueryService {
     private final RegisterCachePort registerCachePort;
 
     public Optional<RegisterSession> getRegisterSession(RegisterInitQueryDTO query) throws JsonProcessingException {
-        log.info("Buscando sessão de registro: email={}, xApplication={}", 
-                query.email(), query.xApplication());
+        log.info("Buscando sessão de registro: email={}, tenantId={}", 
+                query.email(), query.tenantId());
         
-        return registerCachePort.getRegisterSession(query.email(), query.xApplication());
+        return registerCachePort.getRegisterSession(query.email(), query.tenantId());
     }
 
     public boolean existsRegisterSession(RegisterInitQueryDTO query) {
-        log.info("Verificando existência de sessão de registro: email={}, xApplication={}", 
-                query.email(), query.xApplication());
+        log.info("Verificando existência de sessão de registro: email={}, tenantId={}", 
+                query.email(), query.tenantId());
         
-        return registerCachePort.existsRegisterSession(query.email(), query.xApplication());
+        return registerCachePort.existsRegisterSession(query.email(), query.tenantId());
     }
 }
 

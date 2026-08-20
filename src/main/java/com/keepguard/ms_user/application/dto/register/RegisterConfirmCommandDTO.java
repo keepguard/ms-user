@@ -8,8 +8,8 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record RegisterConfirmCommandDTO(
-    @NotNull(message = "xApplication é obrigatório")
-    UUID xApplication,
+    @NotNull(message = "tenantId é obrigatório")
+    UUID tenantId,
 
     @NotNull(message = "registrationSessionId é obrigatório")
     UUID registrationSessionId,

@@ -16,7 +16,7 @@ public class RegisterApplicationMapper {
     public RegisterSession toDomain(RegisterInitCommandDTO command, String token, String passwordHash) {
         return RegisterSession.create(
                 UUID.randomUUID(),
-                command.xApplication(),
+                command.tenantId(),
                 command.email(),
                 token,
                 passwordHash,

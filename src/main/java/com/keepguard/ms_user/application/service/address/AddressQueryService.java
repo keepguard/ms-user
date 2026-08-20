@@ -24,7 +24,7 @@ public class AddressQueryService {
 
     @Transactional(readOnly = true)
     public AddressDetailsViewDTO getById(AddressGetByIdQueryDTO query) {
-        log.info("Buscando endereço por ID: {}, xApplication: {}", query.id(), query.xApplication());
+        log.info("Buscando endereço por ID: {}, tenantId: {}", query.id(), query.tenantId());
 
         var address = addressRepositoryPort.findById(query.id())
                 .orElseThrow(() -> new NotFoundException("Endereço não encontrado: " + query.id(),
@@ -35,7 +35,7 @@ public class AddressQueryService {
 
     @Transactional(readOnly = true)
     public List<AddressDetailsViewDTO> getByUserId(AddressGetByUserIdQueryDTO query) {
-        log.info("Buscando endereços do usuário: {}, xApplication: {}", query.userId(), query.xApplication());
+        log.info("Buscando endereços do usuário: {}, tenantId: {}", query.userId(), query.tenantId());
 
         var addresses = addressRepositoryPort.findByUserId(query.userId());
 

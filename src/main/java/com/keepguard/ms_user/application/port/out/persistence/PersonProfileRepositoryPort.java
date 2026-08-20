@@ -36,8 +36,8 @@ public interface PersonProfileRepositoryPort {
 
     boolean existsByUserId(UUID userId);
 
-    boolean existsByCpfAndXApplication(String cpf, UUID xApplication);
+    boolean existsByCpfAndTenantId(String cpf, UUID tenantId);
 
-    Optional<PersonProfile> findByCpfAndXApplication(String cpf, UUID xApplication);
+    Optional<PersonProfile> findByCpfAndTenantId(String cpf, UUID tenantId);
 }
 

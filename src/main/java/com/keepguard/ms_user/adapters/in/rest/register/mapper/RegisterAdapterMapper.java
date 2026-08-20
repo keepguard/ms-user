@@ -20,9 +20,9 @@ import java.util.UUID;
 @Component
 public class RegisterAdapterMapper {
 
-    public RegisterInitCommandDTO toInitCommand(RegisterInitRequestDTO request, UUID xApplication) {
+    public RegisterInitCommandDTO toInitCommand(RegisterInitRequestDTO request, UUID tenantId) {
         return new RegisterInitCommandDTO(
-                xApplication,
+                tenantId,
                 request.email(),
                 request.nameFull(),
                 request.password(),
@@ -36,9 +36,9 @@ public class RegisterAdapterMapper {
         );
     }
 
-    public RegisterConfirmCommandDTO toConfirmCommand(RegisterConfirmRequestDTO request, UUID xApplication) {
+    public RegisterConfirmCommandDTO toConfirmCommand(RegisterConfirmRequestDTO request, UUID tenantId) {
         return new RegisterConfirmCommandDTO(
-                xApplication,
+                tenantId,
                 request.registrationSessionId(),
                 request.email(),
                 request.token()
@@ -66,7 +66,7 @@ public class RegisterAdapterMapper {
 
         return RegisterConfirmResponseDTO.builder()
                 .registrationSessionId(session.getRegistrationSessionId())
-                .xApplication(session.getXApplication())
+                .tenantId(session.getTenantId())
                 .email(session.getEmail())
                 .nameFull(session.getNameFull())
                 .phone(session.getPhone())
@@ -83,9 +83,9 @@ public class RegisterAdapterMapper {
                 .build();
     }
 
-    public RegisterResendCommandDTO toResendCommand(RegisterResendRequestDTO request, UUID xApplication) {
+    public RegisterResendCommandDTO toResendCommand(RegisterResendRequestDTO request, UUID tenantId) {
         return new RegisterResendCommandDTO(
-                xApplication,
+                tenantId,
                 request.email(),
                 request.registrationSessionId()
         );

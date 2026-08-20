@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public record ContactCreateCommandDTO(
     UUID userId,
-    UUID xApplication,
+    UUID tenantId,
     String value,
     ContactTypeEnum type,
     String description,

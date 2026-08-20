@@ -32,8 +32,8 @@ public class UserJpaEntity {
     @Column(name = "company_id", nullable = false)
     private UUID companyId;
 
-    @Column(name = "x_application", nullable = false, updatable = false, columnDefinition = "uuid")
-    private UUID xApplication;
+    @Column(name = "tenant_id", nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID tenantId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

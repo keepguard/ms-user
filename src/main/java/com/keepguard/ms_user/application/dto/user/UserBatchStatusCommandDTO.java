@@ -11,8 +11,8 @@ public record UserBatchStatusCommandDTO(
     @NotEmpty(message = "userIds é obrigatório")
     List<UUID> userIds,
     
-    @NotNull(message = "xApplication é obrigatório")
-    UUID xApplication,
+    @NotNull(message = "tenantId é obrigatório")
+    UUID tenantId,
     
     @NotBlank(message = "reason é obrigatório")
     String reason

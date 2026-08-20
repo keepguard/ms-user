@@ -24,7 +24,7 @@ public class UserTestBuilder {
     private UUID id = UUID.randomUUID();
     private UUID codeUser = UUID.randomUUID();
     private UUID companyId = UUID.randomUUID();
-    private UUID xApplication = UUID.randomUUID();
+    private UUID tenantId = UUID.randomUUID();
     private UserTypeEnum type = UserTypeEnum.PERSON;
     private UserStatusEnum status = UserStatusEnum.ACTIVE;
     private String email = "test@example.com";
@@ -131,7 +131,7 @@ public class UserTestBuilder {
         return User.create(
                 codeUser,
                 companyId,
-                xApplication,
+                tenantId,
                 type,
                 email,
                 phoneE164,
@@ -146,7 +146,7 @@ public class UserTestBuilder {
                 id,
                 codeUser,
                 companyId,
-                xApplication,
+                tenantId,
                 type,
                 status,
                 email,
@@ -230,7 +230,7 @@ public class UserTestBuilder {
     public UserCreateCommandDTO buildCreateCommand() {
         return new UserCreateCommandDTO(
                 companyId,
-                UUID.randomUUID(), // xApplication
+                UUID.randomUUID(), // tenantId
                 type,
                 email,
                 phoneE164,
@@ -246,7 +246,7 @@ public class UserTestBuilder {
     public UserUpdateCommandDTO buildUpdateCommand() {
         return new UserUpdateCommandDTO(
                 UUID.randomUUID(), // id
-                UUID.randomUUID(), // xApplication
+                UUID.randomUUID(), // tenantId
                 Optional.ofNullable(companyId),
                 Optional.ofNullable(codeUser),
                 Optional.ofNullable(type),
@@ -341,20 +341,20 @@ public class UserTestBuilder {
     }
     
     public com.keepguard.ms_user.application.dto.user.UserGetByIdQueryDTO buildGetByIdQuery() {
-        return new com.keepguard.ms_user.application.dto.user.UserGetByIdQueryDTO(id, xApplication);
+        return new com.keepguard.ms_user.application.dto.user.UserGetByIdQueryDTO(id, tenantId);
     }
     
     public com.keepguard.ms_user.application.dto.user.UserGetByCodeUserQueryDTO buildGetByCodeUserQuery() {
-        return new com.keepguard.ms_user.application.dto.user.UserGetByCodeUserQueryDTO(codeUser, xApplication);
+        return new com.keepguard.ms_user.application.dto.user.UserGetByCodeUserQueryDTO(codeUser, tenantId);
     }
     
     public com.keepguard.ms_user.application.dto.user.UserGetByEmailQueryDTO buildGetByEmailQuery() {
-        return new com.keepguard.ms_user.application.dto.user.UserGetByEmailQueryDTO(email, xApplication);
+        return new com.keepguard.ms_user.application.dto.user.UserGetByEmailQueryDTO(email, tenantId);
     }
     
     public com.keepguard.ms_user.application.dto.user.UserSearchQueryDTO buildSearchQuery() {
         return new com.keepguard.ms_user.application.dto.user.UserSearchQueryDTO(
-                xApplication,
+                tenantId,
                 email,
                 companyId,
                 type,
@@ -367,18 +367,18 @@ public class UserTestBuilder {
     }
     
     public com.keepguard.ms_user.application.dto.user.UserStatusChangeCommandDTO buildStatusChangeCommand() {
-        return new com.keepguard.ms_user.application.dto.user.UserStatusChangeCommandDTO(id, xApplication, "Test reason");
+        return new com.keepguard.ms_user.application.dto.user.UserStatusChangeCommandDTO(id, tenantId, "Test reason");
     }
     
     public com.keepguard.ms_user.application.dto.user.UserBatchStatusCommandDTO buildBatchStatusCommand() {
         return new com.keepguard.ms_user.application.dto.user.UserBatchStatusCommandDTO(
                 java.util.List.of(id),
-                xApplication,
+                tenantId,
                 "Test batch reason"
         );
     }
     
     public com.keepguard.ms_user.application.dto.user.UserDeleteCommandDTO buildDeleteCommand() {
-        return new com.keepguard.ms_user.application.dto.user.UserDeleteCommandDTO(id, xApplication);
+        return new com.keepguard.ms_user.application.dto.user.UserDeleteCommandDTO(id, tenantId);
     }
 }

@@ -23,7 +23,7 @@ class LocaleValidationIntegrationTest {
     void scenario1_CreateUserWithValidLocale() {
         // Given - Dados de um novo usuário com locale brasileiro
         UUID companyId = UUID.randomUUID();
-        UUID xApplication = UUID.randomUUID();
+        UUID tenantId = UUID.randomUUID();
         String email = "usuario@example.com";
         String locale = "pt-BR";
 
@@ -31,7 +31,7 @@ class LocaleValidationIntegrationTest {
         User user = User.create(
             UUID.randomUUID(),
             companyId,
-            xApplication,
+            tenantId,
             UserTypeEnum.PERSON,
             email,
             null,
@@ -51,7 +51,7 @@ class LocaleValidationIntegrationTest {
     void scenario2_CreateUserWithMixedCaseLocale() {
         // Given - Locale em formato misto
         UUID companyId = UUID.randomUUID();
-        UUID xApplication = UUID.randomUUID();
+        UUID tenantId = UUID.randomUUID();
         String email = "usuario@example.com";
         String locale = "PT-br";  // Case incorreto
 
@@ -59,7 +59,7 @@ class LocaleValidationIntegrationTest {
         User user = User.create(
             UUID.randomUUID(),
             companyId,
-            xApplication,
+            tenantId,
             UserTypeEnum.PERSON,
             email,
             null,
@@ -78,14 +78,14 @@ class LocaleValidationIntegrationTest {
     void scenario3_CreateUserWithoutLocale() {
         // Given - Usuário sem locale
         UUID companyId = UUID.randomUUID();
-        UUID xApplication = UUID.randomUUID();
+        UUID tenantId = UUID.randomUUID();
         String email = "usuario@example.com";
 
         // When - Criar usuário sem locale
         User user = User.create(
             UUID.randomUUID(),
             companyId,
-            xApplication,
+            tenantId,
             UserTypeEnum.PERSON,
             email,
             null,
@@ -104,7 +104,7 @@ class LocaleValidationIntegrationTest {
     void scenario4_CreateUserWithInvalidLocale() {
         // Given - Locale inválido
         UUID companyId = UUID.randomUUID();
-        UUID xApplication = UUID.randomUUID();
+        UUID tenantId = UUID.randomUUID();
         String email = "usuario@example.com";
         String invalidLocale = "xx-XX";
 
@@ -114,7 +114,7 @@ class LocaleValidationIntegrationTest {
             () -> User.create(
                 UUID.randomUUID(),
                 companyId,
-                xApplication,
+                tenantId,
                 UserTypeEnum.PERSON,
                 email,
                 null,

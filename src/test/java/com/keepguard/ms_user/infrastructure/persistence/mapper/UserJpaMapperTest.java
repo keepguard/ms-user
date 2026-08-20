@@ -23,7 +23,7 @@ class UserJpaMapperTest {
     private UUID userId;
     private UUID codeUser;
     private UUID companyId;
-    private UUID xApplication;
+    private UUID tenantId;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -33,7 +33,7 @@ class UserJpaMapperTest {
         userId = UUID.randomUUID();
         codeUser = UUID.randomUUID();
         companyId = UUID.randomUUID();
-        xApplication = UUID.randomUUID();
+        tenantId = UUID.randomUUID();
         createdAt = OffsetDateTime.now().minusDays(1);
         updatedAt = OffsetDateTime.now();
     }
@@ -46,7 +46,7 @@ class UserJpaMapperTest {
                 .id(userId)
                 .codeUser(codeUser)
                 .companyId(companyId)
-                .xApplication(xApplication)
+                .tenantId(tenantId)
                 .type(UserTypeEnum.PERSON)
                 .status(UserStatusEnum.ACTIVE)
                 .email("test@example.com")
@@ -85,7 +85,7 @@ class UserJpaMapperTest {
                 .id(userId)
                 .codeUser(codeUser)
                 .companyId(companyId)
-                .xApplication(xApplication)
+                .tenantId(tenantId)
                 .type(UserTypeEnum.COMPANY)
                 .status(UserStatusEnum.PENDING)
                 .email("company@example.com")
@@ -134,7 +134,7 @@ class UserJpaMapperTest {
                 userId,
                 codeUser,
                 companyId,
-                xApplication,
+                tenantId,
                 UserTypeEnum.PERSON,
                 UserStatusEnum.ACTIVE,
                 "test@example.com",
@@ -174,7 +174,7 @@ class UserJpaMapperTest {
                 userId,
                 codeUser,
                 companyId,
-                xApplication,
+                tenantId,
                 UserTypeEnum.COMPANY,
                 UserStatusEnum.INACTIVE,
                 "company@example.com",
@@ -234,7 +234,7 @@ class UserJpaMapperTest {
                     userId,
                     codeUser,
                     companyId,
-                    xApplication,
+                    tenantId,
                     UserTypeEnum.PERSON,
                     status,
                     "test@example.com",
@@ -271,7 +271,7 @@ class UserJpaMapperTest {
                     userId,
                     codeUser,
                     companyId,
-                    xApplication,
+                    tenantId,
                     type,
                     UserStatusEnum.ACTIVE,
                     "test@example.com",
@@ -311,7 +311,7 @@ class UserJpaMapperTest {
                     .id(userId)
                     .codeUser(codeUser)
                     .companyId(companyId)
-                    .xApplication(xApplication)
+                    .tenantId(tenantId)
                     .type(UserTypeEnum.PERSON)
                     .status(status)
                     .email("test@example.com")
@@ -347,7 +347,7 @@ class UserJpaMapperTest {
                     .id(userId)
                     .codeUser(codeUser)
                     .companyId(companyId)
-                    .xApplication(xApplication)
+                    .tenantId(tenantId)
                     .type(type)
                     .status(UserStatusEnum.ACTIVE)
                     .email("test@example.com")
@@ -375,7 +375,7 @@ class UserJpaMapperTest {
         User user = User.create(
                 codeUser,
                 companyId,
-                xApplication,
+                tenantId,
                 UserTypeEnum.PERSON,
                 "test@example.com",
                 "+5511999999999",
@@ -422,7 +422,7 @@ class UserJpaMapperTest {
                 userId,
                 codeUser,
                 companyId,
-                xApplication,
+                tenantId,
                 UserTypeEnum.PERSON,
                 UserStatusEnum.ACTIVE,
                 "TEST@EXAMPLE.COM", // Email em maiúsculas
@@ -451,7 +451,7 @@ class UserJpaMapperTest {
                 .id(userId)
                 .codeUser(codeUser)
                 .companyId(companyId)
-                .xApplication(xApplication)
+                .tenantId(tenantId)
                 .type(UserTypeEnum.PERSON)
                 .status(UserStatusEnum.ACTIVE)
                 .email("TEST@EXAMPLE.COM") // Email em maiúsculas
