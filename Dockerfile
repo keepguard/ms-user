@@ -15,7 +15,7 @@ WORKDIR /app
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Copia o JAR compilado localmente
-COPY target/ms-user-1.1.12-SNAPSHOT.jar app.jar
+COPY target/ms-user-VERSION_PLACEHOLDER.jar app.jar
 
 # Define as permissões corretas
 RUN chown -R appuser:appuser /app
