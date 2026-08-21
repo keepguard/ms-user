@@ -123,7 +123,7 @@ keepguard:
   security:
     jwt:
       enabled: true
-      secret: ${JWT_SECRET}
+      secret: ${JWT_SECRET:dGhpcy1pcy1hLXZlcnktc2VjdXJlLWFuZC1sb25nLWVub3VnaC1zZWNyZXQta2V5LTMyeC1jaGFycw==}
       expiration: 3600000
       issuer: ms-auth
       validate-issuer: true
