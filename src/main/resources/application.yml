@@ -3,6 +3,9 @@ application:
   timezone: America/Sao_Paulo
 
 spring:
+  threads:
+    virtual:
+      enabled: true
   profiles:
     active: local
   application:
