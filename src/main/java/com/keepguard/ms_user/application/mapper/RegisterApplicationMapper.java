@@ -13,12 +13,15 @@ import java.util.UUID;
 @Component
 public class RegisterApplicationMapper {
 
-    public RegisterSession toDomain(RegisterInitCommandDTO command, String token, String passwordHash) {
+    public RegisterSession toDomain(RegisterInitCommandDTO command, String emailToken, String smsToken, String whatsAppToken, String passwordHash) {
         return RegisterSession.create(
                 UUID.randomUUID(),
                 command.tenantId(),
                 command.email(),
-                token,
+                emailToken,
+                emailToken,
+                smsToken,
+                whatsAppToken,
                 passwordHash,
                 command.nameFull(),
                 command.phone(),
@@ -31,13 +34,20 @@ public class RegisterApplicationMapper {
         );
     }
 
+    public RegisterSession toDomain(RegisterInitCommandDTO command, String token, String passwordHash) {
+        return toDomain(command, token, null, null, passwordHash);
+    }
+
     public RegisterInitViewDTO toView(RegisterSession session, String message, Integer expiresIn) {
         return new RegisterInitViewDTO(
                 session.getRegistrationSessionId(),
                 session.getEmail(),
                 expiresIn,
                 message,
-                session.getToken()
+                session.getToken(),
+                session.getEmailToken(),
+                session.getSmsToken(),
+                session.getWhatsAppToken()
         );
     }
 }

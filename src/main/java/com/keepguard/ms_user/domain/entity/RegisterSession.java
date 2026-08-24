@@ -23,7 +23,10 @@ public final class RegisterSession {
     @JsonProperty("tenantId")
     private final UUID tenantId;
     private final String email;
-    private final String token;
+    private final String token; // Legado / fallback
+    private final String emailToken;
+    private final String smsToken;
+    private final String whatsAppToken;
     private final String passwordHash;
     private final String nameFull;
     private final String phone;
@@ -43,6 +46,9 @@ public final class RegisterSession {
             @JsonProperty("tenantId") UUID tenantId, 
             @JsonProperty("email") String email, 
             @JsonProperty("token") String token,
+            @JsonProperty("emailToken") String emailToken,
+            @JsonProperty("smsToken") String smsToken,
+            @JsonProperty("whatsAppToken") String whatsAppToken,
             @JsonProperty("passwordHash") String passwordHash, 
             @JsonProperty("nameFull") String nameFull, 
             @JsonProperty("phone") String phone, 
@@ -58,7 +64,10 @@ public final class RegisterSession {
         this.registrationSessionId = registrationSessionId;
         this.tenantId = validateTenantId(tenantId);
         this.email = validateEmail(email);
-        this.token = token;
+        this.token = token != null ? token : emailToken;
+        this.emailToken = emailToken != null ? emailToken : token;
+        this.smsToken = smsToken;
+        this.whatsAppToken = whatsAppToken;
         this.passwordHash = passwordHash;
         this.nameFull = nameFull;
         this.phone = phone;
@@ -78,11 +87,36 @@ public final class RegisterSession {
                                         Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
                                         String ipAddress, String userAgent, String geolocation,
                                         UserTypeEnum type) {
+        return create(registrationSessionId, tenantId, email, token, token, null, null,
+                passwordHash, nameFull, phone, hasAcceptedTermsAndPrivacy, acceptedMarketing,
+                ipAddress, userAgent, geolocation, type);
+    }
+
+    public static RegisterSession create(UUID registrationSessionId, UUID tenantId, String email, 
+                                        String emailToken, String smsToken, String whatsAppToken,
+                                        String passwordHash, String nameFull, String phone,
+                                        Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
+                                        String ipAddress, String userAgent, String geolocation,
+                                        UserTypeEnum type) {
+        return create(registrationSessionId, tenantId, email, emailToken, emailToken, smsToken, whatsAppToken,
+                passwordHash, nameFull, phone, hasAcceptedTermsAndPrivacy, acceptedMarketing,
+                ipAddress, userAgent, geolocation, type);
+    }
+
+    public static RegisterSession create(UUID registrationSessionId, UUID tenantId, String email, 
+                                        String token, String emailToken, String smsToken, String whatsAppToken,
+                                        String passwordHash, String nameFull, String phone,
+                                        Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
+                                        String ipAddress, String userAgent, String geolocation,
+                                        UserTypeEnum type) {
         return new RegisterSession(
                 registrationSessionId,
                 tenantId,
                 email,
                 token,
+                emailToken,
+                smsToken,
+                whatsAppToken,
                 passwordHash,
                 nameFull,
                 phone,
@@ -108,6 +142,9 @@ public final class RegisterSession {
                 tenantId,
                 email,
                 token,
+                token,
+                null,
+                null,
                 passwordHash,
                 nameFull,
                 phone,

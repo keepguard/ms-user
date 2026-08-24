@@ -20,9 +20,24 @@ public record RegisterConfirmRequestDTO(
     @Size(max = 255, message = "email deve ter no máximo 255 caracteres")
     String email,
 
-    @Schema(description = "Token de verificação de 6 dígitos", example = "123456")
-    @NotBlank(message = "token é obrigatório")
+    @Schema(description = "Token de verificação geral (ou do e-mail)", example = "123456")
     @Size(min = 6, max = 6, message = "token deve ter exatamente 6 dígitos")
-    String token
-) {}
+    String token,
+
+    @Schema(description = "Token de verificação do E-mail", example = "123456")
+    @Size(min = 6, max = 6, message = "emailToken deve ter exatamente 6 dígitos")
+    String emailToken,
+
+    @Schema(description = "Token de verificação do SMS", example = "654321")
+    @Size(min = 6, max = 6, message = "smsToken deve ter exatamente 6 dígitos")
+    String smsToken,
+
+    @Schema(description = "Token de verificação do WhatsApp", example = "987654")
+    @Size(min = 6, max = 6, message = "whatsAppToken deve ter exatamente 6 dígitos")
+    String whatsAppToken
+) {
+    public RegisterConfirmRequestDTO(UUID registrationSessionId, String email, String token) {
+        this(registrationSessionId, email, token, token, null, null);
+    }
+}
 

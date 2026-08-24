@@ -43,8 +43,10 @@ public class NotifyJpaMapper {
         }
 
         try {
+            boolean isNew = domain.getCreatedAt() == null || domain.getVersion() == null || domain.getVersion() == 0L;
             var entity = NotifyJpaEntity.builder()
                 .userId(domain.getUserId())
+                .isNew(isNew)
                 .notifyEmail(domain.isNotifyEmail())
                 .notifySms(domain.isNotifySms())
                 .notifyWhatsapp(domain.isNotifyWhatsapp())
@@ -53,7 +55,7 @@ public class NotifyJpaMapper {
                 .updatedAt(domain.getUpdatedAt())
                 .version(domain.getVersion())
                 .build();
-            log.info("🔍 JPA MAPPER - Entity criada com sucesso");
+            log.info("🔍 JPA MAPPER - Entity criada com sucesso (isNew={})", isNew);
             return entity;
         } catch (Exception e) {
             log.error("🔍 JPA MAPPER - ERRO ao criar entity: {}", e.getMessage(), e);

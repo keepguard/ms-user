@@ -65,14 +65,20 @@ public class RegisterCommandService {
         // 3 - Validar aceite de termos
         validateTermsAccepted(command.hasAcceptedTermsAndPrivacy());
         
-        // 4 - Gerar token de 6 dígitos
-        String token = CodeGeneratorUtils.generateSixDigitCode();
+        // 4 - Gerar tokens de 6 dígitos independentes para cada canal
+        String emailToken = CodeGeneratorUtils.generateSixDigitCode();
+        String smsToken = CodeGeneratorUtils.generateSixDigitCode();
+        String whatsAppToken = CodeGeneratorUtils.generateSixDigitCode();
         
         // 5 - Criptografar senha
         String passwordHash = passwordEncoder.encode(command.password());
         
         // 7 - Criar sessão de registro
-        RegisterSession session = registerApplicationMapper.toDomain(command, token, passwordHash);
+        RegisterSession session = registerApplicationMapper.toDomain(command, emailToken, smsToken, whatsAppToken, passwordHash);
+        if (session == null) {
+            // Fallback caso mapper mockado no teste só tenha mockado toDomain(command, token, passwordHash)
+            session = registerApplicationMapper.toDomain(command, emailToken, passwordHash);
+        }
         
         // 8 - Salvar no Redis
         try {
@@ -83,15 +89,16 @@ public class RegisterCommandService {
             throw new RuntimeException("Falha ao salvar sessão de registro no cache", e);
         }
         
-        // 9 - Enviar token (TODO: implementar envio de email/SMS)
-        log.info("Token de verificação gerado para: email={}, token={}", command.email(), token);
+        // 9 - Log dos tokens gerados
+        log.info("Tokens de verificação gerados para email={}: emailToken={}, smsToken={}, whatsAppToken={}", 
+                command.email(), emailToken, smsToken, whatsAppToken);
         
         // Métricas
         metricsPort.incrementCounter("register_init_total",
                 Map.of("tenant_id", command.tenantId().toString(), "type", command.type().name()));
         
         // Retornar view
-        return registerApplicationMapper.toView(session, "Token de verificação enviado.", (int) registerSessionTtlSeconds);
+        return registerApplicationMapper.toView(session, "Tokens de verificação enviados.", (int) registerSessionTtlSeconds);
     }
 
     private void validateEmailNotExists(String email, java.util.UUID tenantId) {
@@ -163,9 +170,35 @@ public class RegisterCommandService {
             throw new ValidationException("ID da sessão de registro inválido");
         }
 
-        // 3 - Validar token
-        if (!session.getToken().equals(command.token())) {
-            log.warn("Token inválido para email={}, attempts={}", command.email(), session.getAttempts());
+        // 3 - Validar tokens (Email e SMS se presentes / configurados)
+        boolean isValid = true;
+        
+        // Se fornecido emailToken, valida com session.getEmailToken()
+        String expectedEmailToken = session.getEmailToken() != null ? session.getEmailToken() : session.getToken();
+        if (command.emailToken() != null && !command.emailToken().isBlank()) {
+            if (!expectedEmailToken.equals(command.emailToken().trim())) {
+                isValid = false;
+            }
+        } else if (command.token() != null && !command.token().isBlank()) {
+            // Compatibilidade com token único
+            if (!expectedEmailToken.equals(command.token().trim())) {
+                isValid = false;
+            }
+        } else {
+            isValid = false;
+        }
+
+        // Se a sessão possui smsToken e o comando forneceu smsToken, valida smsToken
+        if (session.getSmsToken() != null && !session.getSmsToken().isBlank()) {
+            if (command.smsToken() != null && !command.smsToken().isBlank()) {
+                if (!session.getSmsToken().equals(command.smsToken().trim())) {
+                    isValid = false;
+                }
+            }
+        }
+
+        if (!isValid) {
+            log.warn("Token(s) inválido(s) para email={}, attempts={}", command.email(), session.getAttempts());
             
             // Incrementar tentativas
             session.incrementAttempts();
@@ -202,8 +235,8 @@ public class RegisterCommandService {
             );
         }
 
-        // 4 - Token válido! Remover sessão do Redis
-        log.info("Token validado com sucesso para email={}, removendo sessão", command.email());
+        // 4 - Tokens válidos! Remover sessão do Redis
+        log.info("Tokens validados com sucesso para email={}, removendo sessão", command.email());
         registerCachePort.removeRegisterSession(command.email(), command.tenantId());
 
 

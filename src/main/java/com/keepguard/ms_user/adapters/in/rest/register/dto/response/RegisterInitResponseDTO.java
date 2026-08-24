@@ -27,7 +27,16 @@ public class RegisterInitResponseDTO {
     @Schema(description = "Mensagem de resposta", example = "Token de verificação enviado.")
     private String message;
 
-    @Schema(description = "Token de verificação de 6 dígitos", example = "123456")
+    @Schema(description = "Token de verificação de 6 dígitos (legado)", example = "123456")
     private String token;
+
+    @Schema(description = "Token de verificação para E-mail", example = "123456")
+    private String emailToken;
+
+    @Schema(description = "Token de verificação para SMS", example = "654321")
+    private String smsToken;
+
+    @Schema(description = "Token de verificação para WhatsApp", example = "987654")
+    private String whatsAppToken;
 }
 

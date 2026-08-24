@@ -12,6 +12,8 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.springframework.data.domain.Persistable;
+
 @Entity
 @Table(name = "user_notify")
 @Getter @Setter
@@ -19,11 +21,44 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NotifyJpaEntity {
+public class NotifyJpaEntity implements Persistable<UUID> {
 
     @Id
     @Column(name = "user_id", columnDefinition = "uuid", nullable = false)
     private UUID userId;
+
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+
+    public NotifyJpaEntity(UUID userId, boolean notifyEmail, boolean notifySms,
+                           boolean notifyWhatsapp, boolean notifyPush,
+                           OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+        this.userId = userId;
+        this.notifyEmail = notifyEmail;
+        this.notifySms = notifySms;
+        this.notifyWhatsapp = notifyWhatsapp;
+        this.notifyPush = notifyPush;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.isNew = true;
+    }
+
+    public NotifyJpaEntity(UUID userId, boolean notifyEmail, boolean notifySms,
+                           boolean notifyWhatsapp, boolean notifyPush,
+                           OffsetDateTime createdAt, OffsetDateTime updatedAt, Long version) {
+        this(userId, notifyEmail, notifySms, notifyWhatsapp, notifyPush, createdAt, updatedAt);
+    }
+
+    @Override
+    public UUID getId() {
+        return userId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
 
     @Column(name = "notify_email", nullable = false)
     @Builder.Default
@@ -47,9 +82,9 @@ public class NotifyJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
-    @Version
     @Column(name = "version", nullable = false)
-    private Long version;
+    @Builder.Default
+    private Long version = 0L;
 
     @PrePersist
     public void prePersist() {

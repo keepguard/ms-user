@@ -7,6 +7,13 @@ public record RegisterInitViewDTO(
     String email,
     Integer expiresIn,
     String message,
-    String token
-) {}
+    String token,
+    String emailToken,
+    String smsToken,
+    String whatsAppToken
+) {
+    public RegisterInitViewDTO(UUID registrationSessionId, String email, Integer expiresIn, String message, String token) {
+        this(registrationSessionId, email, expiresIn, message, token, token, null, null);
+    }
+}
 

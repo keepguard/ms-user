@@ -13,18 +13,27 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.springframework.data.domain.Persistable;
+
 @Entity
 @Table(name = "users")
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserJpaEntity {
+public class UserJpaEntity implements Persistable<UUID> {
 
     @Id
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Transient
+    private boolean isNew = true;
+
+    @Override
+    public boolean isNew() {
+        return isNew || createdAt == null;
+    }
 
     @Column(name = "code_user", nullable = false)
     private UUID codeUser;

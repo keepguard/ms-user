@@ -115,6 +115,8 @@ class RegisterCommandServiceTest {
         when(registerCachePort.existsRegisterSession(anyString(), any(UUID.class)))
                 .thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashed");
+        when(registerApplicationMapper.toDomain(any(), anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(session);
         when(registerApplicationMapper.toDomain(any(), anyString(), anyString()))
                 .thenReturn(session);
         when(registerApplicationMapper.toView(any(), anyString(), anyInt()))
@@ -241,6 +243,8 @@ class RegisterCommandServiceTest {
         when(registerCachePort.existsRegisterSession(anyString(), any(UUID.class)))
                 .thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashed");
+        when(registerApplicationMapper.toDomain(any(), anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(session);
         when(registerApplicationMapper.toDomain(any(), anyString(), anyString()))
                 .thenReturn(session);
         when(registerApplicationMapper.toView(any(), anyString(), anyInt()))
@@ -255,7 +259,7 @@ class RegisterCommandServiceTest {
         registerCommandService.init(command);
 
         // Then
-        verify(registerApplicationMapper).toDomain(eq(command), anyString(), eq("$2a$10$hashed"));
+        verify(registerApplicationMapper).toDomain(eq(command), anyString(), anyString(), anyString(), eq("$2a$10$hashed"));
     }
 
     @Test
@@ -267,6 +271,8 @@ class RegisterCommandServiceTest {
         when(registerCachePort.existsRegisterSession(anyString(), any(UUID.class)))
                 .thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashed");
+        when(registerApplicationMapper.toDomain(any(), anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(session);
         when(registerApplicationMapper.toDomain(any(), anyString(), anyString()))
                 .thenReturn(session);
         doThrow(new com.fasterxml.jackson.core.JsonProcessingException("Erro de serialização") {})

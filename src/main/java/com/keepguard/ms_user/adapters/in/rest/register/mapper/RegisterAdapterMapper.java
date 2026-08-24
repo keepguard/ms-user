@@ -41,7 +41,10 @@ public class RegisterAdapterMapper {
                 tenantId,
                 request.registrationSessionId(),
                 request.email(),
-                request.token()
+                request.token(),
+                request.emailToken(),
+                request.smsToken(),
+                request.whatsAppToken()
         );
     }
 
@@ -56,6 +59,9 @@ public class RegisterAdapterMapper {
                 .expiresIn(view.expiresIn())
                 .message(view.message())
                 .token(view.token())
+                .emailToken(view.emailToken())
+                .smsToken(view.smsToken())
+                .whatsAppToken(view.whatsAppToken())
                 .build();
     }
 

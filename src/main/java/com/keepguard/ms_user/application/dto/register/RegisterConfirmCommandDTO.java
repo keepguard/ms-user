@@ -19,8 +19,12 @@ public record RegisterConfirmCommandDTO(
     @Size(max = 255, message = "email deve ter no máximo 255 caracteres")
     String email,
 
-    @NotBlank(message = "token é obrigatório")
-    @Size(min = 6, max = 6, message = "token deve ter exatamente 6 dígitos")
-    String token
-) {}
-
+    String token,
+    String emailToken,
+    String smsToken,
+    String whatsAppToken
+) {
+    public RegisterConfirmCommandDTO(UUID tenantId, UUID registrationSessionId, String email, String token) {
+        this(tenantId, registrationSessionId, email, token, token, null, null);
+    }
+}
