@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ms-user
+description: Helm Chart para o Microsserviço ms-user do KeepGuard
+type: application
+version: 1.0.5
+appVersion: "1.0.5"
