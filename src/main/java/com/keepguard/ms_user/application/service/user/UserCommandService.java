@@ -12,6 +12,7 @@ import com.keepguard.ms_user.application.service.exception.AlreadyExistsExceptio
 import com.keepguard.ms_user.application.service.exception.NotFoundException;
 import com.keepguard.ms_user.domain.entity.User;
 import com.keepguard.ms_user.domain.enums.UserStatusEnum;
+import com.keepguard.ms_user.domain.util.DisplayHandleGenerator;
 import com.keepguard.ms_user.application.port.out.cache.UserCachePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,31 +70,12 @@ public class UserCommandService {
                         throw new AlreadyExistsException("CPF já está em uso nesta aplicação", "CPF_ALREADY_EXISTS", Map.of("cpf", cleanedCpf));
                     }
                 }
-                
-                // Validar display_handle (unicidade por company_id) - em users
-                String displayHandle = command.displayHandle();
-                if (displayHandle != null && !displayHandle.trim().isEmpty()) {
-                    UUID tempExcludeUserId = UUID.randomUUID();
-                    if (userRepositoryPort.existsByDisplayHandleAndCompanyId(
-                            displayHandle,
-                            command.companyId(),
-                            tempExcludeUserId)) {
-                        metricsPort.incrementCounter("user_business_errors_total",
-                            Map.of("error_code", "DISPLAY_HANDLE_ALREADY_EXISTS", "operation", "create"));
-                        throw new AlreadyExistsException(
-                                "display_handle já está em uso nesta empresa",
-                                "DISPLAY_HANDLE_ALREADY_EXISTS",
-                                Map.of("displayHandle", displayHandle, "companyId", command.companyId().toString()));
-                    }
-                }
             }
         }
 
         // Criar usuário usando o mapper
         var user = userApplicationMapper.toDomain(command);
-        if (command.displayHandle() != null && !command.displayHandle().trim().isEmpty()) {
-            user.setDisplayHandle(command.displayHandle());
-        }
+        user.setDisplayHandle(resolveDisplayHandleForCreate(command));
         user.activate();
 
         var userSaved = userRepositoryPort.save(user);
@@ -111,6 +93,43 @@ public class UserCommandService {
 
         log.info("Usuário criado com sucesso: {} - {}", userSaved.getId(), userSaved.getEmail());
         return userView;
+    }
+
+    private String resolveDisplayHandleForCreate(UserCreateCommandDTO command) {
+        String provided = command.displayHandle();
+        if (provided != null && !provided.trim().isEmpty()) {
+            String handle = provided.trim();
+            if (isDisplayHandleTaken(handle, command.companyId(), null)) {
+                metricsPort.incrementCounter("user_business_errors_total",
+                    Map.of("error_code", "DISPLAY_HANDLE_ALREADY_EXISTS", "operation", "create"));
+                throw new AlreadyExistsException(
+                        "display_handle já está em uso nesta empresa",
+                        "DISPLAY_HANDLE_ALREADY_EXISTS",
+                        Map.of("displayHandle", handle, "companyId", command.companyId().toString()));
+            }
+            return handle;
+        }
+
+        String fullName = null;
+        if (command.personProfile() != null) {
+            fullName = command.personProfile().getFullName();
+        }
+        String base = DisplayHandleGenerator.baseFrom(fullName, command.email());
+        for (int n = 1; n <= 9999; n++) {
+            String candidate = DisplayHandleGenerator.withUniquenessSuffix(base, n);
+            if (!isDisplayHandleTaken(candidate, command.companyId(), null)) {
+                return candidate;
+            }
+        }
+        throw new AlreadyExistsException(
+                "não foi possível gerar display_handle único nesta empresa",
+                "DISPLAY_HANDLE_ALREADY_EXISTS",
+                Map.of("companyId", command.companyId().toString()));
+    }
+
+    private boolean isDisplayHandleTaken(String displayHandle, UUID companyId, UUID excludeUserId) {
+        UUID exclude = excludeUserId != null ? excludeUserId : UUID.randomUUID();
+        return userRepositoryPort.existsByDisplayHandleAndCompanyId(displayHandle, companyId, exclude);
     }
 
     @LogOperation(
