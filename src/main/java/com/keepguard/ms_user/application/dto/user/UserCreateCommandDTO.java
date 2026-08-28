@@ -19,6 +19,8 @@ public record UserCreateCommandDTO(
     @NotNull(message = "companyId é obrigatório")
     UUID companyId,
 
+    UUID tenantId,
+
     @NotNull(message = "type é obrigatório")
     UserTypeEnum type,
 

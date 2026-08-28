@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -92,7 +93,7 @@ class UserControllerTest {
                 .withEmail("test@example.com")
                 .buildDetailsView();
         
-        when(mapper.toCreateCommand(any(), any())).thenReturn(UserTestBuilder.builder().buildCreateCommand());
+        when(mapper.toCreateCommand(any(), any(), nullable(UUID.class))).thenReturn(UserTestBuilder.builder().buildCreateCommand());
         when(userPort.create(any())).thenReturn(view);
         when(mapper.toResponseDTO(view)).thenReturn(UserTestBuilder.builder().buildResponseDTO());
         

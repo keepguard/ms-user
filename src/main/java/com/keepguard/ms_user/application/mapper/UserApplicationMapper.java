@@ -22,10 +22,11 @@ import java.util.UUID;
 public class UserApplicationMapper {
 
     public User toDomain(UserCreateCommandDTO command) {
+        UUID tenantId = command.tenantId() != null ? command.tenantId() : command.companyId();
         return User.create(
             UUID.randomUUID(), // codeUser será gerado na regra de negócio
             command.companyId(),
-            command.companyId(),
+            tenantId,
             command.type(),
             command.email(),
             command.phoneE164(),

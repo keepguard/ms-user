@@ -38,12 +38,14 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> create(
             @Valid @RequestBody UserCreateRequestDTO request,
             @Parameter(description = "UUID da empresa", required = true)
-            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId,
+            @Parameter(description = "TenantId da empresa")
+            @RequestHeader(value = "X-Tenant-Id", required = false) UUID tenantId) {
         
         
-        log.info("Criando novo usuário: {}, application={} (endpoint público)", request.email(), companyId);
+        log.info("Criando novo usuário: {}, companyId={}, tenantId={} (endpoint público)", request.email(), companyId, tenantId);
 
-        var command = mapper.toCreateCommand(request, companyId);
+        var command = mapper.toCreateCommand(request, companyId, tenantId);
         var view = userPort.create(command);
         var response = mapper.toResponseDTO(view);
         

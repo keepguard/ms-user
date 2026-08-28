@@ -20,9 +20,15 @@ import java.util.UUID;
 public class UserAdapterMapper {
 
     public UserCreateCommandDTO toCreateCommand(UserCreateRequestDTO request, UUID companyId) {
+        return toCreateCommand(request, companyId, null);
+    }
+
+    public UserCreateCommandDTO toCreateCommand(UserCreateRequestDTO request, UUID companyId, UUID tenantId) {
         String displayHandle = request.personProfile() != null ? request.personProfile().displayHandle() : null;
+        UUID resolvedTenantId = tenantId != null ? tenantId : companyId;
         return new UserCreateCommandDTO(
             companyId,
+            resolvedTenantId,
             request.type(),
             request.email(),
             request.phoneE164(),

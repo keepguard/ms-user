@@ -230,6 +230,7 @@ public class UserTestBuilder {
     public UserCreateCommandDTO buildCreateCommand() {
         return new UserCreateCommandDTO(
                 companyId,
+                companyId,
                 type,
                 email,
                 phoneE164,
