@@ -65,20 +65,17 @@ class RegisterCommandServiceTest {
 
     private RegisterInitCommandDTO command;
     private RegisterSession session;
-    private UUID tenantId;
     private UUID companyId;
 
     @BeforeEach
     void setUp() {
-        tenantId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+        companyId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
         companyId = UUID.fromString("660e8400-e29b-41d4-a716-446655440000");
         
         // Configurar maxAttempts para 5 usando ReflectionTestUtils
         ReflectionTestUtils.setField(registerCommandService, "maxAttempts", 5);
         
-        command = new RegisterInitCommandDTO(
-                tenantId,
-                companyId,
+        command = new RegisterInitCommandDTO(companyId,
                 "teste@example.com",
                 "João Silva",
                 "SenhaSegura123!",
@@ -93,7 +90,7 @@ class RegisterCommandServiceTest {
 
         session = RegisterSession.of(
                 UUID.randomUUID(),
-                tenantId,
+                companyId,
                 "teste@example.com",
                 "123456",
                 "$2a$10$hashed",
@@ -140,9 +137,9 @@ class RegisterCommandServiceTest {
         assertThat(result.message()).isEqualTo("Token enviado");
         verify(userRepositoryPort).existsByEmailAndCompanyId(command.email(), companyId, null);
         verify(userRepositoryPort).existsByPhoneE164AndCompanyId("+5511999999999", companyId, null);
-        verify(registerCachePort).existsRegisterSession(command.email(), tenantId);
+        verify(registerCachePort).existsRegisterSession(command.email(), companyId);
         verify(passwordEncoder).encode(command.password());
-        verify(registerCachePort).saveRegisterSession(command.email(), tenantId, session);
+        verify(registerCachePort).saveRegisterSession(command.email(), companyId, session);
         verify(metricsPort).incrementCounter(anyString(), any());
     }
 
@@ -217,7 +214,7 @@ class RegisterCommandServiceTest {
                 .hasMessageContaining("Já existe uma sessão de registro ativa");
 
         verify(userRepositoryPort).existsByEmailAndCompanyId(command.email(), companyId, null);
-        verify(registerCachePort).existsRegisterSession(command.email(), tenantId);
+        verify(registerCachePort).existsRegisterSession(command.email(), companyId);
         verify(registerCachePort, never()).saveRegisterSession(any(), any(), any());
         verify(metricsPort).incrementCounter(anyString(), any());
     }
@@ -226,9 +223,7 @@ class RegisterCommandServiceTest {
     @DisplayName("Deve lançar exceção quando termos não foram aceitos")
     void deveLancarExcecaoQuandoTermosNaoForamAceitos() {
         // Given
-        RegisterInitCommandDTO commandSemTermos = new RegisterInitCommandDTO(
-                tenantId,
-                companyId,
+        RegisterInitCommandDTO commandSemTermos = new RegisterInitCommandDTO(companyId,
                 "teste@example.com",
                 "João Silva",
                 "SenhaSegura123!",
@@ -330,9 +325,9 @@ class RegisterCommandServiceTest {
                 .hasMessageContaining("Falha ao salvar sessão de registro no cache");
 
         verify(userRepositoryPort).existsByEmailAndCompanyId(command.email(), companyId, null);
-        verify(registerCachePort).existsRegisterSession(command.email(), tenantId);
+        verify(registerCachePort).existsRegisterSession(command.email(), companyId);
         verify(passwordEncoder).encode(command.password());
-        verify(registerCachePort).saveRegisterSession(command.email(), tenantId, session);
+        verify(registerCachePort).saveRegisterSession(command.email(), companyId, session);
     }
 
     // ========== TESTES DO MÉTODO CONFIRM ==========
@@ -378,8 +373,8 @@ class RegisterCommandServiceTest {
         assertThat(result.getEmail()).isEqualTo("teste@example.com");
         assertThat(result.getToken()).isEqualTo("123456");
 
-        verify(registerCachePort).getRegisterSession(command.email(), command.tenantId());
-        verify(registerCachePort).removeRegisterSession(command.email(), command.tenantId());
+        verify(registerCachePort).getRegisterSession(command.email(), command.companyId());
+        verify(registerCachePort).removeRegisterSession(command.email(), command.companyId());
         verify(metricsPort).incrementCounter(eq("register_confirm_total"), any(Map.class));
     }
 
@@ -402,7 +397,7 @@ class RegisterCommandServiceTest {
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Sessão de registro não encontrada ou expirada. Por favor, inicie o registro novamente.");
 
-        verify(registerCachePort).getRegisterSession(command.email(), command.tenantId());
+        verify(registerCachePort).getRegisterSession(command.email(), command.companyId());
         verify(metricsPort).incrementCounter(eq("register_business_errors_total"), any(Map.class));
     }
 
@@ -425,7 +420,7 @@ class RegisterCommandServiceTest {
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("ID da sessão de registro inválido");
 
-        verify(registerCachePort).getRegisterSession(command.email(), command.tenantId());
+        verify(registerCachePort).getRegisterSession(command.email(), command.companyId());
         verify(metricsPort).incrementCounter(eq("register_business_errors_total"), any(Map.class));
     }
 
@@ -434,10 +429,10 @@ class RegisterCommandServiceTest {
     void deveLancarValidationExceptionQuandoTokenInvalido() throws Exception {
         // Given
         UUID registrationSessionId = UUID.randomUUID();
-        UUID tenantId = UUID.randomUUID();
+        UUID companyId = UUID.randomUUID();
         
         RegisterConfirmCommandDTO command = new RegisterConfirmCommandDTO(
-                tenantId,
+                companyId,
                 registrationSessionId,
                 "teste@example.com",
                 "654321" // Token diferente
@@ -446,7 +441,7 @@ class RegisterCommandServiceTest {
         // Criar uma sessão com 0 tentativas
         RegisterSession sessionComZeroTentativas = RegisterSession.of(
                 registrationSessionId,
-                tenantId,
+                companyId,
                 "teste@example.com",
                 "123456",
                 "encodedPassword",
@@ -464,7 +459,7 @@ class RegisterCommandServiceTest {
         );
 
         // Mock específico para este teste
-        when(registerCachePort.getRegisterSession(command.email(), command.tenantId()))
+        when(registerCachePort.getRegisterSession(command.email(), command.companyId()))
                 .thenReturn(Optional.of(sessionComZeroTentativas));
 
         // Mock para salvar a sessão atualizada (com 1 tentativa)
@@ -476,8 +471,8 @@ class RegisterCommandServiceTest {
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("Token inválido. Tentativas restantes: 4");
 
-        verify(registerCachePort).getRegisterSession(eq(command.email()), eq(command.tenantId()));
-        verify(registerCachePort).saveRegisterSession(eq(command.email()), eq(command.tenantId()), any(RegisterSession.class));
+        verify(registerCachePort).getRegisterSession(eq(command.email()), eq(command.companyId()));
+        verify(registerCachePort).saveRegisterSession(eq(command.email()), eq(command.companyId()), any(RegisterSession.class));
         verify(metricsPort).incrementCounter(eq("register_business_errors_total"), any(Map.class));
     }
 
@@ -506,8 +501,8 @@ class RegisterCommandServiceTest {
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("Número máximo de tentativas excedido. Por favor, inicie o registro novamente.");
 
-        verify(registerCachePort).getRegisterSession(command.email(), command.tenantId());
-        verify(registerCachePort).removeRegisterSession(command.email(), command.tenantId());
+        verify(registerCachePort).getRegisterSession(command.email(), command.companyId());
+        verify(registerCachePort).removeRegisterSession(command.email(), command.companyId());
         verify(metricsPort).incrementCounter(eq("register_business_errors_total"), any(Map.class));
     }
 

@@ -37,14 +37,13 @@ public class ContactController {
     @MetricsEndpoint(endpoint = "contact_create")
     public ResponseEntity<ContactDetailsResponseDTO> create(
             @Valid @RequestBody ContactCreateRequestDTO request,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
 
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
-        log.info("Criando novo contato para usuário: {}, application={}", request.userId(), tenantId);
+        log.info("Criando novo contato para usuário: {}, application={}", request.userId(), companyId);
 
-        var command = mapper.toCreateCommand(request, tenantId);
+        var command = mapper.toCreateCommand(request, companyId);
         var view = contactPort.create(command);
         var response = mapper.toResponseDTO(view);
         
@@ -56,13 +55,12 @@ public class ContactController {
     @MetricsEndpoint(endpoint = "contact_get_by_id")
     public ResponseEntity<ContactDetailsResponseDTO> getById(
             @PathVariable UUID id,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Buscando contato por ID: application={}, id={}", tenantId, id);
+        log.info("Buscando contato por ID: application={}, id={}", companyId, id);
 
-        var query = mapper.toGetByIdQuery(id, tenantId);
+        var query = mapper.toGetByIdQuery(id, companyId);
         var view = contactPort.getById(query);
         var response = mapper.toResponseDTO(view);
         
@@ -74,13 +72,12 @@ public class ContactController {
     @MetricsEndpoint(endpoint = "contact_get_by_user")
     public ResponseEntity<List<ContactDetailsResponseDTO>> getByUserId(
             @PathVariable UUID userId,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Buscando contatos do usuário: application={}, userId={}", tenantId, userId);
+        log.info("Buscando contatos do usuário: application={}, userId={}", companyId, userId);
 
-        var query = mapper.toGetByUserIdQuery(userId, tenantId);
+        var query = mapper.toGetByUserIdQuery(userId, companyId);
         var views = contactPort.getByUserId(query);
         var responses = views.stream()
                 .map(mapper::toResponseDTO)
@@ -95,13 +92,12 @@ public class ContactController {
     public ResponseEntity<ContactDetailsResponseDTO> update(
             @PathVariable UUID id,
             @Valid @RequestBody ContactUpdateRequestDTO request,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Atualizando contato: application={}, id={}", tenantId, id);
+        log.info("Atualizando contato: application={}, id={}", companyId, id);
         
-        var command = mapper.toUpdateCommand(request, id, tenantId);
+        var command = mapper.toUpdateCommand(request, id, companyId);
         var view = contactPort.update(command);
         var response = mapper.toResponseDTO(view);
         
@@ -113,13 +109,12 @@ public class ContactController {
     @MetricsEndpoint(endpoint = "contact_delete")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Deletando contato: application={}, id={}", tenantId, id);
+        log.info("Deletando contato: application={}, id={}", companyId, id);
         
-        var command = mapper.toDeleteCommand(id, tenantId);
+        var command = mapper.toDeleteCommand(id, companyId);
         contactPort.delete(command);
         
         return ResponseEntity.noContent().build();
@@ -131,12 +126,11 @@ public class ContactController {
     public ResponseEntity<PageResultDTO<ContactDetailsResponseDTO>> search(
             @PathVariable UUID userId,
             @Valid @ModelAttribute ContactSearchRequestDTO searchRequest,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
 
         log.info("Buscando contatos do usuário: application={}, userId={}, value={}, type={}",
-                tenantId, userId, searchRequest.getValue(), searchRequest.getType());
+                companyId, userId, searchRequest.getValue(), searchRequest.getType());
 
         if (searchRequest.getPage() < 0) {
             throw new IllegalArgumentException("Página deve ser maior ou igual a 0");
@@ -145,7 +139,7 @@ public class ContactController {
             throw new IllegalArgumentException("Tamanho da página deve estar entre 1 e 100");
         }
 
-        var query = mapper.toSearchQuery(searchRequest, tenantId, userId);
+        var query = mapper.toSearchQuery(searchRequest, companyId, userId);
         var result = contactPort.search(query);
 
         var responseData = result.content().stream()

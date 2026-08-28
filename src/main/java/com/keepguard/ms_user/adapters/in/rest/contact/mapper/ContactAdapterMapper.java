@@ -16,10 +16,10 @@ public class ContactAdapterMapper {
 
     // === Command Methods ===
 
-    public ContactCreateCommandDTO toCreateCommand(ContactCreateRequestDTO request, UUID tenantId) {
+    public ContactCreateCommandDTO toCreateCommand(ContactCreateRequestDTO request, UUID companyId) {
         return new ContactCreateCommandDTO(
             request.userId(),
-            tenantId,
+            companyId,
             request.value(),
             request.type(),
             request.description(),
@@ -28,10 +28,10 @@ public class ContactAdapterMapper {
         );
     }
 
-    public ContactUpdateCommandDTO toUpdateCommand(ContactUpdateRequestDTO request, UUID id, UUID tenantId) {
+    public ContactUpdateCommandDTO toUpdateCommand(ContactUpdateRequestDTO request, UUID id, UUID companyId) {
         return new ContactUpdateCommandDTO(
             id,
-            tenantId,
+            companyId,
             Optional.ofNullable(request.value()),
             Optional.ofNullable(request.type()),
             Optional.ofNullable(request.description()),
@@ -40,25 +40,25 @@ public class ContactAdapterMapper {
         );
     }
 
-    public ContactDeleteCommandDTO toDeleteCommand(UUID id, UUID tenantId) {
-        return new ContactDeleteCommandDTO(id, tenantId);
+    public ContactDeleteCommandDTO toDeleteCommand(UUID id, UUID companyId) {
+        return new ContactDeleteCommandDTO(id, companyId);
     }
 
     // === Query Methods ===
 
-    public ContactGetByIdQueryDTO toGetByIdQuery(UUID id, UUID tenantId) {
-        return new ContactGetByIdQueryDTO(id, tenantId);
+    public ContactGetByIdQueryDTO toGetByIdQuery(UUID id, UUID companyId) {
+        return new ContactGetByIdQueryDTO(id, companyId);
     }
 
-    public ContactGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID tenantId) {
-        return new ContactGetByUserIdQueryDTO(userId, tenantId);
+    public ContactGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID companyId) {
+        return new ContactGetByUserIdQueryDTO(userId, companyId);
     }
 
-    public ContactSearchQueryDTO toSearchQuery(ContactSearchRequestDTO request, UUID tenantId, UUID userId) {
+    public ContactSearchQueryDTO toSearchQuery(ContactSearchRequestDTO request, UUID companyId, UUID userId) {
         var contactType = request.getType() != null ? ContactTypeEnum.valueOf(request.getType()) : null;
 
         return new ContactSearchQueryDTO(
-            tenantId,
+            companyId,
             userId,
             request.getValue(),
             contactType,

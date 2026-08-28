@@ -43,12 +43,11 @@ public class InternalUserController {
     public ResponseEntity<UserResponseDTO> getById(
             @PathVariable UUID id,
             @Parameter(description = "UUID da empresa", required = true)
-            @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
 
         log.debug("[INTERNAL] Buscando usuário por ID: id={}", id);
 
-        UUID companyId = UUID.fromString(companyIdHeader);
-        var query = mapper.toGetByIdQuery(id, null, companyId);
+        var query = mapper.toGetByIdQuery(id, companyId);
         var view = userPort.getById(query);
         var response = mapper.toGetByIdResponseDTO(view);
         
@@ -63,12 +62,11 @@ public class InternalUserController {
     public ResponseEntity<UserResponseDTO> getByCodeUser(
             @PathVariable UUID codeUser,
             @Parameter(description = "UUID da empresa", required = true)
-            @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
 
         log.debug("[INTERNAL] Buscando usuário por codeUser: codeUser={}", codeUser);
 
-        UUID companyId = UUID.fromString(companyIdHeader);
-        var query = mapper.toGetByCodeUserQuery(codeUser, null, companyId);
+        var query = mapper.toGetByCodeUserQuery(codeUser, companyId);
         var view = userPort.getByCodeUser(query);
         var response = mapper.toGetByCodeUserResponseDTO(view);
         

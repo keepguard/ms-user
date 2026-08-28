@@ -36,7 +36,7 @@ public interface UserPort {
 
     UserDetailsViewDTO getByCodeUser(UserGetByCodeUserQueryDTO query);
 
-    UserDetailsViewDTO getByCodeUserForTenant(UUID codeUser, UUID tenantId);
+    UserDetailsViewDTO getByCodeUserForTenant(UUID codeUser, UUID companyId);
 
     UserDetailsViewDTO getByEmail(UserGetByEmailQueryDTO query);
 

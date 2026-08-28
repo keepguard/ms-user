@@ -9,9 +9,6 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record RegisterInitCommandDTO(
-    @NotNull(message = "tenantId é obrigatório")
-    UUID tenantId,
-
     @NotNull(message = "companyId é obrigatório")
     UUID companyId,
 

@@ -9,8 +9,8 @@ public record UserStatusChangeCommandDTO(
     @NotNull(message = "id é obrigatório")
     UUID id,
     
-    @NotNull(message = "tenantId é obrigatório")
-    UUID tenantId,
+    @NotNull(message = "companyId é obrigatório")
+    UUID companyId,
     
     @NotBlank(message = "reason é obrigatório")
     String reason

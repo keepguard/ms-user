@@ -21,7 +21,7 @@ public class AddressTestBuilder {
     
     private UUID id = UUID.randomUUID();
     private UUID userId = UUID.randomUUID();
-    private UUID tenantId = UUID.randomUUID();
+    private UUID companyId = UUID.randomUUID();
     private String street = "Rua das Flores";
     private String number = "123";
     private String complement = "Apto 45";
@@ -56,8 +56,8 @@ public class AddressTestBuilder {
         return this;
     }
     
-    public AddressTestBuilder withTenantId(UUID tenantId) {
-        this.tenantId = tenantId;
+    public AddressTestBuilder withTenantId(UUID companyId) {
+        this.companyId = companyId;
         return this;
     }
     
@@ -169,7 +169,7 @@ public class AddressTestBuilder {
     public AddressCreateCommandDTO buildCreateCommand() {
         return new AddressCreateCommandDTO(
                 userId,
-                tenantId,
+                companyId,
                 street,
                 number,
                 complement,
@@ -187,7 +187,7 @@ public class AddressTestBuilder {
     public AddressUpdateCommandDTO buildUpdateCommand() {
         return new AddressUpdateCommandDTO(
                 id,
-                tenantId,
+                companyId,
                 Optional.of(street),
                 Optional.of(number),
                 Optional.of(complement),
@@ -205,7 +205,7 @@ public class AddressTestBuilder {
     public AddressUpdateCommandDTO buildUpdateCommandWithPrimary(Boolean primary) {
         return new AddressUpdateCommandDTO(
                 id,
-                tenantId,
+                companyId,
                 Optional.of(street),
                 Optional.of(number),
                 Optional.of(complement),
@@ -221,20 +221,20 @@ public class AddressTestBuilder {
     }
     
     public AddressDeleteCommandDTO buildDeleteCommand() {
-        return new AddressDeleteCommandDTO(id, tenantId);
+        return new AddressDeleteCommandDTO(id, companyId);
     }
     
     public AddressGetByIdQueryDTO buildGetByIdQuery() {
-        return new AddressGetByIdQueryDTO(id, tenantId);
+        return new AddressGetByIdQueryDTO(id, companyId);
     }
     
     public AddressGetByUserIdQueryDTO buildGetByUserIdQuery() {
-        return new AddressGetByUserIdQueryDTO(userId, tenantId);
+        return new AddressGetByUserIdQueryDTO(userId, companyId);
     }
     
     public AddressSearchQueryDTO buildSearchQuery() {
         return new AddressSearchQueryDTO(
-                tenantId,
+                companyId,
                 userId,
                 city,
                 state,

@@ -6,7 +6,7 @@ import java.util.UUID;
  * DTO de comando para reenvio de token de registro.
  */
 public record RegisterResendCommandDTO(
-    UUID tenantId,
+    UUID companyId,
     String email,
     UUID registrationSessionId
 ) {}

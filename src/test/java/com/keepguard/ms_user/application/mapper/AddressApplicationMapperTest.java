@@ -166,7 +166,7 @@ class AddressApplicationMapperTest {
         
         var command = new com.keepguard.ms_user.application.dto.address.AddressUpdateCommandDTO(
             address.getId(),
-            builder.buildCreateCommand().tenantId(),
+            builder.buildCreateCommand().companyId(),
             Optional.empty(),
             Optional.empty(),
             Optional.of("Novo Complemento"),

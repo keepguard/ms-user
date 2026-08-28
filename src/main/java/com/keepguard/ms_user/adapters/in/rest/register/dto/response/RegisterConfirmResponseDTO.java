@@ -23,8 +23,8 @@ public class RegisterConfirmResponseDTO {
     private UUID registrationSessionId;
 
     @Schema(description = "ID da aplicação", example = "123e4567-e89b-12d3-a456-426614174000")
-    @JsonProperty("tenant_id")
-    private UUID tenantId;
+    @JsonProperty("company_id")
+    private UUID companyId;
 
     @Schema(description = "Email do usuário", example = "usuario@exemplo.com")
     private String email;

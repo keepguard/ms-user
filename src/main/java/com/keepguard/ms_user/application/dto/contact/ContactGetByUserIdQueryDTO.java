@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record ContactGetByUserIdQueryDTO(
     UUID userId,
-    UUID tenantId
+    UUID companyId
 ) {}
 

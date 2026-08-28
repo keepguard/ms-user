@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record ContactDeleteCommandDTO(
     UUID id,
-    UUID tenantId
+    UUID companyId
 ) {}
 

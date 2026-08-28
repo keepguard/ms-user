@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record ContactUpdateCommandDTO(
     UUID id,
-    UUID tenantId,
+    UUID companyId,
     Optional<String> value,
     Optional<ContactTypeEnum> type,
     Optional<String> description,

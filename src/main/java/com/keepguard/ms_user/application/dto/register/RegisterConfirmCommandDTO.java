@@ -8,8 +8,8 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record RegisterConfirmCommandDTO(
-    @NotNull(message = "tenantId é obrigatório")
-    UUID tenantId,
+    @NotNull(message = "companyId é obrigatório")
+    UUID companyId,
 
     @NotNull(message = "registrationSessionId é obrigatório")
     UUID registrationSessionId,
@@ -24,7 +24,7 @@ public record RegisterConfirmCommandDTO(
     String smsToken,
     String whatsAppToken
 ) {
-    public RegisterConfirmCommandDTO(UUID tenantId, UUID registrationSessionId, String email, String token) {
-        this(tenantId, registrationSessionId, email, token, token, null, null);
+    public RegisterConfirmCommandDTO(UUID companyId, UUID registrationSessionId, String email, String token) {
+        this(companyId, registrationSessionId, email, token, token, null, null);
     }
 }

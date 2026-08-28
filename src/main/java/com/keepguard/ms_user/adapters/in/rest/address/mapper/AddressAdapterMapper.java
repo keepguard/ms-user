@@ -16,10 +16,10 @@ public class AddressAdapterMapper {
 
     // === Command Methods ===
 
-    public AddressCreateCommandDTO toCreateCommand(AddressCreateRequestDTO request, UUID tenantId) {
+    public AddressCreateCommandDTO toCreateCommand(AddressCreateRequestDTO request, UUID companyId) {
         return new AddressCreateCommandDTO(
             request.userId(),
-            tenantId,
+            companyId,
             request.street(),
             request.number(),
             request.complement(),
@@ -34,10 +34,10 @@ public class AddressAdapterMapper {
         );
     }
 
-    public AddressUpdateCommandDTO toUpdateCommand(AddressUpdateRequestDTO request, UUID id, UUID tenantId) {
+    public AddressUpdateCommandDTO toUpdateCommand(AddressUpdateRequestDTO request, UUID id, UUID companyId) {
         return new AddressUpdateCommandDTO(
             id,
-            tenantId,
+            companyId,
             Optional.ofNullable(request.street()),
             Optional.ofNullable(request.number()),
             Optional.ofNullable(request.complement()),
@@ -52,25 +52,25 @@ public class AddressAdapterMapper {
         );
     }
 
-    public AddressDeleteCommandDTO toDeleteCommand(UUID id, UUID tenantId) {
-        return new AddressDeleteCommandDTO(id, tenantId);
+    public AddressDeleteCommandDTO toDeleteCommand(UUID id, UUID companyId) {
+        return new AddressDeleteCommandDTO(id, companyId);
     }
 
     // === Query Methods ===
 
-    public AddressGetByIdQueryDTO toGetByIdQuery(UUID id, UUID tenantId) {
-        return new AddressGetByIdQueryDTO(id, tenantId);
+    public AddressGetByIdQueryDTO toGetByIdQuery(UUID id, UUID companyId) {
+        return new AddressGetByIdQueryDTO(id, companyId);
     }
 
-    public AddressGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID tenantId) {
-        return new AddressGetByUserIdQueryDTO(userId, tenantId);
+    public AddressGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID companyId) {
+        return new AddressGetByUserIdQueryDTO(userId, companyId);
     }
 
-    public AddressSearchQueryDTO toSearchQuery(AddressSearchRequestDTO request, UUID tenantId, UUID userId) {
+    public AddressSearchQueryDTO toSearchQuery(AddressSearchRequestDTO request, UUID companyId, UUID userId) {
         var addressType = request.getType() != null ? AddressTypeEnum.valueOf(request.getType()) : null;
 
         return new AddressSearchQueryDTO(
-            tenantId,
+            companyId,
             userId,
             request.getCity(),
             request.getState(),

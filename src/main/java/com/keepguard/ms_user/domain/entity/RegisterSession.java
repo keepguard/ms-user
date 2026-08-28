@@ -20,8 +20,8 @@ public final class RegisterSession {
 
     private final UUID registrationSessionId;
     
-    @JsonProperty("tenantId")
-    private final UUID tenantId;
+    @JsonProperty("companyId")
+    private final UUID companyId;
     private final String email;
     private final String token; // Legado / fallback
     private final String emailToken;
@@ -43,7 +43,7 @@ public final class RegisterSession {
     @JsonCreator
     private RegisterSession(
             @JsonProperty("registrationSessionId") UUID registrationSessionId, 
-            @JsonProperty("tenantId") UUID tenantId, 
+            @JsonProperty("companyId") UUID companyId, 
             @JsonProperty("email") String email, 
             @JsonProperty("token") String token,
             @JsonProperty("emailToken") String emailToken,
@@ -62,7 +62,7 @@ public final class RegisterSession {
             @JsonProperty("attempts") Integer attempts,
             @JsonProperty("resendAttempts") Integer resendAttempts) {
         this.registrationSessionId = registrationSessionId;
-        this.tenantId = validateTenantId(tenantId);
+        this.companyId = validateTenantId(companyId);
         this.email = validateEmail(email);
         this.token = token != null ? token : emailToken;
         this.emailToken = emailToken != null ? emailToken : token;
@@ -82,28 +82,28 @@ public final class RegisterSession {
         this.resendAttempts = resendAttempts != null ? resendAttempts : 0;
     }
 
-    public static RegisterSession create(UUID registrationSessionId, UUID tenantId, String email, String token,
+    public static RegisterSession create(UUID registrationSessionId, UUID companyId, String email, String token,
                                         String passwordHash, String nameFull, String phone,
                                         Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
                                         String ipAddress, String userAgent, String geolocation,
                                         UserTypeEnum type) {
-        return create(registrationSessionId, tenantId, email, token, token, null, null,
+        return create(registrationSessionId, companyId, email, token, token, null, null,
                 passwordHash, nameFull, phone, hasAcceptedTermsAndPrivacy, acceptedMarketing,
                 ipAddress, userAgent, geolocation, type);
     }
 
-    public static RegisterSession create(UUID registrationSessionId, UUID tenantId, String email, 
+    public static RegisterSession create(UUID registrationSessionId, UUID companyId, String email, 
                                         String emailToken, String smsToken, String whatsAppToken,
                                         String passwordHash, String nameFull, String phone,
                                         Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
                                         String ipAddress, String userAgent, String geolocation,
                                         UserTypeEnum type) {
-        return create(registrationSessionId, tenantId, email, emailToken, emailToken, smsToken, whatsAppToken,
+        return create(registrationSessionId, companyId, email, emailToken, emailToken, smsToken, whatsAppToken,
                 passwordHash, nameFull, phone, hasAcceptedTermsAndPrivacy, acceptedMarketing,
                 ipAddress, userAgent, geolocation, type);
     }
 
-    public static RegisterSession create(UUID registrationSessionId, UUID tenantId, String email, 
+    public static RegisterSession create(UUID registrationSessionId, UUID companyId, String email, 
                                         String token, String emailToken, String smsToken, String whatsAppToken,
                                         String passwordHash, String nameFull, String phone,
                                         Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
@@ -111,7 +111,7 @@ public final class RegisterSession {
                                         UserTypeEnum type) {
         return new RegisterSession(
                 registrationSessionId,
-                tenantId,
+                companyId,
                 email,
                 token,
                 emailToken,
@@ -132,14 +132,14 @@ public final class RegisterSession {
         );
     }
 
-    public static RegisterSession of(UUID registrationSessionId, UUID tenantId, String email, String token,
+    public static RegisterSession of(UUID registrationSessionId, UUID companyId, String email, String token,
                                     String passwordHash, String nameFull, String phone,
                                     Boolean hasAcceptedTermsAndPrivacy, Boolean acceptedMarketing,
                                     String ipAddress, String userAgent, String geolocation,
                                     UserTypeEnum type, OffsetDateTime createdAt, Integer attempts, Integer resendAttempts) {
         return new RegisterSession(
                 registrationSessionId,
-                tenantId,
+                companyId,
                 email,
                 token,
                 token,
@@ -160,11 +160,11 @@ public final class RegisterSession {
         );
     }
 
-    private UUID validateTenantId(UUID tenantId) {
-        if (tenantId == null) {
-            throw new ValidationException("tenantId é obrigatório");
+    private UUID validateTenantId(UUID companyId) {
+        if (companyId == null) {
+            throw new ValidationException("companyId é obrigatório");
         }
-        return tenantId;
+        return companyId;
     }
 
     private String validateEmail(String email) {

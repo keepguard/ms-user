@@ -16,7 +16,7 @@ public class RegisterApplicationMapper {
     public RegisterSession toDomain(RegisterInitCommandDTO command, String emailToken, String smsToken, String whatsAppToken, String passwordHash) {
         return RegisterSession.create(
                 UUID.randomUUID(),
-                command.tenantId(),
+                command.companyId(),
                 command.email(),
                 emailToken,
                 emailToken,

@@ -37,14 +37,13 @@ public class AddressController {
     @MetricsEndpoint(endpoint = "address_create")
     public ResponseEntity<AddressDetailsResponseDTO> create(
             @Valid @RequestBody AddressCreateRequestDTO request,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
 
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
 
-        log.info("Criando novo endereço para usuário: {}, application={}", request.userId(), tenantId);
+        log.info("Criando novo endereço para usuário: {}, application={}", request.userId(), companyId);
 
-        var command = mapper.toCreateCommand(request, tenantId);
+        var command = mapper.toCreateCommand(request, companyId);
         var view = addressPort.create(command);
         var response = mapper.toResponseDTO(view);
         
@@ -56,13 +55,12 @@ public class AddressController {
     @MetricsEndpoint(endpoint = "address_get_by_id")
     public ResponseEntity<AddressDetailsResponseDTO> getById(
             @PathVariable UUID id,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Buscando endereço por ID: application={}, id={}", tenantId, id);
+        log.info("Buscando endereço por ID: application={}, id={}", companyId, id);
 
-        var query = mapper.toGetByIdQuery(id, tenantId);
+        var query = mapper.toGetByIdQuery(id, companyId);
         var view = addressPort.getById(query);
         var response = mapper.toResponseDTO(view);
         
@@ -74,13 +72,12 @@ public class AddressController {
     @MetricsEndpoint(endpoint = "address_get_by_user")
     public ResponseEntity<List<AddressDetailsResponseDTO>> getByUserId(
             @PathVariable UUID userId,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Buscando endereços do usuário: application={}, userId={}", tenantId, userId);
+        log.info("Buscando endereços do usuário: application={}, userId={}", companyId, userId);
 
-        var query = mapper.toGetByUserIdQuery(userId, tenantId);
+        var query = mapper.toGetByUserIdQuery(userId, companyId);
         var views = addressPort.getByUserId(query);
         var responses = views.stream()
                 .map(mapper::toResponseDTO)
@@ -95,13 +92,12 @@ public class AddressController {
     public ResponseEntity<AddressDetailsResponseDTO> update(
             @PathVariable UUID id,
             @Valid @RequestBody AddressUpdateRequestDTO request,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Atualizando endereço: application={}, id={}", tenantId, id);
+        log.info("Atualizando endereço: application={}, id={}", companyId, id);
         
-        var command = mapper.toUpdateCommand(request, id, tenantId);
+        var command = mapper.toUpdateCommand(request, id, companyId);
         var view = addressPort.update(command);
         var response = mapper.toResponseDTO(view);
         
@@ -113,13 +109,12 @@ public class AddressController {
     @MetricsEndpoint(endpoint = "address_delete")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        log.info("Deletando endereço: application={}, id={}", tenantId, id);
+        log.info("Deletando endereço: application={}, id={}", companyId, id);
         
-        var command = mapper.toDeleteCommand(id, tenantId);
+        var command = mapper.toDeleteCommand(id, companyId);
         addressPort.delete(command);
         
         return ResponseEntity.noContent().build();
@@ -131,12 +126,11 @@ public class AddressController {
     public ResponseEntity<PageResultDTO<AddressDetailsResponseDTO>> search(
             @PathVariable UUID userId,
             @Valid @ModelAttribute AddressSearchRequestDTO searchRequest,
-            @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
 
         log.info("Buscando endereços do usuário: application={}, userId={}, city={}, state={}, type={}",
-                tenantId, userId, searchRequest.getCity(), searchRequest.getState(), searchRequest.getType());
+                companyId, userId, searchRequest.getCity(), searchRequest.getState(), searchRequest.getType());
 
         if (searchRequest.getPage() < 0) {
             throw new IllegalArgumentException("Página deve ser maior ou igual a 0");
@@ -145,7 +139,7 @@ public class AddressController {
             throw new IllegalArgumentException("Tamanho da página deve estar entre 1 e 100");
         }
 
-        var query = mapper.toSearchQuery(searchRequest, tenantId, userId);
+        var query = mapper.toSearchQuery(searchRequest, companyId, userId);
         var result = addressPort.search(query);
 
         var responseData = result.content().stream()

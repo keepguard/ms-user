@@ -1,5 +1,7 @@
 package com.keepguard.ms_user.adapters.in.rest.register;
 
+
+import java.util.UUID;
 import com.keepguard.lib_common.metrics.annotation.MetricsEndpoint;
 import com.keepguard.lib_common.utils.ValidationUtils;
 import com.keepguard.lib_security.annotation.PublicEndpoint;
@@ -98,18 +100,17 @@ public class RegisterController {
             )
             @Valid @RequestBody RegisterInitRequestDTO request,
             @Parameter(
-                description = "UUID da aplicação cliente",
+                description = "UUID da empresa",
                 required = true,
                 example = "550e8400-e29b-41d4-a716-446655440000"
             )
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
         log.info("Iniciando registro de usuário: email={}, application={} (endpoint público)", 
-                request.email(), tenantId);
+                request.email(), companyId);
 
-        var command = mapper.toInitCommand(request, tenantId);
+        var command = mapper.toInitCommand(request, companyId);
         var view = registerPort.init(command);
         var response = mapper.toResponseDTO(view);
         
@@ -178,18 +179,17 @@ public class RegisterController {
             )
             @Valid @RequestBody RegisterConfirmRequestDTO request,
             @Parameter(
-                description = "UUID da aplicação cliente",
+                description = "UUID da empresa",
                 required = true,
                 example = "550e8400-e29b-41d4-a716-446655440000"
             )
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
         log.info("Confirmando registro de usuário: email={}, application={} (endpoint público)", 
-                request.email(), tenantId);
+                request.email(), companyId);
 
-        var command = mapper.toConfirmCommand(request, tenantId);
+        var command = mapper.toConfirmCommand(request, companyId);
         var session = registerPort.confirm(command);
         var response = mapper.toConfirmResponseDTO(session);
         
@@ -226,14 +226,13 @@ public class RegisterController {
     @MetricsEndpoint(endpoint = "register_resend")
     public ResponseEntity<RegisterResendResponseDTO> resend(
         @Valid @RequestBody RegisterResendRequestDTO request,
-        @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+        @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
         
-        var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
         
         log.info("Reenviando token de registro: email={}, application={} (endpoint público)", 
-                request.email(), tenantId);
+                request.email(), companyId);
         
-        var command = mapper.toResendCommand(request, tenantId);
+        var command = mapper.toResendCommand(request, companyId);
         var session = registerPort.resend(command);
         var response = mapper.toResendResponseDTO(session, maxResendAttempts, registerSessionTtlSeconds);
         

@@ -191,7 +191,7 @@ public class UserNotifyCommandService {
             var updatedCommand = new UserNotifyPatchCommandDTO(
                 userId,
                 codeUser,
-                command.tenantId(),
+                command.companyId(),
                 command.notifyEmail(),
                 command.notifySms(),
                 command.notifyWhatsapp(),

@@ -53,14 +53,13 @@ class InternalUserControllerTest {
     private UUID userId;
     private UUID codeUser;
     private UUID companyId;
-    private UUID tenantId;
     
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
         codeUser = UUID.randomUUID();
         companyId = UUID.randomUUID();
-        tenantId = UUID.fromString("4f74e125-c90d-442d-910b-5ea70b02e5e9");
+        companyId = UUID.fromString("4f74e125-c90d-442d-910b-5ea70b02e5e9");
         
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -75,7 +74,7 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByIdQuery(any(), any(), any())).thenReturn(null);
+        when(mapper.toGetByIdQuery(any(), any())).thenReturn(null);
         when(userPort.getById(any())).thenReturn(view);
         when(mapper.toGetByIdResponseDTO(any())).thenReturn(response);
         
@@ -97,7 +96,7 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByIdQuery(any(), any(), any())).thenReturn(null);
+        when(mapper.toGetByIdQuery(any(), any())).thenReturn(null);
         when(userPort.getById(any())).thenReturn(view);
         when(mapper.toGetByIdResponseDTO(any())).thenReturn(response);
         
@@ -122,7 +121,7 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByCodeUserQuery(any(), any(), any())).thenReturn(null);
+        when(mapper.toGetByCodeUserQuery(any(), any())).thenReturn(null);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
         
@@ -142,7 +141,7 @@ class InternalUserControllerTest {
     @DisplayName("Deve recusar busca por codeUser sem X-Company-Id")
     void shouldRejectGetUserByCodeUserWithoutCompanyId() throws Exception {
         mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
-                .header("X-Tenant-Id", tenantId.toString())
+                .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -154,7 +153,7 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByCodeUserQuery(any(), any(), any())).thenReturn(null);
+        when(mapper.toGetByCodeUserQuery(any(), any())).thenReturn(null);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
         

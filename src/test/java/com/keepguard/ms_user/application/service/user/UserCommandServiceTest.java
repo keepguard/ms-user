@@ -162,8 +162,7 @@ class UserCommandServiceTest {
     private UserUpdateCommandDTO updateCommand(Optional<String> email, Optional<String> phone) {
         return new UserUpdateCommandDTO(
                 user.getId(),
-                user.getTenantId(),
-                Optional.empty(),
+                user.getCompanyId(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),

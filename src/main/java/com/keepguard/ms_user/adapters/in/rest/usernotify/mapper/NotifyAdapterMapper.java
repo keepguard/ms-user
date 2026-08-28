@@ -18,14 +18,14 @@ import java.util.UUID;
 @Component
 public class NotifyAdapterMapper {
 
-    public UserNotifyCreateCommandDTO toCreateCommand(UUID tenantId, UserNotifyCreateRequestDTO request) {
+    public UserNotifyCreateCommandDTO toCreateCommand(UUID companyId, UserNotifyCreateRequestDTO request) {
         if (request == null) {
             return null;
         }
 
         return new UserNotifyCreateCommandDTO(
             request.userId(),
-            tenantId,
+            companyId,
             request.notifyEmail(),
             request.notifySms(),
             request.notifyWhatsapp(),
@@ -33,7 +33,7 @@ public class NotifyAdapterMapper {
         );
     }
 
-    public UserNotifyPatchCommandDTO toPatchCommand(UUID userId, UUID codeUser, UUID tenantId, UserNotifyPatchRequestDTO request) {
+    public UserNotifyPatchCommandDTO toPatchCommand(UUID userId, UUID codeUser, UUID companyId, UserNotifyPatchRequestDTO request) {
         if (request == null) {
             return null;
         }
@@ -41,7 +41,7 @@ public class NotifyAdapterMapper {
         return new UserNotifyPatchCommandDTO(
             userId,
             codeUser,
-            tenantId,
+            companyId,
             request.notifyEmail(),
             request.notifySms(),
             request.notifyWhatsapp(),
@@ -49,12 +49,12 @@ public class NotifyAdapterMapper {
         );
     }
 
-    public UserNotifyGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID tenantId) {
-        return new UserNotifyGetByUserIdQueryDTO(userId, tenantId);
+    public UserNotifyGetByUserIdQueryDTO toGetByUserIdQuery(UUID userId, UUID companyId) {
+        return new UserNotifyGetByUserIdQueryDTO(userId, companyId);
     }
 
-    public UserNotifyGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID tenantId) {
-        return new UserNotifyGetByCodeUserQueryDTO(codeUser, tenantId);
+    public UserNotifyGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID companyId) {
+        return new UserNotifyGetByCodeUserQueryDTO(codeUser, companyId);
     }
 
     public UserNotifyResponseDTO toResponseDTO(NotifyViewDTO view) {

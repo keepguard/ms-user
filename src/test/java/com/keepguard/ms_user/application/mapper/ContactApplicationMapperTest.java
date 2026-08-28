@@ -155,7 +155,7 @@ class ContactApplicationMapperTest {
         
         var command = new com.keepguard.ms_user.application.dto.contact.ContactUpdateCommandDTO(
             contact.getId(),
-            builder.buildCreateCommand().tenantId(),
+            builder.buildCreateCommand().companyId(),
             Optional.empty(),
             Optional.empty(),
             Optional.of("Nova descrição"),

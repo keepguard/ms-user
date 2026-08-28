@@ -9,7 +9,7 @@ public record RegisterInitQueryDTO(
     @NotBlank(message = "email é obrigatório")
     String email,
 
-    @NotNull(message = "tenantId é obrigatório")
-    UUID tenantId
+    @NotNull(message = "companyId é obrigatório")
+    UUID companyId
 ) {}
 

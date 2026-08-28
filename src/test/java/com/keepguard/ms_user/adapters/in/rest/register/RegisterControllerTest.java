@@ -65,13 +65,13 @@ class RegisterControllerTest {
     @InjectMocks
     private RegisterController registerController;
 
-    private UUID tenantId;
+    private UUID companyId;
     private RegisterInitRequestDTO initRequest;
     private RegisterConfirmRequestDTO confirmRequest;
 
     @BeforeEach
     void setUp() {
-        tenantId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+        companyId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
         
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(registerController)
@@ -125,7 +125,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Tenant-Id", tenantId.toString())
+                        .header("X-Company-Id", companyId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(initRequest)))
                 .andExpect(status().isCreated())
@@ -154,7 +154,7 @@ class RegisterControllerTest {
     void deveRetornarErro400QuandoTenantIdEInvalido() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Tenant-Id", "invalid-uuid")
+                        .header("X-Company-Id", "invalid-uuid")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(initRequest)))
                 .andExpect(status().is5xxServerError()); // O controller lança exceção que resulta em 500
@@ -182,7 +182,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Tenant-Id", tenantId.toString())
+                        .header("X-Company-Id", companyId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestIncompleto)))
                 .andExpect(status().isBadRequest());
@@ -210,7 +210,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/init")
-                        .header("X-Tenant-Id", tenantId.toString())
+                        .header("X-Company-Id", companyId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestEmailInvalido)))
                 .andExpect(status().isBadRequest());
@@ -226,7 +226,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Tenant-Id", tenantId.toString())
+                        .header("X-Company-Id", companyId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(confirmRequest)))
                 .andExpect(status().isOk());
@@ -258,7 +258,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Tenant-Id", tenantId.toString())
+                        .header("X-Company-Id", companyId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestIncompleto)))
                 .andExpect(status().isBadRequest());
@@ -278,7 +278,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Tenant-Id", tenantId.toString())
+                        .header("X-Company-Id", companyId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestTokenInvalido)))
                 .andExpect(status().isBadRequest());
@@ -298,7 +298,7 @@ class RegisterControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/register/confirm")
-                        .header("X-Tenant-Id", tenantId.toString())
+                        .header("X-Company-Id", companyId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestEmailInvalido)))
                 .andExpect(status().isBadRequest());

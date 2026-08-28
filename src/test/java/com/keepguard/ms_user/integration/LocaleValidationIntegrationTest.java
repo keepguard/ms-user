@@ -114,7 +114,7 @@ class LocaleValidationIntegrationTest {
             () -> User.create(
                 UUID.randomUUID(),
                 companyId,
-                tenantId,
+                companyId,
                 UserTypeEnum.PERSON,
                 email,
                 null,

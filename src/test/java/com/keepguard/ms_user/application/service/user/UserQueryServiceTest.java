@@ -96,7 +96,7 @@ class UserQueryServiceTest {
     @DisplayName("Deve buscar usuário por ID do cache com sucesso")
     void shouldGetUserByIdFromCacheSuccessfully() {
         // Given
-        var query = new UserGetByIdQueryDTO(userId, user.getTenantId(), companyId);
+        var query = new UserGetByIdQueryDTO(userId, companyId);
         when(userCachePort.getUserByIdFromCache(userId.toString())).thenReturn(userDetailsView);
         
         // When
@@ -115,7 +115,7 @@ class UserQueryServiceTest {
     @DisplayName("Deve buscar usuário por ID do banco quando não está no cache")
     void shouldGetUserByIdFromDatabaseWhenNotInCache() {
         // Given
-        var query = new UserGetByIdQueryDTO(userId, user.getTenantId(), companyId);
+        var query = new UserGetByIdQueryDTO(userId, companyId);
         when(userCachePort.getUserByIdFromCache(userId.toString())).thenReturn(null);
         when(userRepositoryPort.findByIdAndCompanyId(userId, companyId)).thenReturn(Optional.of(user));
         when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
@@ -138,7 +138,7 @@ class UserQueryServiceTest {
     @DisplayName("Deve lançar NotFoundException quando usuário não existe")
     void shouldThrowNotFoundExceptionWhenUserDoesNotExist() {
         // Given
-        var query = new UserGetByIdQueryDTO(userId, user.getTenantId(), companyId);
+        var query = new UserGetByIdQueryDTO(userId, companyId);
         when(userCachePort.getUserByIdFromCache(userId.toString())).thenReturn(null);
         when(userRepositoryPort.findByIdAndCompanyId(userId, companyId)).thenReturn(Optional.empty());
         
@@ -156,7 +156,7 @@ class UserQueryServiceTest {
     @DisplayName("Deve buscar usuário por codeUser do cache com sucesso")
     void shouldGetUserByCodeUserFromCacheSuccessfully() {
         // Given
-        var query = new UserGetByCodeUserQueryDTO(codeUser, user.getTenantId(), companyId);
+        var query = new UserGetByCodeUserQueryDTO(codeUser, companyId);
         when(userCachePort.getUserByCodeFromCache(codeUser.toString())).thenReturn(userDetailsView);
         
         // When
@@ -175,7 +175,7 @@ class UserQueryServiceTest {
     @DisplayName("Deve buscar usuário por codeUser do banco quando não está no cache")
     void shouldGetUserByCodeUserFromDatabaseWhenNotInCache() {
         // Given
-        var query = new UserGetByCodeUserQueryDTO(codeUser, user.getTenantId(), companyId);
+        var query = new UserGetByCodeUserQueryDTO(codeUser, companyId);
         when(userCachePort.getUserByCodeFromCache(codeUser.toString())).thenReturn(null);
         when(userRepositoryPort.findByCodeUserAndCompanyId(codeUser, companyId)).thenReturn(Optional.of(user));
         when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
@@ -198,7 +198,7 @@ class UserQueryServiceTest {
     @DisplayName("Deve lançar NotFoundException quando usuário não existe por codeUser")
     void shouldThrowNotFoundExceptionWhenUserDoesNotExistByCodeUser() {
         // Given
-        var query = new UserGetByCodeUserQueryDTO(codeUser, user.getTenantId(), companyId);
+        var query = new UserGetByCodeUserQueryDTO(codeUser, companyId);
         when(userCachePort.getUserByCodeFromCache(codeUser.toString())).thenReturn(null);
         when(userRepositoryPort.findByCodeUserAndCompanyId(codeUser, companyId)).thenReturn(Optional.empty());
         
@@ -217,7 +217,7 @@ class UserQueryServiceTest {
         when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
         when(userApplicationMapper.toByCodeUserView(eq(user), any(UserProfile.class))).thenReturn(userDetailsView);
 
-        var result = userQueryService.getByCodeUserForTenant(codeUser, user.getTenantId());
+        var result = userQueryService.getByCodeUserForTenant(codeUser, user.getCompanyId());
 
         assertNotNull(result);
         assertEquals(codeUser, result.codeUser());
@@ -244,7 +244,7 @@ class UserQueryServiceTest {
     void shouldGetUserByEmailFromCacheSuccessfully() {
         // Given
         var email = "test@example.com";
-        var query = new UserGetByEmailQueryDTO(email, user.getTenantId(), companyId);
+        var query = new UserGetByEmailQueryDTO(email, companyId);
         when(userCachePort.getUserByEmailFromCache(companyId, email)).thenReturn(userDetailsView);
         
         // When
@@ -264,7 +264,7 @@ class UserQueryServiceTest {
     void shouldGetUserByEmailFromDatabaseWhenNotInCache() {
         // Given
         var email = "test@example.com";
-        var query = new UserGetByEmailQueryDTO(email, user.getTenantId(), companyId);
+        var query = new UserGetByEmailQueryDTO(email, companyId);
         when(userCachePort.getUserByEmailFromCache(companyId, email)).thenReturn(null);
         when(userRepositoryPort.findByEmailAndCompanyId(email, companyId)).thenReturn(Optional.of(user));
         when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
@@ -288,7 +288,7 @@ class UserQueryServiceTest {
     void shouldThrowNotFoundExceptionWhenUserDoesNotExistByEmail() {
         // Given
         var email = "test@example.com";
-        var query = new UserGetByEmailQueryDTO(email, user.getTenantId(), companyId);
+        var query = new UserGetByEmailQueryDTO(email, companyId);
         when(userCachePort.getUserByEmailFromCache(companyId, email)).thenReturn(null);
         when(userRepositoryPort.findByEmailAndCompanyId(email, companyId)).thenReturn(Optional.empty());
         

@@ -8,8 +8,6 @@ public record UserGetByIdQueryDTO(
     @NotNull(message = "id é obrigatório")
     UUID id,
     
-    UUID tenantId,
-
     @NotNull(message = "companyId é obrigatório")
     UUID companyId
 ) {

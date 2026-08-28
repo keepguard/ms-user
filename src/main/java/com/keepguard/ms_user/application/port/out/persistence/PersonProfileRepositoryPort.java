@@ -36,10 +36,10 @@ public interface PersonProfileRepositoryPort {
 
     boolean existsByUserId(UUID userId);
 
-    boolean existsByCpfAndTenantId(String cpf, UUID tenantId);
+    boolean existsByCpfAndTenantId(String cpf, UUID companyId);
 
     boolean existsByCpfAndCompanyId(String cpf, UUID companyId, UUID excludeUserId);
 
-    Optional<PersonProfile> findByCpfAndTenantId(String cpf, UUID tenantId);
+    Optional<PersonProfile> findByCpfAndTenantId(String cpf, UUID companyId);
 }
 

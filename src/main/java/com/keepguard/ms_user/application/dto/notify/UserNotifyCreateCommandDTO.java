@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public record UserNotifyCreateCommandDTO(
     UUID userId,
-    UUID tenantId,
+    UUID companyId,
     Boolean notifyEmail,
     Boolean notifySms,
     Boolean notifyWhatsapp,

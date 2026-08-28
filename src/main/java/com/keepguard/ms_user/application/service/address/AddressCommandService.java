@@ -31,8 +31,8 @@ public class AddressCommandService {
     )
     @Transactional
     public AddressDetailsViewDTO create(AddressCreateCommandDTO command) {
-        log.info("Criando endereço para usuário: {}, cidade: {}, estado: {}, tenantId: {}",
-                command.userId(), command.city(), command.state(), command.tenantId());
+        log.info("Criando endereço para usuário: {}, cidade: {}, estado: {}, companyId: {}",
+                command.userId(), command.city(), command.state(), command.companyId());
 
         // Validações de campos obrigatórios são feitas pela entidade de domínio Address
         var address = addressApplicationMapper.toDomain(command);
@@ -65,7 +65,7 @@ public class AddressCommandService {
     )
     @Transactional
     public AddressDetailsViewDTO update(AddressUpdateCommandDTO command) {
-        log.info("Atualizando endereço: {}, tenantId: {}", command.id(), command.tenantId());
+        log.info("Atualizando endereço: {}, companyId: {}", command.id(), command.companyId());
 
         var address = addressRepositoryPort.findById(command.id())
                 .orElseThrow(() -> {
@@ -100,7 +100,7 @@ public class AddressCommandService {
     )
     @Transactional
     public void delete(AddressDeleteCommandDTO command) {
-        log.info("Deletando endereço: {}, tenantId: {}", command.id(), command.tenantId());
+        log.info("Deletando endereço: {}, companyId: {}", command.id(), command.companyId());
 
         if (!addressRepositoryPort.existsById(command.id())) {
             metricsPort.incrementCounter("address_business_errors_total",

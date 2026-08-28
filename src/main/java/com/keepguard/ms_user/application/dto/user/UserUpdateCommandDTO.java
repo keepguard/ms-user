@@ -17,10 +17,9 @@ public record UserUpdateCommandDTO(
     @NotNull(message = "id é obrigatório")
     UUID id,
     
-    @NotNull(message = "tenantId é obrigatório")
-    UUID tenantId,
+    @NotNull(message = "companyId é obrigatório")
+    UUID companyId,
     
-    Optional<UUID> companyId,
     Optional<UUID> codeUser,
     Optional<UserTypeEnum> type,
     Optional<UserStatusEnum> status,

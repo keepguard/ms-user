@@ -88,8 +88,8 @@ public class UserUseCaseService implements UserPort {
     }
 
     @Override
-    public UserDetailsViewDTO getByCodeUserForTenant(UUID codeUser, UUID tenantId) {
-        return userQueryService.getByCodeUserForTenant(codeUser, tenantId);
+    public UserDetailsViewDTO getByCodeUserForTenant(UUID codeUser, UUID companyId) {
+        return userQueryService.getByCodeUserForTenant(codeUser, companyId);
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record ContactSearchQueryDTO(
-    UUID tenantId,
+    UUID companyId,
     UUID userId,
     String value,
     ContactTypeEnum type,

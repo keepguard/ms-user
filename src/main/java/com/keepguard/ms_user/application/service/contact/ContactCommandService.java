@@ -31,8 +31,8 @@ public class ContactCommandService {
     )
     @Transactional
     public ContactDetailsViewDTO create(ContactCreateCommandDTO command) {
-        log.info("Criando contato para usuário: {}, tipo: {}, tenantId: {}",
-                command.userId(), command.type(), command.tenantId());
+        log.info("Criando contato para usuário: {}, tipo: {}, companyId: {}",
+                command.userId(), command.type(), command.companyId());
 
         var contact = contactApplicationMapper.toDomain(command);
         var contactSaved = contactRepositoryPort.save(contact);
@@ -53,7 +53,7 @@ public class ContactCommandService {
     )
     @Transactional
     public ContactDetailsViewDTO update(ContactUpdateCommandDTO command) {
-        log.info("Atualizando contato: {}, tenantId: {}", command.id(), command.tenantId());
+        log.info("Atualizando contato: {}, companyId: {}", command.id(), command.companyId());
 
         var contact = contactRepositoryPort.findById(command.id())
                 .orElseThrow(() -> {
@@ -82,7 +82,7 @@ public class ContactCommandService {
     )
     @Transactional
     public void delete(ContactDeleteCommandDTO command) {
-        log.info("Deletando contato: {}, tenantId: {}", command.id(), command.tenantId());
+        log.info("Deletando contato: {}, companyId: {}", command.id(), command.companyId());
 
         if (!contactRepositoryPort.existsById(command.id())) {
             metricsPort.incrementCounter("contact_business_errors_total",
