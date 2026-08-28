@@ -141,20 +141,12 @@ class InternalUserControllerTest {
     }
 
     @Test
-    @DisplayName("Deve buscar usuário por codeUser sem X-Company-Id")
-    void shouldGetUserByCodeUserWithoutCompanyId() throws Exception {
-        var view = buildUserDetailsView();
-        var response = buildUserResponse();
-
-        when(userPort.getByCodeUserForTenant(codeUser, tenantId)).thenReturn(view);
-        when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
-
+    @DisplayName("Deve recusar busca por codeUser sem X-Company-Id")
+    void shouldRejectGetUserByCodeUserWithoutCompanyId() throws Exception {
         mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
                 .header("X-Tenant-Id", tenantId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.codeUser").value(codeUser.toString()))
-                .andExpect(jsonPath("$.email").value("test@example.com"));
+                .andExpect(status().isBadRequest());
     }
     
     @Test

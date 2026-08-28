@@ -61,23 +61,18 @@ public class InternalUserController {
     @GetMapping("/code/{codeUser}")
     @PublicEndpoint
     @Operation(summary = "[INTERNAL] Buscar usuário por codeUser", 
-               description = "Endpoint interno para buscar usuário pelo codeUser (campo 'sub' do JWT). Não requer autenticação JWT. X-Company-Id é opcional: sem ele a busca é por codeUser + tenant.")
+               description = "Endpoint interno para buscar usuário pelo codeUser (campo 'sub' do JWT). Não requer autenticação JWT. Exige X-Company-Id resolvido pelo BFF via cache tenant→company.")
     @MetricsEndpoint(endpoint = "internal_user_get_by_code")
     public ResponseEntity<UserResponseDTO> getByCodeUser(
             @PathVariable UUID codeUser,
             @Parameter(description = "UUID da aplicação (CineAI)", required = false)
             @RequestHeader(value = "X-Tenant-Id", required = false, defaultValue = "4f74e125-c90d-442d-910b-5ea70b02e5e9") String tenantIdHeader,
-            @Parameter(description = "UUID da empresa", required = false)
-            @RequestHeader(value = "X-Company-Id", required = false) String companyIdHeader) {
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
         
         log.debug("[INTERNAL] Buscando usuário por codeUser: codeUser={}", codeUser);
         
         UUID tenantId = parseTenantId(tenantIdHeader);
-        if (companyIdHeader == null || companyIdHeader.isBlank()) {
-            var view = userPort.getByCodeUserForTenant(codeUser, tenantId);
-            return ResponseEntity.ok(mapper.toGetByCodeUserResponseDTO(view));
-        }
-
         UUID companyId = UUID.fromString(companyIdHeader);
         var query = mapper.toGetByCodeUserQuery(codeUser, tenantId, companyId);
         var view = userPort.getByCodeUser(query);
