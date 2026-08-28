@@ -146,7 +146,7 @@ class UserControllerTest {
                 .buildDetailsView();
         
         var query = UserTestBuilder.builder().buildGetByCodeUserQuery();
-        when(mapper.toGetByCodeUserQuery(codeUser, tenantId, companyId)).thenReturn(query);
+        when(mapper.toGetByCodeUserQuery(codeUser, null, companyId)).thenReturn(query);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(view)).thenReturn(UserTestBuilder.builder()
                 .withId(userId)
@@ -155,7 +155,6 @@ class UserControllerTest {
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/code/{codeUser}", codeUser)
-                        .header("X-Tenant-Id", tenantIdStr)
                         .header("X-Company-Id", companyId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.codeUser").value(codeUser.toString()));
@@ -174,13 +173,12 @@ class UserControllerTest {
                 .buildDetailsView();
         
         var query = UserTestBuilder.builder().buildGetByEmailQuery();
-        when(mapper.toGetByEmailQuery(email, tenantId, companyId)).thenReturn(query);
+        when(mapper.toGetByEmailQuery(email, null, companyId)).thenReturn(query);
         when(userPort.getByEmail(any())).thenReturn(view);
         when(mapper.toGetByEmail(view)).thenReturn(UserTestBuilder.builder().buildResponseDTO());
         
         // When & Then
         mockMvc.perform(get("/api/v1/users/email/{email}", email)
-                        .header("X-Tenant-Id", tenantIdStr)
                         .header("X-Company-Id", companyId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email));

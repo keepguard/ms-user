@@ -42,16 +42,13 @@ public class InternalUserController {
     @MetricsEndpoint(endpoint = "internal_user_get_by_id")
     public ResponseEntity<UserResponseDTO> getById(
             @PathVariable UUID id,
-            @Parameter(description = "UUID da aplicação (CineAI)", required = false)
-            @RequestHeader(value = "X-Tenant-Id", required = false, defaultValue = "4f74e125-c90d-442d-910b-5ea70b02e5e9") String tenantIdHeader,
             @Parameter(description = "UUID da empresa", required = true)
             @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
-        
+
         log.debug("[INTERNAL] Buscando usuário por ID: id={}", id);
-        
-        UUID tenantId = parseTenantId(tenantIdHeader);
+
         UUID companyId = UUID.fromString(companyIdHeader);
-        var query = mapper.toGetByIdQuery(id, tenantId, companyId);
+        var query = mapper.toGetByIdQuery(id, null, companyId);
         var view = userPort.getById(query);
         var response = mapper.toGetByIdResponseDTO(view);
         
@@ -65,28 +62,17 @@ public class InternalUserController {
     @MetricsEndpoint(endpoint = "internal_user_get_by_code")
     public ResponseEntity<UserResponseDTO> getByCodeUser(
             @PathVariable UUID codeUser,
-            @Parameter(description = "UUID da aplicação (CineAI)", required = false)
-            @RequestHeader(value = "X-Tenant-Id", required = false, defaultValue = "4f74e125-c90d-442d-910b-5ea70b02e5e9") String tenantIdHeader,
             @Parameter(description = "UUID da empresa", required = true)
             @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
-        
+
         log.debug("[INTERNAL] Buscando usuário por codeUser: codeUser={}", codeUser);
-        
-        UUID tenantId = parseTenantId(tenantIdHeader);
+
         UUID companyId = UUID.fromString(companyIdHeader);
-        var query = mapper.toGetByCodeUserQuery(codeUser, tenantId, companyId);
+        var query = mapper.toGetByCodeUserQuery(codeUser, null, companyId);
         var view = userPort.getByCodeUser(query);
         var response = mapper.toGetByCodeUserResponseDTO(view);
         
         return ResponseEntity.ok(response);
-    }
-    
-    private UUID parseTenantId(String tenantId) {
-        try {
-            return UUID.fromString(tenantId);
-        } catch (Exception e) {
-            return UUID.fromString("4f74e125-c90d-442d-910b-5ea70b02e5e9");
-        }
     }
 }
 

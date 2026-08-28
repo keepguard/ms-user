@@ -81,7 +81,6 @@ class InternalUserControllerTest {
         
         // When & Then
         mockMvc.perform(get("/internal/v1/users/{id}", userId)
-                .header("X-Tenant-Id", tenantId.toString())
                 .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -129,7 +128,6 @@ class InternalUserControllerTest {
         
         // When & Then
         mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
-                .header("X-Tenant-Id", tenantId.toString())
                 .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -173,27 +171,6 @@ class InternalUserControllerTest {
     // @Test
     // @DisplayName("Deve retornar 404 quando usuário não existe (por codeUser)")
     // void shouldReturn404WhenUserNotFoundByCodeUser() throws Exception {}
-    
-    @Test
-    @DisplayName("Deve aceitar X-Tenant-Id inválido e usar default")
-    void shouldHandleInvalidTenantId() throws Exception {
-        // Given
-        var view = buildUserDetailsView();
-        var response = buildUserResponse();
-        
-        when(mapper.toGetByCodeUserQuery(any(), any(), any())).thenReturn(null);
-        when(userPort.getByCodeUser(any())).thenReturn(view);
-        when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
-        
-        // When & Then
-        mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
-                .header("X-Tenant-Id", "invalid-uuid")
-                .header("X-Company-Id", companyId.toString())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-    
-    // === HELPER METHODS ===
     
     private UserDetailsViewDTO buildUserDetailsView() {
         return new UserDetailsViewDTO(
