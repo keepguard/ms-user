@@ -23,6 +23,7 @@ public class RegisterAdapterMapper {
     public RegisterInitCommandDTO toInitCommand(RegisterInitRequestDTO request, UUID tenantId) {
         return new RegisterInitCommandDTO(
                 tenantId,
+                request.companyId(),
                 request.email(),
                 request.nameFull(),
                 request.password(),

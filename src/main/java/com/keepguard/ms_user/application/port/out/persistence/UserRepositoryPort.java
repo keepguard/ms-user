@@ -16,6 +16,8 @@ public interface UserRepositoryPort {
 
     Optional<User> findById(UUID id);
 
+    Optional<User> findByIdAndCompanyId(UUID id, UUID companyId);
+
     List<User> findAll();
 
     void deleteById(UUID id);
@@ -24,9 +26,13 @@ public interface UserRepositoryPort {
 
     Optional<User> findByCodeUser(UUID codeUser);
 
+    Optional<User> findByCodeUserAndCompanyId(UUID codeUser, UUID companyId);
+
     Optional<User> findByEmail(String email);
 
     Optional<User> findByEmailAndTenantId(String email, UUID tenantId);
+
+    Optional<User> findByEmailAndCompanyId(String email, UUID companyId);
 
     List<User> findAllByCompanyId(UUID companyId);
 
@@ -37,6 +43,10 @@ public interface UserRepositoryPort {
     boolean existsByEmail(String email);
 
     boolean existsByEmailAndTenantId(String email, UUID tenantId);
+
+    boolean existsByEmailAndCompanyId(String email, UUID companyId, UUID excludeUserId);
+
+    boolean existsByPhoneE164AndCompanyId(String phoneE164, UUID companyId, UUID excludeUserId);
 
     boolean existsByCodeUser(UUID codeUser);
 

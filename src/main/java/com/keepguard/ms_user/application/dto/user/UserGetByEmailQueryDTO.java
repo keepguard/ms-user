@@ -10,6 +10,9 @@ public record UserGetByEmailQueryDTO(
     String email,
     
     @NotNull(message = "tenantId é obrigatório")
-    UUID tenantId
+    UUID tenantId,
+
+    @NotNull(message = "companyId é obrigatório")
+    UUID companyId
 ) {
 }

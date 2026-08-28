@@ -60,16 +60,16 @@ public class UserAdapterMapper {
 
     // === Query Methods ===
 
-    public UserGetByIdQueryDTO toGetByIdQuery(UUID id, UUID tenantId) {
-        return new UserGetByIdQueryDTO(id, tenantId);
+    public UserGetByIdQueryDTO toGetByIdQuery(UUID id, UUID tenantId, UUID companyId) {
+        return new UserGetByIdQueryDTO(id, tenantId, companyId);
     }
 
-    public UserGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID tenantId) {
-        return new UserGetByCodeUserQueryDTO(codeUser, tenantId);
+    public UserGetByCodeUserQueryDTO toGetByCodeUserQuery(UUID codeUser, UUID tenantId, UUID companyId) {
+        return new UserGetByCodeUserQueryDTO(codeUser, tenantId, companyId);
     }
 
-    public UserGetByEmailQueryDTO toGetByEmailQuery(String email, UUID tenantId) {
-        return new UserGetByEmailQueryDTO(email, tenantId);
+    public UserGetByEmailQueryDTO toGetByEmailQuery(String email, UUID tenantId, UUID companyId) {
+        return new UserGetByEmailQueryDTO(email, tenantId, companyId);
     }
 
     public UserSearchQueryDTO toSearchQuery(UserSearchRequestDTO request, UUID tenantId, UUID companyId) {

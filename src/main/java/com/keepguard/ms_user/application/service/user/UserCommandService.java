@@ -50,27 +50,13 @@ public class UserCommandService {
         log.info("Criando usuário com email: {}, tipo: {}, companyId: {}, tenantId: {}, tem dados de perfil: {}", 
                 command.email(), command.type(), command.companyId(), command.tenantId(), command.hasProfileData());
 
-        // Validar se email já existe
-        if (userRepositoryPort.existsByEmail(command.email())) {
-            metricsPort.incrementCounter("user_business_errors_total",
-                Map.of("error_code", "EMAIL_ALREADY_EXISTS", "operation", "create"));
-            throw new AlreadyExistsException("Email já está em uso: " + command.email(), "EMAIL_ALREADY_EXISTS", Map.of("email", command.email()));
-        }
+        assertEmailAvailable(command.email(), command.companyId(), null);
+        assertPhoneAvailable(command.phoneE164(), command.companyId(), null);
 
-        // Validar se CPF já existe para esta aplicação (se informado e for pessoa física)
+        // Validar se CPF já existe para esta empresa (se informado e for pessoa física)
         if (command.hasProfileData() && command.type() == com.keepguard.ms_user.domain.enums.UserTypeEnum.PERSON) {
             var personProfile = (com.keepguard.ms_user.domain.entity.PersonProfile) command.getProfileData();
-            if (personProfile != null) {
-                // Validar CPF
-                if (personProfile.getCpf() != null && !personProfile.getCpf().trim().isEmpty()) {
-                    String cleanedCpf = personProfile.getCpf().replaceAll("[^0-9]", "");
-                    if (personProfileRepositoryPort.existsByCpfAndTenantId(cleanedCpf, command.tenantId())) {
-                        metricsPort.incrementCounter("user_business_errors_total",
-                            Map.of("error_code", "CPF_ALREADY_EXISTS", "operation", "create"));
-                        throw new AlreadyExistsException("CPF já está em uso nesta aplicação", "CPF_ALREADY_EXISTS", Map.of("cpf", cleanedCpf));
-                    }
-                }
-            }
+            assertCpfAvailable(personProfile, command.companyId(), null);
         }
 
         // Criar usuário usando o mapper
@@ -154,9 +140,21 @@ public class UserCommandService {
         // Validar email se fornecido
         if (command.email().isPresent()) {
             var newEmail = command.email().get();
-            if (!Objects.equals(before.getEmail(), newEmail) && userRepositoryPort.existsByEmail(newEmail)) {
-                throw new AlreadyExistsException("Email já está em uso: " + newEmail);
+            if (!Objects.equals(before.getEmail(), newEmail)) {
+                assertEmailAvailable(newEmail, before.getCompanyId(), before.getId());
             }
+        }
+
+        if (command.phoneE164().isPresent()) {
+            var newPhone = command.phoneE164().get();
+            if (!Objects.equals(before.getPhoneE164(), newPhone)) {
+                assertPhoneAvailable(newPhone, before.getCompanyId(), before.getId());
+            }
+        }
+
+        if (before.getType() == com.keepguard.ms_user.domain.enums.UserTypeEnum.PERSON) {
+            command.personProfile().ifPresent(personProfile ->
+                    assertCpfAvailable(personProfile, before.getCompanyId(), before.getId()));
         }
 
         // Validar display_handle se fornecido (unicidade em users)
@@ -515,5 +513,49 @@ public class UserCommandService {
         strategy.deleteProfile(user.getId());
         log.info("Perfil deletado com sucesso para usuário: {} tipo: {}", 
                 user.getId(), user.getType());
+    }
+
+    private void assertEmailAvailable(String email, UUID companyId, UUID excludeUserId) {
+        if (userRepositoryPort.existsByEmailAndCompanyId(email, companyId, excludeUserId)) {
+            metricsPort.incrementCounter("user_business_errors_total",
+                Map.of("error_code", "EMAIL_ALREADY_EXISTS", "operation", excludeUserId == null ? "create" : "update"));
+            throw new AlreadyExistsException(
+                    "Email já está em uso nesta empresa: " + email,
+                    "EMAIL_ALREADY_EXISTS",
+                    Map.of("email", email, "companyId", companyId.toString()));
+        }
+    }
+
+    private void assertPhoneAvailable(String phone, UUID companyId, UUID excludeUserId) {
+        if (phone == null || phone.isBlank()) {
+            return;
+        }
+        String normalizedPhone = com.keepguard.ms_user.domain.validator.PhoneValidator.validate(phone);
+        if (normalizedPhone == null) {
+            return;
+        }
+        if (userRepositoryPort.existsByPhoneE164AndCompanyId(normalizedPhone, companyId, excludeUserId)) {
+            metricsPort.incrementCounter("user_business_errors_total",
+                Map.of("error_code", "PHONE_ALREADY_EXISTS", "operation", excludeUserId == null ? "create" : "update"));
+            throw new AlreadyExistsException(
+                    "Telefone já está em uso nesta empresa: " + normalizedPhone,
+                    "PHONE_ALREADY_EXISTS",
+                    Map.of("phone", normalizedPhone, "companyId", companyId.toString()));
+        }
+    }
+
+    private void assertCpfAvailable(com.keepguard.ms_user.domain.entity.PersonProfile personProfile, UUID companyId, UUID excludeUserId) {
+        if (personProfile == null || personProfile.getCpf() == null || personProfile.getCpf().trim().isEmpty()) {
+            return;
+        }
+        String cleanedCpf = personProfile.getCpf().replaceAll("[^0-9]", "");
+        if (personProfileRepositoryPort.existsByCpfAndCompanyId(cleanedCpf, companyId, excludeUserId)) {
+            metricsPort.incrementCounter("user_business_errors_total",
+                Map.of("error_code", "CPF_ALREADY_EXISTS", "operation", excludeUserId == null ? "create" : "update"));
+            throw new AlreadyExistsException(
+                    "CPF já está em uso nesta empresa",
+                    "CPF_ALREADY_EXISTS",
+                    Map.of("cpf", cleanedCpf, "companyId", companyId.toString()));
+        }
     }
 }

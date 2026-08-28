@@ -19,14 +19,23 @@ public interface UserSpringRepository extends JpaRepository<UserJpaEntity, UUID>
     @Query("SELECT u FROM UserJpaEntity u WHERE u.id = :id")
     Optional<UserJpaEntity> findByIdWithRelations(@Param("id") UUID id);
 
+    @Query("SELECT u FROM UserJpaEntity u WHERE u.id = :id AND u.companyId = :companyId")
+    Optional<UserJpaEntity> findByIdAndCompanyId(@Param("id") UUID id, @Param("companyId") UUID companyId);
+
     @Query("SELECT u FROM UserJpaEntity u WHERE u.codeUser = :codeUser")
     Optional<UserJpaEntity> findByCodeUser(@Param("codeUser") UUID codeUser);
+
+    @Query("SELECT u FROM UserJpaEntity u WHERE u.codeUser = :codeUser AND u.companyId = :companyId")
+    Optional<UserJpaEntity> findByCodeUserAndCompanyId(@Param("codeUser") UUID codeUser, @Param("companyId") UUID companyId);
 
     @Query("SELECT u FROM UserJpaEntity u WHERE u.email = :email")
     Optional<UserJpaEntity> findByEmail(@Param("email") String email);
 
     @Query("SELECT u FROM UserJpaEntity u WHERE u.email = :email AND u.tenantId = :tenantId")
     Optional<UserJpaEntity> findByEmailAndTenantId(@Param("email") String email, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT u FROM UserJpaEntity u WHERE u.email = :email AND u.companyId = :companyId")
+    Optional<UserJpaEntity> findByEmailAndCompanyId(@Param("email") String email, @Param("companyId") UUID companyId);
 
     @Query("SELECT u FROM UserJpaEntity u WHERE u.companyId = :companyId")
     List<UserJpaEntity> findAllByCompanyId(@Param("companyId") UUID companyId);
@@ -41,6 +50,32 @@ public interface UserSpringRepository extends JpaRepository<UserJpaEntity, UUID>
 
     @Query("SELECT COUNT(u) > 0 FROM UserJpaEntity u WHERE u.email = :email AND u.tenantId = :tenantId")
     boolean existsByEmailAndTenantId(@Param("email") String email, @Param("tenantId") UUID tenantId);
+
+    @Query("""
+        SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END
+        FROM UserJpaEntity u
+        WHERE u.email = :email
+        AND u.companyId = :companyId
+        AND (:excludeUserId IS NULL OR u.id != :excludeUserId)
+        """)
+    boolean existsByEmailAndCompanyId(
+        @Param("email") String email,
+        @Param("companyId") UUID companyId,
+        @Param("excludeUserId") UUID excludeUserId
+    );
+
+    @Query("""
+        SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END
+        FROM UserJpaEntity u
+        WHERE u.phoneE164 = :phoneE164
+        AND u.companyId = :companyId
+        AND (:excludeUserId IS NULL OR u.id != :excludeUserId)
+        """)
+    boolean existsByPhoneE164AndCompanyId(
+        @Param("phoneE164") String phoneE164,
+        @Param("companyId") UUID companyId,
+        @Param("excludeUserId") UUID excludeUserId
+    );
 
     boolean existsByCodeUser(UUID codeUser);
 

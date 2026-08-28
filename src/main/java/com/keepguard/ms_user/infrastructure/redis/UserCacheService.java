@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -65,9 +66,9 @@ public class UserCacheService implements UserCachePort {
     }
 
     @CircuitBreaker(name = "redisCache")
-    public void cacheUserByEmail(String email, UserDetailsViewDTO user) {
+    public void cacheUserByEmail(UUID companyId, String email, UserDetailsViewDTO user) {
         try {
-            String key = userCachePrefix + ":email:" + email.toLowerCase().trim();
+            String key = emailCacheKey(companyId, email);
             String value = objectMapper.writeValueAsString(user);
             redisTemplate.opsForValue().set(key, value, userTtlSeconds, TimeUnit.SECONDS);
         } catch (Exception e) {
@@ -75,10 +76,10 @@ public class UserCacheService implements UserCachePort {
         }
     }
 
-    @CircuitBreaker(name = "redisCache", fallbackMethod = "getUserFallback")
+    @CircuitBreaker(name = "redisCache", fallbackMethod = "getUserByEmailFallback")
     @Retry(name = "redisCache")
-    public UserDetailsViewDTO getUserByEmailFromCache(String email) {
-        var key = "%s:email:%s".formatted(userCachePrefix, email);
+    public UserDetailsViewDTO getUserByEmailFromCache(UUID companyId, String email) {
+        var key = emailCacheKey(companyId, email);
         try {
             var value = redisTemplate.opsForValue().get(key);
             if (value == null || value.isBlank()) return null;
@@ -89,10 +90,9 @@ public class UserCacheService implements UserCachePort {
     }
 
     @CircuitBreaker(name = "redisCache")
-    public void removeUserFromCacheByEmail(String email) {
+    public void removeUserFromCacheByEmail(UUID companyId, String email) {
         try {
-            String key = userCachePrefix + ":email:" + email.toLowerCase().trim();
-            redisTemplate.delete(key);
+            redisTemplate.delete(emailCacheKey(companyId, email));
         } catch (Exception e) {
             log.warn("Falha ao remover usuário do cache por email | key={}", email);
         }
@@ -135,7 +135,7 @@ public class UserCacheService implements UserCachePort {
     @CircuitBreaker(name = "redisCache")
     public void removeUserFromCache(User user) {
         removeUserFromCacheById(user.getId().toString());
-        removeUserFromCacheByEmail(user.getEmail());
+        removeUserFromCacheByEmail(user.getCompanyId(), user.getEmail());
         removeUserFromCacheByCode(user.getCodeUser().toString());
     }
 
@@ -154,6 +154,15 @@ public class UserCacheService implements UserCachePort {
         } catch (Exception e) {
             log.warn("Falha ao limpar cache de usuários");
         }
+    }
+
+    private String emailCacheKey(UUID companyId, String email) {
+        return userCachePrefix + ":email:" + companyId + ":" + email.toLowerCase().trim();
+    }
+
+    private UserDetailsViewDTO getUserByEmailFallback(UUID companyId, String email, Exception ex) {
+        log.warn("FALLBACK: Redis indisponivel");
+        return null;
     }
 
     private UserDetailsViewDTO getUserFallback(String param, Exception ex) {

@@ -56,8 +56,9 @@ public class RegisterCommandService {
                 command.email(), command.tenantId(), command.type());
 
         // 0 - Validar palavras proibidas no nome (já validado pelo @ModeratedContent)
-        // 1 - Consultar se o email com X-Tenant-Id já existe
-        validateEmailNotExists(command.email(), command.tenantId());
+        // 1 - Consultar se o email já existe nesta company
+        validateEmailNotExists(command.email(), command.companyId());
+        validatePhoneNotExists(command.phone(), command.companyId());
         
         // 2 - Verificar se já existe sessão de registro no Redis
         validateNoActiveSession(command.email(), command.tenantId());
@@ -101,14 +102,30 @@ public class RegisterCommandService {
         return registerApplicationMapper.toView(session, "Tokens de verificação enviados.", (int) registerSessionTtlSeconds);
     }
 
-    private void validateEmailNotExists(String email, java.util.UUID tenantId) {
-        if (userRepositoryPort.existsByEmailAndTenantId(email, tenantId)) {
+    private void validateEmailNotExists(String email, java.util.UUID companyId) {
+        if (userRepositoryPort.existsByEmailAndCompanyId(email, companyId, null)) {
             metricsPort.incrementCounter("register_business_errors_total",
                     Map.of("error_code", "EMAIL_ALREADY_EXISTS", "operation", "init"));
             throw new AlreadyExistsException(
-                    "Email já está em uso nesta aplicação: " + email, 
-                    "EMAIL_ALREADY_EXISTS", 
-                    Map.of("email", email, "tenantId", tenantId.toString())
+                    "Email já está em uso nesta empresa: " + email,
+                    "EMAIL_ALREADY_EXISTS",
+                    Map.of("email", email, "companyId", companyId.toString())
+            );
+        }
+    }
+
+    private void validatePhoneNotExists(String phone, java.util.UUID companyId) {
+        String normalizedPhone = com.keepguard.ms_user.domain.validator.PhoneValidator.validate(phone);
+        if (normalizedPhone == null) {
+            return;
+        }
+        if (userRepositoryPort.existsByPhoneE164AndCompanyId(normalizedPhone, companyId, null)) {
+            metricsPort.incrementCounter("register_business_errors_total",
+                    Map.of("error_code", "PHONE_ALREADY_EXISTS", "operation", "init"));
+            throw new AlreadyExistsException(
+                    "Telefone já está em uso nesta empresa: " + normalizedPhone,
+                    "PHONE_ALREADY_EXISTS",
+                    Map.of("phone", normalizedPhone, "companyId", companyId.toString())
             );
         }
     }

@@ -138,6 +138,14 @@ public class PersonProfileRepositoryAdapter implements PersonProfileRepositoryPo
     }
 
     @Override
+    public boolean existsByCpfAndCompanyId(String cpf, UUID companyId, UUID excludeUserId) {
+        if (cpf == null || cpf.trim().isEmpty() || companyId == null) {
+            return false;
+        }
+        return springRepository.existsByCpfAndCompanyId(cpf, companyId, excludeUserId);
+    }
+
+    @Override
     public Optional<PersonProfile> findByCpfAndTenantId(String cpf, UUID tenantId) {
         if (cpf == null || cpf.trim().isEmpty() || tenantId == null) {
             return Optional.empty();

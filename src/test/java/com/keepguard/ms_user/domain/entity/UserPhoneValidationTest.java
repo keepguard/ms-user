@@ -24,7 +24,7 @@ class UserPhoneValidationTest {
     private static final UUID DEFAULT_ID = UUID.randomUUID();
     private static final UUID DEFAULT_CODE_USER = UUID.randomUUID();
     private static final UUID DEFAULT_COMPANY_ID = UUID.randomUUID();
-    private static final UUID DEFAULT_X_APPLICATION = UUID.randomUUID();
+    private static final UUID DEFAULT_TENANT_ID = UUID.randomUUID();
     private static final String DEFAULT_EMAIL = "test@example.com";
     private static final OffsetDateTime DEFAULT_CREATED_AT = OffsetDateTime.now();
     private static final OffsetDateTime DEFAULT_UPDATED_AT = OffsetDateTime.now();
@@ -37,7 +37,7 @@ class UserPhoneValidationTest {
 
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             validPhone, "pt-BR", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -60,7 +60,7 @@ class UserPhoneValidationTest {
     void shouldCreateUserWithPhonesFromDifferentCountries(String phone, String locale) {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             phone, locale, null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -80,7 +80,7 @@ class UserPhoneValidationTest {
 
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             formattedPhone, "pt-BR", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -96,7 +96,7 @@ class UserPhoneValidationTest {
     void shouldCreateUserWithNullPhone() {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, "pt-BR", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -112,7 +112,7 @@ class UserPhoneValidationTest {
     void shouldCreateUserWithEmptyPhone() {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             "", "pt-BR", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -128,7 +128,7 @@ class UserPhoneValidationTest {
     void shouldCreateUserWithBlankPhone() {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             "   ", "pt-BR", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -147,7 +147,7 @@ class UserPhoneValidationTest {
 
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             phoneWithSpaces, "pt-BR", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -166,7 +166,7 @@ class UserPhoneValidationTest {
         ValidationException exception = assertThrows(
             ValidationException.class,
             () -> User.of(
-                DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+                DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
                 UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
                 invalidPhone, "pt-BR", null, null, null,
                 DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -185,7 +185,7 @@ class UserPhoneValidationTest {
 
         // When
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             validPhone, "pt-BR", null, null
         );
@@ -205,7 +205,7 @@ class UserPhoneValidationTest {
         ValidationException exception = assertThrows(
             ValidationException.class,
             () -> User.create(
-                DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+                DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
                 UserTypeEnum.PERSON, DEFAULT_EMAIL,
                 invalidPhone, "pt-BR", null, null
             )
@@ -219,7 +219,7 @@ class UserPhoneValidationTest {
     void shouldUpdatePhoneWithValidValue() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             "+5511999999999", "pt-BR", null, null
         );
@@ -236,7 +236,7 @@ class UserPhoneValidationTest {
     void shouldUpdatePhoneToNull() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             "+5511999999999", "pt-BR", null, null
         );
@@ -253,7 +253,7 @@ class UserPhoneValidationTest {
     void shouldNormalizePhoneWhenUpdating() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             "+5511999999999", "pt-BR", null, null
         );
@@ -271,7 +271,7 @@ class UserPhoneValidationTest {
     void shouldThrowExceptionWhenUpdatingWithInvalidPhone(String invalidPhone) {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             "+5511999999999", "pt-BR", null, null
         );
@@ -293,7 +293,7 @@ class UserPhoneValidationTest {
     void shouldUpdateUpdatedAtWhenChangingPhone() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             "+5511999999999", "pt-BR", null, null
         );
@@ -323,7 +323,7 @@ class UserPhoneValidationTest {
         
         // When - Com locale brasileiro, deve ser validado e normalizado
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             phone, "pt-BR", null, null
         );
@@ -341,7 +341,7 @@ class UserPhoneValidationTest {
 
         // When - Sem locale
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             phone, null, null, null
         );
@@ -366,7 +366,7 @@ class UserPhoneValidationTest {
         // When & Then
         for (String phone : phones) {
             User user = User.create(
-                DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+                DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
                 UserTypeEnum.PERSON, DEFAULT_EMAIL,
                 phone, "pt-BR", null, null
             );
@@ -381,7 +381,7 @@ class UserPhoneValidationTest {
     void shouldAllowChangingLocaleAndPhoneInSequence() {
         // Given - Usuário brasileiro
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             "+5511999999999", "pt-BR", null, null
         );

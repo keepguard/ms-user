@@ -12,6 +12,9 @@ public record RegisterInitCommandDTO(
     @NotNull(message = "tenantId é obrigatório")
     UUID tenantId,
 
+    @NotNull(message = "companyId é obrigatório")
+    UUID companyId,
+
     @NotBlank(message = "email é obrigatório")
     @Email(message = "email deve ser válido")
     @Size(max = 255, message = "email deve ter no máximo 255 caracteres")

@@ -57,13 +57,16 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getById(
             @PathVariable UUID id,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader,
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
         
         var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+        var companyId = ValidationUtils.validateTenantId(companyIdHeader);
         
-        log.info("Buscando usuário por ID: application={}, id={}", tenantId, id);
+        log.info("Buscando usuário por ID: application={}, companyId={}, id={}", tenantId, companyId, id);
 
-        var query = mapper.toGetByIdQuery(id, tenantId);
+        var query = mapper.toGetByIdQuery(id, tenantId, companyId);
         var view = userPort.getById(query);
 
         var response = mapper.toGetByIdResponseDTO(view);
@@ -76,12 +79,15 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getByCodeUser(
             @PathVariable UUID codeUser,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader,
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
 
         var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+        var companyId = ValidationUtils.validateTenantId(companyIdHeader);
         
-        log.info("Buscando usuário por codeUser: application={}, codeUser={}", tenantId, codeUser);
-        var query = mapper.toGetByCodeUserQuery(codeUser, tenantId);
+        log.info("Buscando usuário por codeUser: application={}, companyId={}, codeUser={}", tenantId, companyId, codeUser);
+        var query = mapper.toGetByCodeUserQuery(codeUser, tenantId, companyId);
         var view = userPort.getByCodeUser(query);
         var response = mapper.toGetByCodeUserResponseDTO(view);
         return ResponseEntity.ok(response);
@@ -93,12 +99,15 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getByEmail(
             @PathVariable String email,
             @Parameter(description = "UUID da aplicação", required = true)
-            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader) {
+            @RequestHeader(value = "X-Tenant-Id", required = true) String tenantIdHeader,
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) String companyIdHeader) {
 
         var tenantId = ValidationUtils.validateTenantId(tenantIdHeader);
+        var companyId = ValidationUtils.validateTenantId(companyIdHeader);
         
-        log.info("Buscando usuário por email: application={}, email={}", tenantId, email);
-        var query = mapper.toGetByEmailQuery(email, tenantId);
+        log.info("Buscando usuário por email: application={}, companyId={}, email={}", tenantId, companyId, email);
+        var query = mapper.toGetByEmailQuery(email, tenantId, companyId);
         var view = userPort.getByEmail(query);
         var response = mapper.toGetByEmail(view);
         return ResponseEntity.ok(response);

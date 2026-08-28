@@ -341,15 +341,15 @@ public class UserTestBuilder {
     }
     
     public com.keepguard.ms_user.application.dto.user.UserGetByIdQueryDTO buildGetByIdQuery() {
-        return new com.keepguard.ms_user.application.dto.user.UserGetByIdQueryDTO(id, tenantId);
+        return new com.keepguard.ms_user.application.dto.user.UserGetByIdQueryDTO(id, tenantId, companyId);
     }
-    
+
     public com.keepguard.ms_user.application.dto.user.UserGetByCodeUserQueryDTO buildGetByCodeUserQuery() {
-        return new com.keepguard.ms_user.application.dto.user.UserGetByCodeUserQueryDTO(codeUser, tenantId);
+        return new com.keepguard.ms_user.application.dto.user.UserGetByCodeUserQueryDTO(codeUser, tenantId, companyId);
     }
-    
+
     public com.keepguard.ms_user.application.dto.user.UserGetByEmailQueryDTO buildGetByEmailQuery() {
-        return new com.keepguard.ms_user.application.dto.user.UserGetByEmailQueryDTO(email, tenantId);
+        return new com.keepguard.ms_user.application.dto.user.UserGetByEmailQueryDTO(email, tenantId, companyId);
     }
     
     public com.keepguard.ms_user.application.dto.user.UserSearchQueryDTO buildSearchQuery() {

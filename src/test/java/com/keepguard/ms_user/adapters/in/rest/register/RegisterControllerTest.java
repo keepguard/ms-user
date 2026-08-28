@@ -79,6 +79,7 @@ class RegisterControllerTest {
                 .build();
 
         initRequest = new RegisterInitRequestDTO(
+                UUID.fromString("660e8400-e29b-41d4-a716-446655440000"),
                 "teste@example.com",
                 "João Silva",
                 "SenhaSegura123!",
@@ -166,6 +167,7 @@ class RegisterControllerTest {
     void deveRetornarErro400QuandoCamposObrigatoriosEstaoAusentes() throws Exception {
         // Given
         RegisterInitRequestDTO requestIncompleto = new RegisterInitRequestDTO(
+                null, // companyId ausente
                 "teste@example.com",
                 null, // nameFull ausente
                 null, // password ausente
@@ -193,6 +195,7 @@ class RegisterControllerTest {
     void deveRetornarErro400QuandoEmailEInvalido() throws Exception {
         // Given
         RegisterInitRequestDTO requestEmailInvalido = new RegisterInitRequestDTO(
+                UUID.fromString("660e8400-e29b-41d4-a716-446655440000"),
                 "email-invalido", // email inválido
                 "João Silva",
                 "SenhaSegura123!",

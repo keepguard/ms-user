@@ -101,4 +101,25 @@ class PersonProfileRepositoryAdapterTest {
         assertThat(saved).isNotNull();
         verify(springRepository).save(any(PersonProfileJpaEntity.class));
     }
+
+    @Test
+    @DisplayName("Deve verificar se CPF existe na company")
+    void shouldCheckIfCpfExistsByCompanyId() {
+        String cpf = "12345678909";
+        when(springRepository.existsByCpfAndCompanyId(cpf, companyId, userId)).thenReturn(true);
+
+        boolean result = adapter.existsByCpfAndCompanyId(cpf, companyId, userId);
+
+        assertThat(result).isTrue();
+        verify(springRepository).existsByCpfAndCompanyId(cpf, companyId, userId);
+    }
+
+    @Test
+    @DisplayName("Deve retornar false para CPF em branco na checagem por company")
+    void shouldReturnFalseWhenCpfIsBlankForCompanyCheck() {
+        boolean result = adapter.existsByCpfAndCompanyId("  ", companyId, null);
+
+        assertThat(result).isFalse();
+        verify(springRepository, never()).existsByCpfAndCompanyId(any(), any(), any());
+    }
 }

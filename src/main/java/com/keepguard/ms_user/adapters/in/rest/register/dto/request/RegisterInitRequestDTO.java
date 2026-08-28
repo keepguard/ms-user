@@ -9,10 +9,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.UUID;
+
 import static com.keepguard.lib_validation.moderation.domain.model.ModerationCategory.*;
 
 @Schema(description = "Dados para inicialização do registro de usuário")
 public record RegisterInitRequestDTO(
+    @Schema(description = "ID interno da empresa (resolvido pelo BFF a partir do tenant)", example = "123e4567-e89b-12d3-a456-426614174000")
+    @NotNull(message = "companyId é obrigatório")
+    UUID companyId,
+
     @Schema(description = "Email do usuário", example = "rafael@example.com")
     @NotBlank(message = "email é obrigatório")
     @Email(message = "email deve ser válido")

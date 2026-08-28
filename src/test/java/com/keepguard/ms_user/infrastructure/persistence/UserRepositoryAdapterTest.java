@@ -198,6 +198,45 @@ class UserRepositoryAdapterTest {
         verify(springRepository).findByIdWithRelations(userId);
         verify(mapper, never()).toDomain(any(UserJpaEntity.class));
     }
+
+    @Test
+    @DisplayName("Deve buscar usuário por ID e companyId")
+    void shouldFindUserByIdAndCompanyIdSuccessfully() {
+        when(springRepository.findByIdAndCompanyId(userId, companyId)).thenReturn(Optional.of(userJpaEntity));
+        when(mapper.toDomain(userJpaEntity)).thenReturn(user);
+
+        Optional<User> result = userRepositoryAdapter.findByIdAndCompanyId(userId, companyId);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(user.getId());
+        verify(springRepository).findByIdAndCompanyId(userId, companyId);
+        verify(mapper).toDomain(userJpaEntity);
+    }
+
+    @Test
+    @DisplayName("Deve buscar usuário por codeUser e companyId")
+    void shouldFindUserByCodeUserAndCompanyIdSuccessfully() {
+        when(springRepository.findByCodeUserAndCompanyId(codeUser, companyId)).thenReturn(Optional.of(userJpaEntity));
+        when(mapper.toDomain(userJpaEntity)).thenReturn(user);
+
+        Optional<User> result = userRepositoryAdapter.findByCodeUserAndCompanyId(codeUser, companyId);
+
+        assertThat(result).isPresent();
+        verify(springRepository).findByCodeUserAndCompanyId(codeUser, companyId);
+    }
+
+    @Test
+    @DisplayName("Deve buscar usuário por email e companyId")
+    void shouldFindUserByEmailAndCompanyIdSuccessfully() {
+        String email = "test@example.com";
+        when(springRepository.findByEmailAndCompanyId(email, companyId)).thenReturn(Optional.of(userJpaEntity));
+        when(mapper.toDomain(userJpaEntity)).thenReturn(user);
+
+        Optional<User> result = userRepositoryAdapter.findByEmailAndCompanyId(email, companyId);
+
+        assertThat(result).isPresent();
+        verify(springRepository).findByEmailAndCompanyId(email, companyId);
+    }
     
     // === TESTES DE FIND ALL ===
     
@@ -437,6 +476,48 @@ class UserRepositoryAdapterTest {
         // Then
         assertThat(result).isFalse();
         verify(springRepository).existsByEmail(email);
+    }
+
+    @Test
+    @DisplayName("Deve verificar se email existe na company")
+    void shouldCheckIfEmailExistsByCompanyId() {
+        String email = "test@example.com";
+        when(springRepository.existsByEmailAndCompanyId(email, companyId, null)).thenReturn(true);
+
+        boolean result = userRepositoryAdapter.existsByEmailAndCompanyId(email, companyId, null);
+
+        assertThat(result).isTrue();
+        verify(springRepository).existsByEmailAndCompanyId(email, companyId, null);
+    }
+
+    @Test
+    @DisplayName("Deve retornar false para email em branco na checagem por company")
+    void shouldReturnFalseWhenEmailIsBlankForCompanyCheck() {
+        boolean result = userRepositoryAdapter.existsByEmailAndCompanyId("  ", companyId, null);
+
+        assertThat(result).isFalse();
+        verify(springRepository, never()).existsByEmailAndCompanyId(anyString(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Deve verificar se telefone existe na company")
+    void shouldCheckIfPhoneExistsByCompanyId() {
+        String phone = "+5511999999999";
+        when(springRepository.existsByPhoneE164AndCompanyId(phone, companyId, userId)).thenReturn(true);
+
+        boolean result = userRepositoryAdapter.existsByPhoneE164AndCompanyId(phone, companyId, userId);
+
+        assertThat(result).isTrue();
+        verify(springRepository).existsByPhoneE164AndCompanyId(phone, companyId, userId);
+    }
+
+    @Test
+    @DisplayName("Deve retornar false para telefone em branco na checagem por company")
+    void shouldReturnFalseWhenPhoneIsBlankForCompanyCheck() {
+        boolean result = userRepositoryAdapter.existsByPhoneE164AndCompanyId(null, companyId, null);
+
+        assertThat(result).isFalse();
+        verify(springRepository, never()).existsByPhoneE164AndCompanyId(anyString(), any(), any());
     }
     
     @Test

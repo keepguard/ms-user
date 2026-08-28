@@ -59,6 +59,12 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public Optional<User> findByIdAndCompanyId(UUID id, UUID companyId) {
+        return springRepository.findByIdAndCompanyId(id, companyId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public List<User> findAll() {
         return springRepository.findAllWithRelations().stream()
                 .map(mapper::toDomain)
@@ -83,6 +89,12 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public Optional<User> findByCodeUserAndCompanyId(UUID codeUser, UUID companyId) {
+        return springRepository.findByCodeUserAndCompanyId(codeUser, companyId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<User> findByEmail(String email) {
         return springRepository.findByEmail(email)
                 .map(mapper::toDomain);
@@ -91,6 +103,12 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     @Override
     public Optional<User> findByEmailAndTenantId(String email, UUID tenantId) {
         return springRepository.findByEmailAndTenantId(email, tenantId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByEmailAndCompanyId(String email, UUID companyId) {
+        return springRepository.findByEmailAndCompanyId(email, companyId)
                 .map(mapper::toDomain);
     }
 
@@ -123,6 +141,22 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     @Override
     public boolean existsByEmailAndTenantId(String email, UUID tenantId) {
         return springRepository.existsByEmailAndTenantId(email, tenantId);
+    }
+
+    @Override
+    public boolean existsByEmailAndCompanyId(String email, UUID companyId, UUID excludeUserId) {
+        if (email == null || email.trim().isEmpty() || companyId == null) {
+            return false;
+        }
+        return springRepository.existsByEmailAndCompanyId(email.trim(), companyId, excludeUserId);
+    }
+
+    @Override
+    public boolean existsByPhoneE164AndCompanyId(String phoneE164, UUID companyId, UUID excludeUserId) {
+        if (phoneE164 == null || phoneE164.trim().isEmpty() || companyId == null) {
+            return false;
+        }
+        return springRepository.existsByPhoneE164AndCompanyId(phoneE164.trim(), companyId, excludeUserId);
     }
 
     @Override
@@ -213,7 +247,9 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
         if (criteria.email() != null) {
             spec = spec.and(hasEmailContaining(criteria.email()));
         }
-        if (criteria.companyId() != null) {
+        if (criteria.companyId() == null) {
+            spec = spec.and((root, query, cb) -> cb.disjunction());
+        } else {
             spec = spec.and(hasCompanyId(criteria.companyId()));
         }
         if (criteria.type() != null) {

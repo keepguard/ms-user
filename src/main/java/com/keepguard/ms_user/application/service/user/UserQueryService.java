@@ -31,16 +31,21 @@ public class UserQueryService {
 
     @Transactional(readOnly = true)
     public UserDetailsViewDTO getById(UserGetByIdQueryDTO query) {
-        log.info("tenantId: {} - Buscando usuário por ID: {}", query.tenantId(), query.id());
+        log.info("tenantId: {} companyId: {} - Buscando usuário por ID: {}", query.tenantId(), query.companyId(), query.id());
 
         var cachedUser = userCachePort.getUserByIdFromCache(query.id().toString());
         if (cachedUser != null) {
+            if (!query.companyId().equals(cachedUser.companyId())) {
+                metricsPort.incrementCounter("user_not_found_total",
+                    Map.of("entity_id", query.id().toString(), "operation", "get_by_id"));
+                throw new NotFoundException("Usuário não encontrado: " + query.id(), "USER_NOT_FOUND", Map.of("userId", query.id()));
+            }
             metricsPort.incrementCounter("user_queries_total",
                 Map.of("query_type", "GET_BY_ID", "status", "CACHE_HIT"));
             return cachedUser;
         }
 
-        var user = userRepositoryPort.findById(query.id())
+        var user = userRepositoryPort.findByIdAndCompanyId(query.id(), query.companyId())
                 .orElseThrow(() -> {
                     metricsPort.incrementCounter("user_not_found_total",
                         Map.of("entity_id", query.id().toString(), "operation", "get_by_id"));
@@ -58,16 +63,21 @@ public class UserQueryService {
 
     @Transactional(readOnly = true)
     public UserDetailsViewDTO getByCodeUser(UserGetByCodeUserQueryDTO query) {
-        log.info("tenantId: {} - Buscando usuário por codeUser: {}", query.tenantId(), query.codeUser());
+        log.info("tenantId: {} companyId: {} - Buscando usuário por codeUser: {}", query.tenantId(), query.companyId(), query.codeUser());
 
         var cachedUser = userCachePort.getUserByCodeFromCache(query.codeUser().toString());
         if (cachedUser != null) {
+            if (!query.companyId().equals(cachedUser.companyId())) {
+                metricsPort.incrementCounter("user_not_found_total",
+                    Map.of("entity_id", query.codeUser().toString(), "operation", "get_by_code"));
+                throw new NotFoundException("Usuário não encontrado com codeUser: " + query.codeUser(), "USER_NOT_FOUND", Map.of("codeUser", query.codeUser()));
+            }
             metricsPort.incrementCounter("user_queries_total",
                 Map.of("query_type", "GET_BY_CODE", "status", "CACHE_HIT"));
             return cachedUser;
         }
 
-        var user = userRepositoryPort.findByCodeUser(query.codeUser())
+        var user = userRepositoryPort.findByCodeUserAndCompanyId(query.codeUser(), query.companyId())
                 .orElseThrow(() -> {
                     metricsPort.incrementCounter("user_not_found_total",
                         Map.of("entity_id", query.codeUser().toString(), "operation", "get_by_code"));
@@ -85,16 +95,16 @@ public class UserQueryService {
 
     @Transactional(readOnly = true)
     public UserDetailsViewDTO getByEmail(UserGetByEmailQueryDTO query) {
-        log.info("tenantId: {} - Buscando usuário por email: {}", query.tenantId(), query.email());
+        log.info("tenantId: {} companyId: {} - Buscando usuário por email: {}", query.tenantId(), query.companyId(), query.email());
 
-        var cachedUser = userCachePort.getUserByEmailFromCache(query.email());
+        var cachedUser = userCachePort.getUserByEmailFromCache(query.companyId(), query.email());
         if (cachedUser != null) {
             metricsPort.incrementCounter("user_queries_total",
                 Map.of("query_type", "GET_BY_EMAIL", "status", "CACHE_HIT"));
             return cachedUser;
         }
 
-        var user = userRepositoryPort.findByEmail(query.email())
+        var user = userRepositoryPort.findByEmailAndCompanyId(query.email(), query.companyId())
                 .orElseThrow(() -> {
                     metricsPort.incrementCounter("user_not_found_total",
                         Map.of("entity_id", query.email(), "operation", "get_by_email"));
@@ -102,7 +112,7 @@ public class UserQueryService {
                 });
 
         var userView = userApplicationMapper.toByEmailView(user, loadProfile(user));
-        userCachePort.cacheUserByEmail(user.getId().toString(), userView);
+        userCachePort.cacheUserByEmail(query.companyId(), query.email(), userView);
 
         metricsPort.incrementCounter("user_queries_total",
             Map.of("query_type", "GET_BY_EMAIL", "status", "SUCCESS"));

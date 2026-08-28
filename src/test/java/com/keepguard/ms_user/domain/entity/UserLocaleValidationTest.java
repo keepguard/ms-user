@@ -23,7 +23,7 @@ class UserLocaleValidationTest {
     private static final UUID DEFAULT_ID = UUID.randomUUID();
     private static final UUID DEFAULT_CODE_USER = UUID.randomUUID();
     private static final UUID DEFAULT_COMPANY_ID = UUID.randomUUID();
-    private static final UUID DEFAULT_X_APPLICATION = UUID.randomUUID();
+    private static final UUID DEFAULT_TENANT_ID = UUID.randomUUID();
     private static final String DEFAULT_EMAIL = "test@example.com";
     private static final OffsetDateTime DEFAULT_CREATED_AT = OffsetDateTime.now();
     private static final OffsetDateTime DEFAULT_UPDATED_AT = OffsetDateTime.now();
@@ -36,7 +36,7 @@ class UserLocaleValidationTest {
 
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, validLocale, null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -53,7 +53,7 @@ class UserLocaleValidationTest {
     void shouldCreateUserWithDifferentValidLocales(String validLocale) {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, validLocale, null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -70,7 +70,7 @@ class UserLocaleValidationTest {
     void shouldNormalizeLocaleWithDifferentCases(String locale) {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, locale, null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -86,7 +86,7 @@ class UserLocaleValidationTest {
     void shouldCreateUserWithNullLocale() {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, null, null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -102,7 +102,7 @@ class UserLocaleValidationTest {
     void shouldCreateUserWithEmptyLocale() {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, "", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -118,7 +118,7 @@ class UserLocaleValidationTest {
     void shouldCreateUserWithBlankLocale() {
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, "   ", null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -137,7 +137,7 @@ class UserLocaleValidationTest {
 
         // When
         User user = User.of(
-            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
             null, localeWithSpaces, null, null, null,
             DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -156,7 +156,7 @@ class UserLocaleValidationTest {
         ValidationException exception = assertThrows(
             ValidationException.class,
             () -> User.of(
-                DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+                DEFAULT_ID, DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
                 UserTypeEnum.PERSON, UserStatusEnum.ACTIVE, DEFAULT_EMAIL,
                 null, invalidLocale, null, null, null,
                 DEFAULT_CREATED_AT, DEFAULT_UPDATED_AT
@@ -174,7 +174,7 @@ class UserLocaleValidationTest {
 
         // When
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             null, validLocale, null, null
         );
@@ -194,7 +194,7 @@ class UserLocaleValidationTest {
         ValidationException exception = assertThrows(
             ValidationException.class,
             () -> User.create(
-                DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+                DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
                 UserTypeEnum.PERSON, DEFAULT_EMAIL,
                 null, invalidLocale, null, null
             )
@@ -208,7 +208,7 @@ class UserLocaleValidationTest {
     void shouldUpdateLocaleWithValidValue() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             null, "pt-BR", null, null
         );
@@ -225,7 +225,7 @@ class UserLocaleValidationTest {
     void shouldUpdateLocaleToNull() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             null, "pt-BR", null, null
         );
@@ -242,7 +242,7 @@ class UserLocaleValidationTest {
     void shouldNormalizeLocaleWhenUpdating() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             null, "pt-BR", null, null
         );
@@ -260,7 +260,7 @@ class UserLocaleValidationTest {
     void shouldThrowExceptionWhenUpdatingWithInvalidLocale(String invalidLocale) {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             null, "pt-BR", null, null
         );
@@ -281,7 +281,7 @@ class UserLocaleValidationTest {
     void shouldUpdateUpdatedAtWhenChangingLocale() {
         // Given
         User user = User.create(
-            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_X_APPLICATION,
+            DEFAULT_CODE_USER, DEFAULT_COMPANY_ID, DEFAULT_TENANT_ID,
             UserTypeEnum.PERSON, DEFAULT_EMAIL,
             null, "pt-BR", null, null
         );

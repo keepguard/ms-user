@@ -75,13 +75,14 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByIdQuery(any(), any())).thenReturn(null);
+        when(mapper.toGetByIdQuery(any(), any(), any())).thenReturn(null);
         when(userPort.getById(any())).thenReturn(view);
         when(mapper.toGetByIdResponseDTO(any())).thenReturn(response);
         
         // When & Then
         mockMvc.perform(get("/internal/v1/users/{id}", userId)
                 .header("X-Tenant-Id", tenantId.toString())
+                .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()))
@@ -97,12 +98,13 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByIdQuery(any(), any())).thenReturn(null);
+        when(mapper.toGetByIdQuery(any(), any(), any())).thenReturn(null);
         when(userPort.getById(any())).thenReturn(view);
         when(mapper.toGetByIdResponseDTO(any())).thenReturn(response);
         
         // When & Then
         mockMvc.perform(get("/internal/v1/users/{id}", userId)
+                .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -121,13 +123,14 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByCodeUserQuery(any(), any())).thenReturn(null);
+        when(mapper.toGetByCodeUserQuery(any(), any(), any())).thenReturn(null);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
         
         // When & Then
         mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
                 .header("X-Tenant-Id", tenantId.toString())
+                .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()))
@@ -144,12 +147,13 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByCodeUserQuery(any(), any())).thenReturn(null);
+        when(mapper.toGetByCodeUserQuery(any(), any(), any())).thenReturn(null);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
         
         // When & Then
         mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
+                .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.personProfile.full_name").value("Test User"))
@@ -168,13 +172,14 @@ class InternalUserControllerTest {
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
-        when(mapper.toGetByCodeUserQuery(any(), any())).thenReturn(null);
+        when(mapper.toGetByCodeUserQuery(any(), any(), any())).thenReturn(null);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
         
         // When & Then
         mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
                 .header("X-Tenant-Id", "invalid-uuid")
+                .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
