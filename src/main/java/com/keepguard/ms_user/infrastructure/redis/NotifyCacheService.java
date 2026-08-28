@@ -30,7 +30,7 @@ public class NotifyCacheService implements NotifyCachePort {
     @CircuitBreaker(name = "redisCache")
     public void cacheNotifyByUserId(String userId, NotifyViewDTO notify) {
         try {
-            String key = notifyCachePrefix + ":user:" + userId;
+            String key = notifyKey(userId);
             String value = objectMapper.writeValueAsString(notify);
             redisTemplate.opsForValue().set(key, value, notifyTtlSeconds, TimeUnit.SECONDS);
         } catch (Exception e) {
@@ -41,7 +41,7 @@ public class NotifyCacheService implements NotifyCachePort {
     @CircuitBreaker(name = "redisCache", fallbackMethod = "getNotifyFallback")
     @Retry(name = "redisCache")
     public NotifyViewDTO getNotifyByUserIdFromCache(String userId) {
-        var key = "%s:user:%s".formatted(notifyCachePrefix, userId);
+        var key = notifyKey(userId);
         try {
             var value = redisTemplate.opsForValue().get(key);
             if (value == null || value.isBlank()) {
@@ -61,7 +61,7 @@ public class NotifyCacheService implements NotifyCachePort {
     @CircuitBreaker(name = "redisCache")
     public void removeNotifyFromCacheByUserId(String userId) {
         try {
-            String key = notifyCachePrefix + ":user:" + userId;
+            String key = notifyKey(userId);
             redisTemplate.delete(key);
         } catch (Exception e) {
             log.warn("Falha ao remover notificação do cache por userId | key={}", userId);
@@ -71,7 +71,7 @@ public class NotifyCacheService implements NotifyCachePort {
     @CircuitBreaker(name = "redisCache")
     public void clearAllNotifyCache() {
         try {
-            var pattern = notifyCachePrefix + ":*";
+            var pattern = basePrefix() + ":*";
             var keys = redisTemplate.keys(pattern);
             
             if (keys != null && !keys.isEmpty()) {
@@ -83,6 +83,21 @@ public class NotifyCacheService implements NotifyCachePort {
         } catch (Exception e) {
             log.warn("Falha ao limpar cache de notificações");
         }
+    }
+
+    private String basePrefix() {
+        if (notifyCachePrefix == null || notifyCachePrefix.isBlank()) {
+            return "notify_cache";
+        }
+        return notifyCachePrefix.replaceAll(":+$", "");
+    }
+
+    private String notifyKey(String userId) {
+        return basePrefix() + ":user:" + normalize(userId);
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 
 }

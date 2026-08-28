@@ -77,7 +77,14 @@ public class RegisterCacheService implements RegisterCachePort {
     }
 
     private String buildKey(String email, UUID companyId) {
-        return String.format("%s:%s:%s", registerCachePrefix, email.toLowerCase().trim(), companyId);
+        return String.format("%s:%s:%s", basePrefix(), email == null ? "" : email.toLowerCase().trim(), companyId);
+    }
+
+    private String basePrefix() {
+        if (registerCachePrefix == null || registerCachePrefix.isBlank()) {
+            return "register_session";
+        }
+        return registerCachePrefix.replaceAll(":+$", "");
     }
 
 }

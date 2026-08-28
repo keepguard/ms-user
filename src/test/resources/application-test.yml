@@ -25,7 +25,7 @@ cache:
       notify: 3600   # 1 hora para testes
     prefix:
       user: "test_user_cache:"
-      notify: "test_notify_cache:"
+      notify: "test_notify_cache"
 
 logging:
   level:
