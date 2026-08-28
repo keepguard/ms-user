@@ -139,6 +139,23 @@ class InternalUserControllerTest {
                 .andExpect(jsonPath("$.personProfile.full_name").value("Test User"))
                 .andExpect(jsonPath("$.display_handle").value("test.user"));
     }
+
+    @Test
+    @DisplayName("Deve buscar usuário por codeUser sem X-Company-Id")
+    void shouldGetUserByCodeUserWithoutCompanyId() throws Exception {
+        var view = buildUserDetailsView();
+        var response = buildUserResponse();
+
+        when(userPort.getByCodeUserForTenant(codeUser, tenantId)).thenReturn(view);
+        when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
+
+        mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
+                .header("X-Tenant-Id", tenantId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.codeUser").value(codeUser.toString()))
+                .andExpect(jsonPath("$.email").value("test@example.com"));
+    }
     
     @Test
     @DisplayName("Deve buscar usuário por codeUser sem X-Tenant-Id header")

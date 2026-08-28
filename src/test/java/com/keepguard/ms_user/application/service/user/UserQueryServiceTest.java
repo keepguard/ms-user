@@ -209,6 +209,33 @@ class UserQueryServiceTest {
         assertTrue(exception.getContext().containsKey("codeUser"));
         assertEquals(codeUser, exception.getContext().get("codeUser"));
     }
+
+    @Test
+    @DisplayName("Deve buscar usuário por codeUser e tenant sem companyId")
+    void shouldGetUserByCodeUserForTenantFromDatabase() {
+        when(userRepositoryPort.findByCodeUser(codeUser)).thenReturn(Optional.of(user));
+        when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
+        when(userApplicationMapper.toByCodeUserView(eq(user), any(UserProfile.class))).thenReturn(userDetailsView);
+
+        var result = userQueryService.getByCodeUserForTenant(codeUser, user.getTenantId());
+
+        assertNotNull(result);
+        assertEquals(codeUser, result.codeUser());
+        verify(userRepositoryPort).findByCodeUser(codeUser);
+        verify(userCachePort).cacheUserByCode(codeUser.toString(), userDetailsView);
+    }
+
+    @Test
+    @DisplayName("Deve lançar NotFoundException quando tenant do usuário não bate")
+    void shouldThrowNotFoundWhenTenantDoesNotMatchForCodeUser() {
+        when(userRepositoryPort.findByCodeUser(codeUser)).thenReturn(Optional.of(user));
+
+        var exception = assertThrows(NotFoundException.class,
+            () -> userQueryService.getByCodeUserForTenant(codeUser, UUID.randomUUID()));
+
+        assertEquals("USER_NOT_FOUND", exception.getErrorCode());
+        verify(userApplicationMapper, never()).toByCodeUserView(any(), any());
+    }
     
     // === TESTES DE BUSCA POR EMAIL ===
     

@@ -94,6 +94,32 @@ public class UserQueryService {
     }
 
     @Transactional(readOnly = true)
+    public UserDetailsViewDTO getByCodeUserForTenant(UUID codeUser, UUID tenantId) {
+        log.info("tenantId: {} - Buscando usuário por codeUser no tenant: {}", tenantId, codeUser);
+
+        var user = userRepositoryPort.findByCodeUser(codeUser)
+                .orElseThrow(() -> {
+                    metricsPort.incrementCounter("user_not_found_total",
+                        Map.of("entity_id", codeUser.toString(), "operation", "get_by_code_tenant"));
+                    return new NotFoundException("Usuário não encontrado com codeUser: " + codeUser, "USER_NOT_FOUND", Map.of("codeUser", codeUser));
+                });
+
+        if (!tenantId.equals(user.getTenantId())) {
+            metricsPort.incrementCounter("user_not_found_total",
+                Map.of("entity_id", codeUser.toString(), "operation", "get_by_code_tenant"));
+            throw new NotFoundException("Usuário não encontrado com codeUser: " + codeUser, "USER_NOT_FOUND", Map.of("codeUser", codeUser));
+        }
+
+        var userView = userApplicationMapper.toByCodeUserView(user, loadProfile(user));
+        userCachePort.cacheUserByCode(user.getCodeUser().toString(), userView);
+
+        metricsPort.incrementCounter("user_queries_total",
+            Map.of("query_type", "GET_BY_CODE_TENANT", "status", "SUCCESS"));
+
+        return userView;
+    }
+
+    @Transactional(readOnly = true)
     public UserDetailsViewDTO getByEmail(UserGetByEmailQueryDTO query) {
         log.info("tenantId: {} companyId: {} - Buscando usuário por email: {}", query.tenantId(), query.companyId(), query.email());
 

@@ -4,6 +4,7 @@ import com.keepguard.ms_user.application.dto.user.*;
 import com.keepguard.ms_user.application.dto.common.PageResultDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface UserPort {
 
@@ -34,6 +35,8 @@ public interface UserPort {
     UserDetailsViewDTO getById(UserGetByIdQueryDTO query);
 
     UserDetailsViewDTO getByCodeUser(UserGetByCodeUserQueryDTO query);
+
+    UserDetailsViewDTO getByCodeUserForTenant(UUID codeUser, UUID tenantId);
 
     UserDetailsViewDTO getByEmail(UserGetByEmailQueryDTO query);
 

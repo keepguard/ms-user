@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +85,11 @@ public class UserUseCaseService implements UserPort {
     @Override
     public UserDetailsViewDTO getByCodeUser(UserGetByCodeUserQueryDTO query) {
         return userQueryService.getByCodeUser(query);
+    }
+
+    @Override
+    public UserDetailsViewDTO getByCodeUserForTenant(UUID codeUser, UUID tenantId) {
+        return userQueryService.getByCodeUserForTenant(codeUser, tenantId);
     }
 
     @Override
