@@ -70,3 +70,7 @@ cache:
       register: "register_session"
     max_attempts:
       register_token: 5  # máximo de tentativas de validação de token
+
+keepguard:
+  audit:
+    exchange: srv-audit-exchange-prod

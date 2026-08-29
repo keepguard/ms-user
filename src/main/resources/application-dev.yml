@@ -86,3 +86,7 @@ logging:
     com.keepguard.lib_common.logging.StructuredLogger: OFF
     com.keepguard.ms_user.infrastructure.filter.CorrelationIdFilter: INFO
     com.keepguard.ms_user: INFO
+
+keepguard:
+  audit:
+    exchange: srv-audit-exchange-dev

@@ -30,6 +30,11 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:${RABBITMQ_DEFAULT_USER:guest}}
+    password: ${RABBITMQ_PASSWORD:${RABBITMQ_DEFAULT_PASS:guest}}
 
 cache:
   redis:
@@ -151,3 +156,8 @@ keepguard:
         enabled: true
         max-attempts: 3
         wait-duration: 500ms
+  audit:
+    enabled: true
+    exchange: srv-audit-exchange-local
+    routing-key: audit.event
+    source-service: ms-user

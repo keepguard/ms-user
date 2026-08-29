@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.keepguard</groupId>
 	<artifactId>ms-user</artifactId>
-	<version>1.0.15</version>
+	<version>1.0.16</version>
 	<name>ms-user</name>
 	<description>User Management Service</description>
 	<url/>
@@ -80,7 +80,7 @@
 		<dependency>
 			<groupId>com.keepguard</groupId>
 			<artifactId>lib-security</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 		<!-- Spring Boot Starter Data Redis -->
 		<dependency>
@@ -119,7 +119,11 @@
 		<dependency>
 			<groupId>com.keepguard</groupId>
 			<artifactId>lib-common</artifactId>
-			<version>1.0.28-SNAPSHOT</version>
+			<version>1.0.36-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
 		
 		<!-- Spring AOP para aspectos -->

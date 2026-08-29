@@ -8,6 +8,7 @@ spring:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   # Configuração de cache para usar mocks
   cache:
     type: simple
@@ -46,3 +47,7 @@ management:
     metrics:
       export:
         enabled: true
+
+keepguard:
+  audit:
+    enabled: false
