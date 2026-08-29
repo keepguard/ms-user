@@ -33,6 +33,6 @@ public class CorrelationContext {
     }
 
     private String generateCorrelationId() {
-        return "ms-user-" + UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 }

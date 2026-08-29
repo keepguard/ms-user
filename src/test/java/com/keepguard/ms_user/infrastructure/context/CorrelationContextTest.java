@@ -51,7 +51,7 @@ class CorrelationContextTest {
         
         // Then
         assertNotNull(correlationId, "Correlation ID deve ser gerado");
-        assertTrue(correlationId.startsWith("ms-user-"), "Correlation ID deve ter prefixo correto");
+        assertEquals(36, correlationId.length());
         assertTrue(correlationId.length() > 20, "Correlation ID deve ter tamanho adequado");
         
         // Verificar se foi adicionado ao MDC
@@ -99,7 +99,7 @@ class CorrelationContextTest {
         // Then
         String correlationId = MDC.get(CorrelationContext.CORRELATION_ID_MDC_KEY);
         assertNotNull(correlationId, "Correlation ID deve ser gerado");
-        assertTrue(correlationId.startsWith("ms-user-"), "Correlation ID deve ter prefixo correto");
+        assertEquals(36, correlationId.length());
     }
     
     @Test
@@ -114,7 +114,7 @@ class CorrelationContextTest {
         // Then
         String correlationId = MDC.get(CorrelationContext.CORRELATION_ID_MDC_KEY);
         assertNotNull(correlationId, "Correlation ID deve ser gerado");
-        assertTrue(correlationId.startsWith("ms-user-"), "Correlation ID deve ter prefixo correto");
+        assertEquals(36, correlationId.length());
     }
     
     @Test
@@ -129,7 +129,7 @@ class CorrelationContextTest {
         // Then
         String correlationId = MDC.get(CorrelationContext.CORRELATION_ID_MDC_KEY);
         assertNotNull(correlationId, "Correlation ID deve ser gerado");
-        assertTrue(correlationId.startsWith("ms-user-"), "Correlation ID deve ter prefixo correto");
+        assertEquals(36, correlationId.length());
     }
     
     @Test
