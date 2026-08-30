@@ -7,6 +7,7 @@ import com.keepguard.ms_user.domain.enums.KycStatusEnum;
 import com.keepguard.ms_user.domain.enums.MaritalStatusEnum;
 import com.keepguard.lib_validation.moderation.application.validator.ModeratedContent;
 import static com.keepguard.lib_validation.moderation.domain.model.ModerationCategory.*;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 public record PersonRequestDTO(
     @Schema(description = "Nome completo", example = "João da Silva")
     @JsonProperty("full_name")
+    @JsonAlias({"fullName", "full_name"})
     @NotBlank(message = "Nome completo é obrigatório")
     @Size(max = 200, message = "Nome completo deve ter no máximo 200 caracteres")
     @ModeratedContent(categories = {HATE, HARASSMENT, SEXUAL}, threshold = 0.15)
