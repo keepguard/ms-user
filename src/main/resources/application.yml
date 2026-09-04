@@ -140,7 +140,7 @@ keepguard:
   validation:
     moderation:
       enabled: true
-      api-key: ${OPENAI_API_KEY}
+      api-key: ${OPENAI_KEEPGUARD_API_KEY:}
       api-url: https://api.openai.com/v1/moderations
       model: omni-moderation-latest
       timeout: 5s

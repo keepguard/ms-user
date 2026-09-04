@@ -72,6 +72,12 @@ spec:
               key: RABBITMQ_DEFAULT_PASS
         - name: KEEPGUARD_VALIDATION_MODERATION_ENABLED
           value: "false"
+        - name: OPENAI_KEEPGUARD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: keepguard-secret
+              key: OPENAI_KEEPGUARD_API_KEY
+              optional: true
         ports:
         - containerPort: {{ .Values.service.port }}
         resources:
