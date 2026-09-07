@@ -48,7 +48,7 @@ public class RegisterCommandService {
         operation = "REGISTER_INIT",
         description = "Inicializando registro de usuário: {command.email}",
         audit = true,
-        auditAction = "CREATE",
+        auditAction = "REGISTER_INIT",
         auditEntityType = "REGISTER_SESSION"
     )
     public RegisterInitViewDTO init(RegisterInitCommandDTO command) {
@@ -154,7 +154,7 @@ public class RegisterCommandService {
         operation = "REGISTER_CONFIRM",
         description = "Confirmando registro de usuário: {command.email}",
         audit = true,
-        auditAction = "CONFIRM",
+        auditAction = "REGISTER_CONFIRM",
         auditEntityType = "REGISTER_SESSION"
     )
     public RegisterSession confirm(RegisterConfirmCommandDTO command) {
@@ -262,7 +262,13 @@ public class RegisterCommandService {
         return session;
     }
 
-    @LogOperation(operation = "REGISTER_RESEND", description = "Reenviando token de registro: {command.email}")
+    @LogOperation(
+        operation = "REGISTER_RESEND",
+        description = "Reenviando token de registro: {command.email}",
+        audit = true,
+        auditAction = "REGISTER_RESEND",
+        auditEntityType = "REGISTER_SESSION"
+    )
     public RegisterSession resend(RegisterResendCommandDTO command) {
         log.info("Reenviando token de registro: email={}, companyId={}", 
                 command.email(), command.companyId());
