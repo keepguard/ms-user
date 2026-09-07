@@ -1,17 +1,15 @@
 package com.keepguard.ms_user.application.dto.user;
 
-import com.keepguard.ms_user.domain.enums.UserTypeEnum;
-import com.keepguard.ms_user.domain.entity.PersonProfile;
-import com.keepguard.ms_user.domain.entity.CompanyProfile;
+import com.keepguard.ms_user.application.dto.profile.CompanyProfileCommandDTO;
+import com.keepguard.ms_user.application.dto.profile.PersonProfileCommandDTO;
 import com.keepguard.ms_user.application.dto.profile.ProfileCommandDTO;
 import com.keepguard.ms_user.application.validator.ValidLocale;
 import com.keepguard.ms_user.application.validator.ValidPhone;
-import com.keepguard.lib_validation.moderation.application.validator.ModeratedContent;
-import com.keepguard.lib_validation.moderation.domain.model.ModerationCategory;
+import com.keepguard.ms_user.domain.enums.UserTypeEnum;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.Valid;
 
 import java.util.UUID;
 
@@ -30,21 +28,20 @@ public record UserCreateCommandDTO(
 
     @ValidPhone
     String phoneE164,
-    
+
     @ValidLocale
     String preferredLocale,
-    
+
     String timezone,
     String avatarUrl,
 
-    /** Apelido (display_handle) do usuário; pode vir do request em user ou personProfile. */
     String displayHandle,
 
     @Valid
-    PersonProfile personProfile,
-    
+    PersonProfileCommandDTO personProfile,
+
     @Valid
-    CompanyProfile companyProfile
+    CompanyProfileCommandDTO companyProfile
 ) implements ProfileCommandDTO {
 
     @Override

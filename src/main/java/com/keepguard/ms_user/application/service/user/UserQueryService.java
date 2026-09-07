@@ -4,12 +4,13 @@ import com.keepguard.ms_user.application.port.out.metrics.MetricsPort;
 import com.keepguard.ms_user.application.dto.user.*;
 import com.keepguard.ms_user.application.dto.common.PageResultDTO;
 import com.keepguard.ms_user.application.mapper.UserApplicationMapper;
+import com.keepguard.ms_user.application.port.out.persistence.CompanyProfileRepositoryPort;
+import com.keepguard.ms_user.application.port.out.persistence.PersonProfileRepositoryPort;
 import com.keepguard.ms_user.application.port.out.persistence.UserRepositoryPort;
 import com.keepguard.ms_user.application.service.exception.NotFoundException;
 import com.keepguard.ms_user.application.port.out.cache.UserCachePort;
 import com.keepguard.ms_user.domain.entity.User;
 import com.keepguard.ms_user.domain.entity.UserProfile;
-import com.keepguard.ms_user.infrastructure.persistence.UserRepositoryAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,8 @@ public class UserQueryService {
     private final UserRepositoryPort userRepositoryPort;
     private final UserCachePort userCachePort;
     private final UserApplicationMapper userApplicationMapper;
-    private final UserRepositoryAdapter userRepositoryAdapter;
+    private final PersonProfileRepositoryPort personProfileRepositoryPort;
+    private final CompanyProfileRepositoryPort companyProfileRepositoryPort;
     private final MetricsPort metricsPort;
 
     @Transactional(readOnly = true)
@@ -175,8 +177,8 @@ public class UserQueryService {
 
     private UserProfile loadProfile(User user) {
         return switch (user.getType()) {
-            case PERSON -> userRepositoryAdapter.findPersonProfileByUserId(user.getId());
-            case COMPANY -> userRepositoryAdapter.findCompanyProfileByUserId(user.getId());
+            case PERSON -> personProfileRepositoryPort.findByUserId(user.getId()).orElse(null);
+            case COMPANY -> companyProfileRepositoryPort.findByUserId(user.getId()).orElse(null);
         };
     }
 

@@ -1,10 +1,8 @@
 package com.keepguard.ms_user.infrastructure.persistence;
 
 import com.keepguard.ms_user.application.dto.user.UserSearchCriteriaDTO;
-import com.keepguard.ms_user.application.dto.user.UserSearchViewDTO;
 import com.keepguard.ms_user.application.dto.common.PageResultDTO;
 import com.keepguard.ms_user.application.port.out.persistence.UserRepositoryPort;
-import com.keepguard.ms_user.application.mapper.UserApplicationMapper;
 import com.keepguard.ms_user.domain.entity.User;
 import com.keepguard.ms_user.domain.entity.UserProfile;
 import com.keepguard.ms_user.domain.enums.UserStatusEnum;
@@ -43,7 +41,6 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     private final UserJpaMapper mapper;
     private final PersonProfileJpaMapper personProfileMapper;
     private final CompanyProfileJpaMapper companyProfileMapper;
-    private final UserApplicationMapper userApplicationMapper;
 
     @Override
     public User save(User user) {
@@ -189,57 +186,6 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 page.getSize()
         );
     }
-
-    /**
-     * Busca perfil de pessoa por ID do usuário
-     */
-    public UserProfile findPersonProfileByUserId(UUID userId) {
-        var personProfile = personProfileRepository.findByUserId(userId);
-        return personProfile.map(personProfileMapper::toDomain).orElse(null);
-    }
-
-    /**
-     * Busca perfil de empresa por ID do usuário
-     */
-    public UserProfile findCompanyProfileByUserId(UUID userId) {
-        var companyProfile = companyProfileRepository.findByUserId(userId);
-        return companyProfile.map(companyProfileMapper::toDomain).orElse(null);
-    }
-
-    /**
-     * Busca usuários com seus profiles carregados.
-     * Versão do método search que inclui os dados de profile.
-     */
-    public PageResultDTO<UserSearchViewDTO> searchWithProfiles(UserSearchCriteriaDTO criteria) {
-        var spec = buildSpecification(criteria);
-        var pageable = buildPageable(criteria);
-
-        var page = springRepository.findAll(spec, pageable);
-
-        var usersWithProfiles = page.getContent().stream()
-                .map(entity -> {
-                    var user = mapper.toDomain(entity);
-                    var profile = loadProfile(entity);
-                    return new UserWithProfile(user, profile);
-                })
-                .collect(Collectors.toList());
-
-        // Converter para UserSearchViewDTO com profiles
-        var userSearchViews = usersWithProfiles.stream()
-                .map(userWithProfile -> userApplicationMapper.toSearchView(
-                    userWithProfile.getUser(), 
-                    userWithProfile.getProfile()
-                ))
-                .collect(Collectors.toList());
-
-        return new PageResultDTO<>(
-                userSearchViews,
-                page.getTotalElements(),
-                page.getNumber(),
-                page.getSize()
-        );
-    }
-
 
     private Specification<UserJpaEntity> buildSpecification(UserSearchCriteriaDTO criteria) {
         Specification<UserJpaEntity> spec = Specification.where(null);

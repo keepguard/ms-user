@@ -1,11 +1,15 @@
 package com.keepguard.ms_user.adapters.in.rest.user.mapper;
 
 import com.keepguard.ms_user.adapters.in.rest.user.dto.request.*;
-import com.keepguard.ms_user.adapters.in.rest.user.dto.response.*;
+import com.keepguard.ms_user.adapters.in.rest.user.dto.response.CompanyResponseDTO;
+import com.keepguard.ms_user.adapters.in.rest.user.dto.response.PersonResponseDTO;
+import com.keepguard.ms_user.adapters.in.rest.user.dto.response.UserResponseDTO;
+import com.keepguard.ms_user.adapters.in.rest.user.dto.response.UserStatusResponseDTO;
+import com.keepguard.ms_user.application.dto.profile.CompanyProfileCommandDTO;
+import com.keepguard.ms_user.application.dto.profile.CompanyProfileViewDTO;
+import com.keepguard.ms_user.application.dto.profile.PersonProfileCommandDTO;
+import com.keepguard.ms_user.application.dto.profile.PersonProfileViewDTO;
 import com.keepguard.ms_user.application.dto.user.*;
-import com.keepguard.ms_user.application.dto.user.UserViewDTO;
-import com.keepguard.ms_user.domain.entity.CompanyProfile;
-import com.keepguard.ms_user.domain.entity.PersonProfile;
 import com.keepguard.ms_user.domain.enums.UserStatusEnum;
 import com.keepguard.ms_user.domain.enums.UserTypeEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -36,33 +41,31 @@ public class UserAdapterMapper {
             request.timezone(),
             request.avatarUrl(),
             displayHandle,
-            request.personProfile() != null ? toPersonProfile(request.personProfile()) : null,
-            request.companyProfile() != null ? toCompanyProfile(request.companyProfile()) : null
+            request.personProfile() != null ? toPersonProfileCommand(request.personProfile()) : null,
+            request.companyProfile() != null ? toCompanyProfileCommand(request.companyProfile()) : null
         );
     }
 
     public UserUpdateCommandDTO toUpdateCommand(UserUpdateRequestDTO request, UUID id, UUID companyId) {
-        java.util.Optional<String> displayHandle = request.personProfile() != null && request.personProfile().displayHandle() != null
-            ? java.util.Optional.of(request.personProfile().displayHandle())
-            : java.util.Optional.empty();
+        Optional<String> displayHandle = request.personProfile() != null && request.personProfile().displayHandle() != null
+            ? Optional.of(request.personProfile().displayHandle())
+            : Optional.empty();
         return new UserUpdateCommandDTO(
             id,
             companyId,
-            java.util.Optional.ofNullable(request.codeUser()),
-            java.util.Optional.ofNullable(request.type()),
-            java.util.Optional.ofNullable(request.status()),
-            java.util.Optional.ofNullable(request.email()),
-            java.util.Optional.ofNullable(request.phoneE164()),
-            java.util.Optional.ofNullable(request.preferredLocale()),
-            java.util.Optional.ofNullable(request.timezone()),
-            java.util.Optional.ofNullable(request.avatarUrl()),
+            Optional.ofNullable(request.codeUser()),
+            Optional.ofNullable(request.type()),
+            Optional.ofNullable(request.status()),
+            Optional.ofNullable(request.email()),
+            Optional.ofNullable(request.phoneE164()),
+            Optional.ofNullable(request.preferredLocale()),
+            Optional.ofNullable(request.timezone()),
+            Optional.ofNullable(request.avatarUrl()),
             displayHandle,
-            request.personProfile() != null ? java.util.Optional.of(toPersonProfile(request.personProfile())) : java.util.Optional.empty(),
-            request.companyProfile() != null ? java.util.Optional.of(toCompanyProfile(request.companyProfile())) : java.util.Optional.empty()
+            request.personProfile() != null ? Optional.of(toPersonProfileCommand(request.personProfile())) : Optional.empty(),
+            request.companyProfile() != null ? Optional.of(toCompanyProfileCommand(request.companyProfile())) : Optional.empty()
         );
     }
-
-    // === Query Methods ===
 
     public UserGetByIdQueryDTO toGetByIdQuery(UUID id, UUID companyId) {
         return new UserGetByIdQueryDTO(id, companyId);
@@ -77,10 +80,9 @@ public class UserAdapterMapper {
     }
 
     public UserSearchQueryDTO toSearchQuery(UserSearchRequestDTO request, UUID companyId) {
-        // Parse enum types usando métodos estáticos dos enums
         var userType = UserTypeEnum.fromString(request.getType());
         var userStatus = UserStatusEnum.fromString(request.getStatus());
-        
+
         return new UserSearchQueryDTO(
             companyId,
             request.getEmail(),
@@ -106,8 +108,6 @@ public class UserAdapterMapper {
         );
     }
 
-    // === Command Methods ===
-
     public UserDeleteCommandDTO toDeleteCommand(UUID id, UUID companyId) {
         return new UserDeleteCommandDTO(id, companyId);
     }
@@ -121,82 +121,21 @@ public class UserAdapterMapper {
     }
 
     public UserResponseDTO toGetByIdResponseDTO(UserDetailsViewDTO view) {
-        if (view == null) {
-            return null;
-        }
-
-        var dto = new UserResponseDTO();
-        dto.setId(view.id());
-        dto.setCodeUser(view.codeUser());
-        dto.setCompanyId(view.companyId());
-        dto.setType(view.type());
-        dto.setEmail(view.email());
-        dto.setPhoneE164(view.phoneE164());
-        dto.setPreferredLocale(view.preferredLocale());
-        dto.setTimezone(view.timezone());
-        dto.setAvatarUrl(view.avatarUrl());
-        dto.setDisplayHandle(view.displayHandle());
-        dto.setStatus(view.status());
-        dto.setPersonProfile(view.personProfile() != null ? toPersonResponseDTO(view.personProfile()) : null);
-        dto.setCompanyProfile(view.companyProfile() != null ? toCompanyResponseDTO(view.companyProfile()) : null);
-        dto.setCreatedAt(view.createdAt());
-        dto.setUpdatedAt(view.updatedAt());
-        return dto;
+        return toResponseDTO(view);
     }
 
     public UserResponseDTO toGetByCodeUserResponseDTO(UserDetailsViewDTO view) {
-        if (view == null) {
-            return null;
-        }
-
-        var dto = new UserResponseDTO();
-        dto.setId(view.id());
-        dto.setCodeUser(view.codeUser());
-        dto.setCompanyId(view.companyId());
-        dto.setType(view.type());
-        dto.setEmail(view.email());
-        dto.setPhoneE164(view.phoneE164());
-        dto.setPreferredLocale(view.preferredLocale());
-        dto.setTimezone(view.timezone());
-        dto.setAvatarUrl(view.avatarUrl());
-        dto.setDisplayHandle(view.displayHandle());
-        dto.setStatus(view.status());
-        dto.setPersonProfile(view.personProfile() != null ? toPersonResponseDTO(view.personProfile()) : null);
-        dto.setCompanyProfile(view.companyProfile() != null ? toCompanyResponseDTO(view.companyProfile()) : null);
-        dto.setCreatedAt(view.createdAt());
-        dto.setUpdatedAt(view.updatedAt());
-        return dto;
+        return toResponseDTO(view);
     }
 
     public UserResponseDTO toGetByEmail(UserDetailsViewDTO view) {
-        if (view == null) {
-            return null;
-        }
-
-        var dto = new UserResponseDTO();
-        dto.setId(view.id());
-        dto.setCodeUser(view.codeUser());
-        dto.setCompanyId(view.companyId());
-        dto.setType(view.type());
-        dto.setEmail(view.email());
-        dto.setPhoneE164(view.phoneE164());
-        dto.setPreferredLocale(view.preferredLocale());
-        dto.setTimezone(view.timezone());
-        dto.setAvatarUrl(view.avatarUrl());
-        dto.setDisplayHandle(view.displayHandle());
-        dto.setStatus(view.status());
-        dto.setPersonProfile(view.personProfile() != null ? toPersonResponseDTO(view.personProfile()) : null);
-        dto.setCompanyProfile(view.companyProfile() != null ? toCompanyResponseDTO(view.companyProfile()) : null);
-        dto.setCreatedAt(view.createdAt());
-        dto.setUpdatedAt(view.updatedAt());
-        return dto;
+        return toResponseDTO(view);
     }
 
     public UserResponseDTO toResponseDTO(UserDetailsViewDTO view) {
         if (view == null) {
             return null;
         }
-
         var dto = new UserResponseDTO();
         dto.setId(view.id());
         dto.setCodeUser(view.codeUser());
@@ -209,8 +148,8 @@ public class UserAdapterMapper {
         dto.setAvatarUrl(view.avatarUrl());
         dto.setDisplayHandle(view.displayHandle());
         dto.setStatus(view.status());
-        dto.setPersonProfile(null); // TODO: Implementar conversão de PersonProfile para PersonResponseDTO
-        dto.setCompanyProfile(null); // TODO: Implementar conversão de CompanyProfile para CompanyResponseDTO
+        dto.setPersonProfile(toPersonResponseDTO(view.personProfile()));
+        dto.setCompanyProfile(toCompanyResponseDTO(view.companyProfile()));
         dto.setCreatedAt(view.createdAt());
         dto.setUpdatedAt(view.updatedAt());
         return dto;
@@ -220,7 +159,6 @@ public class UserAdapterMapper {
         if (view == null) {
             return null;
         }
-
         var dto = new UserResponseDTO();
         dto.setId(view.id());
         dto.setCodeUser(view.codeUser());
@@ -233,8 +171,8 @@ public class UserAdapterMapper {
         dto.setAvatarUrl(view.avatarUrl());
         dto.setDisplayHandle(view.displayHandle());
         dto.setStatus(view.status());
-        dto.setPersonProfile(null); // Será carregado separadamente se necessário
-        dto.setCompanyProfile(null); // Será carregado separadamente se necessário
+        dto.setPersonProfile(toPersonResponseDTO(view.personProfile()));
+        dto.setCompanyProfile(toCompanyResponseDTO(view.companyProfile()));
         dto.setCreatedAt(view.createdAt());
         dto.setUpdatedAt(view.updatedAt());
         return dto;
@@ -244,36 +182,24 @@ public class UserAdapterMapper {
         if (view == null) {
             return null;
         }
-
         var dto = new UserResponseDTO();
         dto.setId(view.id());
         dto.setCodeUser(view.codeUser());
         dto.setCompanyId(view.companyId());
         dto.setType(view.type());
         dto.setEmail(view.email());
-        dto.setPhoneE164(null); // UserSearchViewDTO não tem phoneE164
-        dto.setPreferredLocale(null); // UserSearchViewDTO não tem preferredLocale
-        dto.setTimezone(null); // UserSearchViewDTO não tem timezone
+        dto.setPhoneE164(null);
+        dto.setPreferredLocale(null);
+        dto.setTimezone(null);
         dto.setAvatarUrl(view.avatarUrl());
         dto.setDisplayHandle(view.displayHandle());
         dto.setStatus(view.status());
-        // Converter profiles se existirem
-        if (view.personProfile() != null) {
-            dto.setPersonProfile(toPersonResponseDTO(view.personProfile()));
-        } else {
-            dto.setPersonProfile(null);
-        }
-        
-        if (view.companyProfile() != null) {
-            dto.setCompanyProfile(toCompanyResponseDTO(view.companyProfile()));
-        } else {
-            dto.setCompanyProfile(null);
-        }
+        dto.setPersonProfile(toPersonResponseDTO(view.personProfile()));
+        dto.setCompanyProfile(toCompanyResponseDTO(view.companyProfile()));
         dto.setCreatedAt(view.createdAt());
-        dto.setUpdatedAt(null); // UserSearchViewDTO não tem updatedAt
+        dto.setUpdatedAt(null);
         return dto;
     }
-
 
     public UserStatusResponseDTO toStatusResponse(UserDetailsViewDTO view, UserStatusEnum previousStatus, String reason) {
         var dto = new UserStatusResponseDTO();
@@ -297,16 +223,12 @@ public class UserAdapterMapper {
         return dto;
     }
 
-
     private boolean canPerformOperations(UserStatusEnum status) {
         return UserStatusEnum.ACTIVE.equals(status) || UserStatusEnum.PENDING.equals(status);
     }
 
-
-
-    private PersonProfile toPersonProfile(PersonRequestDTO request) {
-        return com.keepguard.ms_user.domain.entity.PersonProfile.of(
-            null, // userId será definido pelas strategies
+    private PersonProfileCommandDTO toPersonProfileCommand(PersonRequestDTO request) {
+        return new PersonProfileCommandDTO(
             request.fullName(),
             request.cpf(),
             request.rg(),
@@ -325,77 +247,67 @@ public class UserAdapterMapper {
             request.kycStatus(),
             request.kycLevel(),
             request.occupation(),
-            request.incomeRange(),
-            null, // createdAt será definido pelas strategies
-            null  // updatedAt será definido pelas strategies
+            request.incomeRange()
         );
     }
 
-    private CompanyProfile toCompanyProfile(CompanyRequestDTO request) {
-        return com.keepguard.ms_user.domain.entity.CompanyProfile.of(
-            null, // userId será definido pelas strategies
+    private CompanyProfileCommandDTO toCompanyProfileCommand(CompanyRequestDTO request) {
+        return new CompanyProfileCommandDTO(
             request.companyId(),
             request.legalNameSnapshot(),
             request.cnpjSnapshot(),
             request.stateRegistrationSnapshot(),
             request.municipalRegistrationSnapshot(),
             request.representativeName(),
-            request.representativeCpf(),
-            null, // createdAt será definido pelas strategies
-            null  // updatedAt será definido pelas strategies
+            request.representativeCpf()
         );
     }
 
-    private PersonResponseDTO toPersonResponseDTO(PersonProfile personProfile) {
+    private PersonResponseDTO toPersonResponseDTO(PersonProfileViewDTO personProfile) {
         if (personProfile == null) {
             return null;
         }
-        
         return new PersonResponseDTO(
-            personProfile.getUserId(),
-            personProfile.getFullName(),
-            personProfile.getCpf(),
-            personProfile.getRg(),
-            personProfile.getRgIssuer(),
-            personProfile.getRgState(),
-            personProfile.getDateOfBirth(),
-            personProfile.getGender(),
-            personProfile.getMaritalStatus(),
-            personProfile.getNationality(),
-            personProfile.getBirthCountry(),
-            personProfile.getBirthState(),
-            personProfile.getBirthCity(),
-            personProfile.getMotherName(),
-            personProfile.getFatherName(),
-            personProfile.isPep(),
-            personProfile.getKycStatus(),
-            personProfile.getKycLevel(),
-            personProfile.getOccupation(),
-            personProfile.getIncomeRange(),
-            personProfile.getCreatedAt(),
-            personProfile.getUpdatedAt()
+            personProfile.userId(),
+            personProfile.fullName(),
+            personProfile.cpf(),
+            personProfile.rg(),
+            personProfile.rgIssuer(),
+            personProfile.rgState(),
+            personProfile.dateOfBirth(),
+            personProfile.gender(),
+            personProfile.maritalStatus(),
+            personProfile.nationality(),
+            personProfile.birthCountry(),
+            personProfile.birthState(),
+            personProfile.birthCity(),
+            personProfile.motherName(),
+            personProfile.fatherName(),
+            personProfile.pep(),
+            personProfile.kycStatus(),
+            personProfile.kycLevel(),
+            personProfile.occupation(),
+            personProfile.incomeRange(),
+            personProfile.createdAt(),
+            personProfile.updatedAt()
         );
     }
 
-    /**
-     * Converte CompanyProfile (domínio) para CompanyResponseDTO
-     */
-    private CompanyResponseDTO toCompanyResponseDTO(com.keepguard.ms_user.domain.entity.CompanyProfile companyProfile) {
+    private CompanyResponseDTO toCompanyResponseDTO(CompanyProfileViewDTO companyProfile) {
         if (companyProfile == null) {
             return null;
         }
-        
         return new CompanyResponseDTO(
-            companyProfile.getUserId(),
-            companyProfile.getCompanyId(),
-            companyProfile.getLegalNameSnapshot(),
-            companyProfile.getCnpjSnapshot(),
-            companyProfile.getStateRegistrationSnapshot(),
-            companyProfile.getMunicipalRegistrationSnapshot(),
-            companyProfile.getRepresentativeName(),
-            companyProfile.getRepresentativeCpf(),
-            companyProfile.getCreatedAt(),
-            companyProfile.getUpdatedAt()
+            companyProfile.userId(),
+            companyProfile.companyId(),
+            companyProfile.legalNameSnapshot(),
+            companyProfile.cnpjSnapshot(),
+            companyProfile.stateRegistrationSnapshot(),
+            companyProfile.municipalRegistrationSnapshot(),
+            companyProfile.representativeName(),
+            companyProfile.representativeCpf(),
+            companyProfile.createdAt(),
+            companyProfile.updatedAt()
         );
     }
 }

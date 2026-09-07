@@ -55,8 +55,7 @@ public class UserCommandService {
 
         // Validar se CPF já existe para esta empresa (se informado e for pessoa física)
         if (command.hasProfileData() && command.type() == com.keepguard.ms_user.domain.enums.UserTypeEnum.PERSON) {
-            var personProfile = (com.keepguard.ms_user.domain.entity.PersonProfile) command.getProfileData();
-            assertCpfAvailable(personProfile, command.companyId(), null);
+            assertCpfAvailable(command.personProfile(), command.companyId(), null);
         }
 
         // Criar usuário usando o mapper
@@ -98,7 +97,7 @@ public class UserCommandService {
 
         String fullName = null;
         if (command.personProfile() != null) {
-            fullName = command.personProfile().getFullName();
+            fullName = command.personProfile().fullName();
         }
         String base = DisplayHandleGenerator.baseFrom(fullName, command.email());
         for (int n = 1; n <= 9999; n++) {
@@ -489,7 +488,7 @@ public class UserCommandService {
         var strategy = profileStrategyFactory.getStrategy(user.getType());
 
         if (command.hasProfileData()) {
-            strategy.createProfile(user, command.getProfileData());
+            strategy.createProfile(user, toDomainProfile(command));
             log.info("Perfil {} com sucesso para usuário: {} tipo: {}", 
                     action, user.getId(), user.getType());
         }
@@ -499,7 +498,7 @@ public class UserCommandService {
         var strategy = profileStrategyFactory.getStrategy(user.getType());
 
         if (command.hasProfileData()) {
-            strategy.updateProfile(user.getId(), command.getProfileData());
+            strategy.updateProfile(user.getId(), toDomainProfile(command));
             log.info("Perfil {} com sucesso para usuário: {} tipo: {}", 
                     action, user.getId(), user.getType());
         }
@@ -544,11 +543,29 @@ public class UserCommandService {
         }
     }
 
-    private void assertCpfAvailable(com.keepguard.ms_user.domain.entity.PersonProfile personProfile, UUID companyId, UUID excludeUserId) {
-        if (personProfile == null || personProfile.getCpf() == null || personProfile.getCpf().trim().isEmpty()) {
+    private Object toDomainProfile(ProfileCommandDTO command) {
+        if (command instanceof UserCreateCommandDTO create) {
+            return switch (create.type()) {
+                case PERSON -> userApplicationMapper.toPersonProfile(create.personProfile());
+                case COMPANY -> userApplicationMapper.toCompanyProfile(create.companyProfile());
+            };
+        }
+        if (command instanceof UserUpdateCommandDTO update) {
+            if (update.personProfile().isPresent()) {
+                return userApplicationMapper.toPersonProfile(update.personProfile().get());
+            }
+            if (update.companyProfile().isPresent()) {
+                return userApplicationMapper.toCompanyProfile(update.companyProfile().get());
+            }
+        }
+        return null;
+    }
+
+    private void assertCpfAvailable(com.keepguard.ms_user.application.dto.profile.PersonProfileCommandDTO personProfile, UUID companyId, UUID excludeUserId) {
+        if (personProfile == null || personProfile.cpf() == null || personProfile.cpf().trim().isEmpty()) {
             return;
         }
-        String cleanedCpf = personProfile.getCpf().replaceAll("[^0-9]", "");
+        String cleanedCpf = personProfile.cpf().replaceAll("[^0-9]", "");
         if (personProfileRepositoryPort.existsByCpfAndCompanyId(cleanedCpf, companyId, excludeUserId)) {
             metricsPort.incrementCounter("user_business_errors_total",
                 Map.of("error_code", "CPF_ALREADY_EXISTS", "operation", excludeUserId == null ? "create" : "update"));

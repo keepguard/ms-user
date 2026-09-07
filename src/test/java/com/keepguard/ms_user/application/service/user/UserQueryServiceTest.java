@@ -4,12 +4,13 @@ import com.keepguard.ms_user.application.port.out.metrics.MetricsPort;
 import com.keepguard.ms_user.application.dto.user.*;
 import com.keepguard.ms_user.application.mapper.UserApplicationMapper;
 import com.keepguard.ms_user.application.port.out.cache.UserCachePort;
+import com.keepguard.ms_user.application.port.out.persistence.CompanyProfileRepositoryPort;
+import com.keepguard.ms_user.application.port.out.persistence.PersonProfileRepositoryPort;
 import com.keepguard.ms_user.application.port.out.persistence.UserRepositoryPort;
 import com.keepguard.ms_user.application.service.exception.NotFoundException;
 import com.keepguard.ms_user.domain.entity.PersonProfile;
 import com.keepguard.ms_user.domain.entity.User;
 import com.keepguard.ms_user.domain.entity.UserProfile;
-import com.keepguard.ms_user.infrastructure.persistence.UserRepositoryAdapter;
 import com.keepguard.ms_user.test.builder.UserTestBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,9 +44,12 @@ class UserQueryServiceTest {
     
     @Mock
     private UserApplicationMapper userApplicationMapper;
-    
+
     @Mock
-    private UserRepositoryAdapter userRepositoryAdapter;
+    private PersonProfileRepositoryPort personProfileRepositoryPort;
+
+    @Mock
+    private CompanyProfileRepositoryPort companyProfileRepositoryPort;
     
     @Mock
     private MetricsPort metricsPort;
@@ -59,7 +63,14 @@ class UserQueryServiceTest {
     
     @BeforeEach
     void setUp() {
-        userQueryService = new UserQueryService(userRepositoryPort, userCachePort, userApplicationMapper, userRepositoryAdapter, metricsPort);
+        userQueryService = new UserQueryService(
+            userRepositoryPort,
+            userCachePort,
+            userApplicationMapper,
+            personProfileRepositoryPort,
+            companyProfileRepositoryPort,
+            metricsPort
+        );
         
         // Criar dados de teste
         userId = UUID.randomUUID();
@@ -118,7 +129,7 @@ class UserQueryServiceTest {
         var query = new UserGetByIdQueryDTO(userId, companyId);
         when(userCachePort.getUserByIdFromCache(userId.toString())).thenReturn(null);
         when(userRepositoryPort.findByIdAndCompanyId(userId, companyId)).thenReturn(Optional.of(user));
-        when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
+        when(personProfileRepositoryPort.findByUserId(any(UUID.class))).thenReturn(Optional.of((PersonProfile) personProfile));
         when(userApplicationMapper.toGetByIdView(eq(user), any(UserProfile.class))).thenReturn(userDetailsView);
         
         // When
@@ -129,7 +140,7 @@ class UserQueryServiceTest {
         assertEquals(userId, result.id());
         verify(userCachePort).getUserByIdFromCache(userId.toString());
         verify(userRepositoryPort).findByIdAndCompanyId(userId, companyId);
-        verify(userRepositoryAdapter).findPersonProfileByUserId(any(UUID.class));
+        verify(personProfileRepositoryPort).findByUserId(any(UUID.class));
         verify(userApplicationMapper).toGetByIdView(eq(user), any(UserProfile.class));
         verify(userCachePort).cacheUserById(userId.toString(), userDetailsView);
     }
@@ -178,7 +189,7 @@ class UserQueryServiceTest {
         var query = new UserGetByCodeUserQueryDTO(codeUser, companyId);
         when(userCachePort.getUserByCodeFromCache(codeUser.toString())).thenReturn(null);
         when(userRepositoryPort.findByCodeUserAndCompanyId(codeUser, companyId)).thenReturn(Optional.of(user));
-        when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
+        when(personProfileRepositoryPort.findByUserId(any(UUID.class))).thenReturn(Optional.of((PersonProfile) personProfile));
         when(userApplicationMapper.toByCodeUserView(eq(user), any(UserProfile.class))).thenReturn(userDetailsView);
         
         // When
@@ -189,7 +200,7 @@ class UserQueryServiceTest {
         assertEquals(codeUser, result.codeUser());
         verify(userCachePort).getUserByCodeFromCache(codeUser.toString());
         verify(userRepositoryPort).findByCodeUserAndCompanyId(codeUser, companyId);
-        verify(userRepositoryAdapter).findPersonProfileByUserId(any(UUID.class));
+        verify(personProfileRepositoryPort).findByUserId(any(UUID.class));
         verify(userApplicationMapper).toByCodeUserView(eq(user), any(UserProfile.class));
         verify(userCachePort).cacheUserByCode(codeUser.toString(), userDetailsView);
     }
@@ -214,7 +225,7 @@ class UserQueryServiceTest {
     @DisplayName("Deve buscar usuário por codeUser e tenant sem companyId")
     void shouldGetUserByCodeUserForTenantFromDatabase() {
         when(userRepositoryPort.findByCodeUser(codeUser)).thenReturn(Optional.of(user));
-        when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
+        when(personProfileRepositoryPort.findByUserId(any(UUID.class))).thenReturn(Optional.of((PersonProfile) personProfile));
         when(userApplicationMapper.toByCodeUserView(eq(user), any(UserProfile.class))).thenReturn(userDetailsView);
 
         var result = userQueryService.getByCodeUserForTenant(codeUser, user.getCompanyId());
@@ -267,7 +278,7 @@ class UserQueryServiceTest {
         var query = new UserGetByEmailQueryDTO(email, companyId);
         when(userCachePort.getUserByEmailFromCache(companyId, email)).thenReturn(null);
         when(userRepositoryPort.findByEmailAndCompanyId(email, companyId)).thenReturn(Optional.of(user));
-        when(userRepositoryAdapter.findPersonProfileByUserId(any(UUID.class))).thenReturn(personProfile);
+        when(personProfileRepositoryPort.findByUserId(any(UUID.class))).thenReturn(Optional.of((PersonProfile) personProfile));
         when(userApplicationMapper.toByEmailView(eq(user), any(UserProfile.class))).thenReturn(userDetailsView);
         
         // When
@@ -278,7 +289,7 @@ class UserQueryServiceTest {
         assertEquals(email, result.email());
         verify(userCachePort).getUserByEmailFromCache(companyId, email);
         verify(userRepositoryPort).findByEmailAndCompanyId(email, companyId);
-        verify(userRepositoryAdapter).findPersonProfileByUserId(any(UUID.class));
+        verify(personProfileRepositoryPort).findByUserId(any(UUID.class));
         verify(userApplicationMapper).toByEmailView(eq(user), any(UserProfile.class));
         verify(userCachePort).cacheUserByEmail(eq(companyId), anyString(), eq(userDetailsView));
     }

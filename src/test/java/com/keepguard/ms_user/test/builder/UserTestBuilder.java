@@ -6,8 +6,6 @@ import com.keepguard.ms_user.adapters.in.rest.user.dto.response.UserResponseDTO;
 import com.keepguard.ms_user.application.dto.notify.NotifyViewDTO;
 import com.keepguard.ms_user.application.dto.user.*;
 import com.keepguard.ms_user.domain.entity.User;
-import com.keepguard.ms_user.domain.entity.PersonProfile;
-import com.keepguard.ms_user.domain.entity.CompanyProfile;
 import com.keepguard.ms_user.domain.enums.UserStatusEnum;
 import com.keepguard.ms_user.domain.enums.UserTypeEnum;
 import com.keepguard.ms_user.infrastructure.persistence.entity.UserJpaEntity;
@@ -32,8 +30,6 @@ public class UserTestBuilder {
     private String preferredLocale = "pt-BR";
     private String timezone = "America/Sao_Paulo";
     private String avatarUrl = "https://example.com/avatar.jpg";
-    private PersonProfile personProfile = null;
-    private CompanyProfile companyProfile = null;
     private OffsetDateTime createdAt = OffsetDateTime.now();
     private OffsetDateTime updatedAt = OffsetDateTime.now();
     
@@ -221,8 +217,8 @@ public class UserTestBuilder {
                 type,
                 avatarUrl,
                 null, // displayHandle
-                personProfile,
-                companyProfile,
+                null, // personProfile
+                null, // companyProfile
                 createdAt
         );
     }
