@@ -10,11 +10,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,6 +41,7 @@ class PersonProfileRepositoryAdapterTest {
 
     private UUID userId;
     private UUID companyId;
+    private UUID profileId;
     private PersonProfile personProfile;
     private PersonProfileJpaEntity personProfileEntity;
     private UserJpaEntity userEntity;
@@ -47,28 +50,30 @@ class PersonProfileRepositoryAdapterTest {
     void setUp() {
         userId = UUID.randomUUID();
         companyId = UUID.randomUUID();
+        profileId = UUID.randomUUID();
 
         personProfile = PersonProfile.of(
+                null,
                 userId,
                 "Rafael Soares",
-                null, // cpf
-                null, // rg
-                null, // rgIssuer
-                null, // rgState
-                null, // dateOfBirth
-                null, // gender
-                null, // maritalStatus
-                null, // nationality
-                null, // birthCountry
-                null, // birthState
-                null, // birthCity
-                null, // motherName
-                null, // fatherName
-                false, // pep
-                null, // kycStatus
-                null, // kycLevel
-                null, // occupation
-                null, // incomeRange
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                null,
+                null,
                 OffsetDateTime.now(),
                 OffsetDateTime.now()
         );
@@ -79,6 +84,7 @@ class PersonProfileRepositoryAdapterTest {
                 .build();
 
         personProfileEntity = PersonProfileJpaEntity.builder()
+                .id(profileId)
                 .userId(userId)
                 .fullName("Rafael Soares")
                 .user(userEntity)
@@ -86,20 +92,86 @@ class PersonProfileRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Deve salvar PersonProfile")
-    void shouldSavePersonProfile() {
-        // Given
+    @DisplayName("Deve inserir PersonProfile quando não existe linha para o user")
+    void shouldInsertWhenNoExistingProfile() {
         when(userSpringRepository.getReferenceById(userId)).thenReturn(userEntity);
+        when(springRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(mapper.toEntity(personProfile)).thenReturn(personProfileEntity);
         when(springRepository.save(any(PersonProfileJpaEntity.class))).thenReturn(personProfileEntity);
         when(mapper.toDomain(personProfileEntity)).thenReturn(personProfile);
 
-        // When
         PersonProfile saved = adapter.save(personProfile);
 
-        // Then
         assertThat(saved).isNotNull();
-        verify(springRepository).save(any(PersonProfileJpaEntity.class));
+        verify(mapper).toEntity(personProfile);
+        verify(mapper, never()).applyToExisting(any(), any());
+        verify(springRepository).save(personProfileEntity);
+    }
+
+    @Test
+    @DisplayName("Deve atualizar PersonProfile existente quando id está carregado")
+    void shouldUpdateWhenIdPresent() {
+        PersonProfile withId = PersonProfile.of(
+                profileId,
+                userId,
+                "Rafael Atualizado",
+                "39053344705",
+                null, null, null, null, null, null, null, null, null, null, null, null,
+                false, null, null, null, null,
+                OffsetDateTime.now(), OffsetDateTime.now()
+        );
+        PersonProfileJpaEntity managed = PersonProfileJpaEntity.builder()
+                .id(profileId)
+                .userId(userId)
+                .fullName("Rafael Soares")
+                .user(userEntity)
+                .build();
+
+        when(userSpringRepository.getReferenceById(userId)).thenReturn(userEntity);
+        when(springRepository.findById(profileId)).thenReturn(Optional.of(managed));
+        when(springRepository.save(managed)).thenReturn(managed);
+        when(mapper.toDomain(managed)).thenReturn(withId);
+
+        PersonProfile saved = adapter.save(withId);
+
+        assertThat(saved.getId()).isEqualTo(profileId);
+        verify(mapper).applyToExisting(withId, managed);
+        verify(mapper, never()).toEntity(any());
+        ArgumentCaptor<PersonProfileJpaEntity> captor = ArgumentCaptor.forClass(PersonProfileJpaEntity.class);
+        verify(springRepository).save(captor.capture());
+        assertThat(captor.getValue().getId()).isEqualTo(profileId);
+        verify(springRepository, never()).findByUserId(any());
+    }
+
+    @Test
+    @DisplayName("Deve fazer merge por user_id quando id é null mas perfil já existe")
+    void shouldMergeByUserIdWhenIdNull() {
+        PersonProfileJpaEntity managed = PersonProfileJpaEntity.builder()
+                .id(profileId)
+                .userId(userId)
+                .fullName("Rafael Soares")
+                .user(userEntity)
+                .build();
+        PersonProfile mergedDomain = PersonProfile.of(
+                profileId, userId, "Rafael Soares", "39053344705",
+                null, null, null, null, null, null, null, null, null, null, null, null,
+                false, null, null, null, null,
+                OffsetDateTime.now(), OffsetDateTime.now()
+        );
+
+        when(userSpringRepository.getReferenceById(userId)).thenReturn(userEntity);
+        when(springRepository.findByUserId(userId)).thenReturn(Optional.of(managed));
+        when(springRepository.save(managed)).thenReturn(managed);
+        when(mapper.toDomain(managed)).thenReturn(mergedDomain);
+
+        PersonProfile saved = adapter.save(personProfile);
+
+        assertThat(saved.getId()).isEqualTo(profileId);
+        verify(mapper).applyToExisting(personProfile, managed);
+        verify(mapper, never()).toEntity(any());
+        ArgumentCaptor<PersonProfileJpaEntity> captor = ArgumentCaptor.forClass(PersonProfileJpaEntity.class);
+        verify(springRepository).save(captor.capture());
+        assertThat(captor.getValue().getId()).isEqualTo(profileId);
     }
 
     @Test

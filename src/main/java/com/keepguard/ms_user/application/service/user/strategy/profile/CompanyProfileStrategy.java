@@ -34,6 +34,7 @@ public class CompanyProfileStrategy implements ProfileStrategy {
 
         // Criar novo CompanyProfile com o userId correto
         var newCompanyProfile = CompanyProfile.of(
+            null,
             user.getId(),
             companyProfile.getCompanyId(),
             companyProfile.getLegalNameSnapshot(),

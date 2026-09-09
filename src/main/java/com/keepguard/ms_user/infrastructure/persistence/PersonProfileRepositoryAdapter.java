@@ -2,6 +2,7 @@ package com.keepguard.ms_user.infrastructure.persistence;
 
 import com.keepguard.ms_user.application.port.out.persistence.PersonProfileRepositoryPort;
 import com.keepguard.ms_user.domain.entity.PersonProfile;
+import com.keepguard.ms_user.infrastructure.persistence.entity.PersonProfileJpaEntity;
 import com.keepguard.ms_user.infrastructure.persistence.mapper.PersonProfileJpaMapper;
 import com.keepguard.ms_user.infrastructure.persistence.spring.PersonProfileSpringRepository;
 import com.keepguard.ms_user.infrastructure.persistence.spring.UserSpringRepository;
@@ -32,21 +33,31 @@ public class PersonProfileRepositoryAdapter implements PersonProfileRepositoryPo
             throw new IllegalArgumentException("userId não pode ser null ao salvar PersonProfile");
         }
 
-        // 🔑 Pega uma referência gerenciada sem SELECT completo
         var userRef = userSpringRepository.getReferenceById(personProfile.getUserId());
-
-        var entity = mapper.toEntity(personProfile);
-
-        // 🔒 Define a associação antes de salvar
+        var existing = findExisting(personProfile);
+        PersonProfileJpaEntity entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            mapper.applyToExisting(personProfile, entity);
+        } else {
+            entity = mapper.toEntity(personProfile);
+        }
         entity.setUser(userRef);
-
-        // Opcional: sanity checks (úteis durante estabilização)
         if (entity.getUser() == null) {
             throw new IllegalStateException("User não foi definido na entidade PersonProfile");
         }
 
-        var saved = springRepository.save(entity);
-        return mapper.toDomain(saved);
+        return mapper.toDomain(springRepository.save(entity));
+    }
+
+    private Optional<PersonProfileJpaEntity> findExisting(PersonProfile personProfile) {
+        if (personProfile.getId() != null) {
+            var byId = springRepository.findById(personProfile.getId());
+            if (byId.isPresent()) {
+                return byId;
+            }
+        }
+        return springRepository.findByUserId(personProfile.getUserId());
     }
 
     @Override

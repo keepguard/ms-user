@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -167,7 +168,16 @@ class UserCommandServiceTest {
     @DisplayName("Deve gravar CPF na primeira escrita")
     void shouldFirstWriteCpfOnPersonDocument() {
         User person = UserTestBuilder.builder().asPerson().asActive().buildDomainWithId();
-        PersonProfile profile = PersonProfile.create(person.getId(), "Nome Completo", null, null);
+        UUID profileId = UUID.randomUUID();
+        PersonProfile profile = PersonProfile.of(
+                profileId,
+                person.getId(),
+                "Nome Completo",
+                null,
+                null, null, null, null, null, null, null, null, null, null, null, null,
+                false, null, null, null, null,
+                java.time.OffsetDateTime.now(),
+                java.time.OffsetDateTime.now());
         UserPatchPersonDocumentCommandDTO command = new UserPatchPersonDocumentCommandDTO(
                 person.getId(), person.getCompanyId(), VALID_CPF);
 
@@ -182,8 +192,10 @@ class UserCommandServiceTest {
         UserDetailsViewDTO result = userCommandService.patchPersonDocument(command);
 
         assertThat(result).isEqualTo(detailsView);
+        assertThat(profile.getId()).isEqualTo(profileId);
         assertThat(profile.getCpf()).isEqualTo(VALID_CPF);
         verify(personProfileRepositoryPort).save(profile);
+        verify(personProfileRepositoryPort, times(1)).save(any(PersonProfile.class));
         verify(userCachePort).removeUserFromCache(person);
     }
 

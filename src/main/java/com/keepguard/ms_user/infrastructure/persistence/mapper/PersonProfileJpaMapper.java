@@ -13,6 +13,7 @@ public class PersonProfileJpaMapper {
         }
 
         return PersonProfile.of(
+            entity.getId(),
             entity.getUserId(),
             entity.getFullName(),
             entity.getCpf(),
@@ -44,7 +45,8 @@ public class PersonProfileJpaMapper {
         }
 
         return PersonProfileJpaEntity.builder()
-            .userId(domain.getUserId()) // opcional com @MapsId, mas OK
+            .id(domain.getId())
+            .userId(domain.getUserId())
             .fullName(domain.getFullName())
             .cpf(domain.getCpf())
             .rg(domain.getRg())
@@ -67,5 +69,28 @@ public class PersonProfileJpaMapper {
             .createdAt(domain.getCreatedAt())
             .updatedAt(domain.getUpdatedAt())
             .build();
+    }
+
+    public void applyToExisting(PersonProfile domain, PersonProfileJpaEntity existing) {
+        existing.setFullName(domain.getFullName());
+        existing.setCpf(domain.getCpf());
+        existing.setRg(domain.getRg());
+        existing.setRgIssuer(domain.getRgIssuer());
+        existing.setRgState(domain.getRgState());
+        existing.setDateOfBirth(domain.getDateOfBirth());
+        existing.setGender(domain.getGender());
+        existing.setMaritalStatus(domain.getMaritalStatus());
+        existing.setNationality(domain.getNationality());
+        existing.setBirthCountry(domain.getBirthCountry());
+        existing.setBirthState(domain.getBirthState());
+        existing.setBirthCity(domain.getBirthCity());
+        existing.setMotherName(domain.getMotherName());
+        existing.setFatherName(domain.getFatherName());
+        existing.setPep(domain.isPep());
+        existing.setKycStatus(domain.getKycStatus());
+        existing.setKycLevel(domain.getKycLevel());
+        existing.setOccupation(domain.getOccupation());
+        existing.setIncomeRange(domain.getIncomeRange());
+        existing.setUpdatedAt(domain.getUpdatedAt());
     }
 }

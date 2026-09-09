@@ -30,21 +30,35 @@ public class CompanyProfileRepositoryAdapter implements CompanyProfileRepository
 
     @Override
     public CompanyProfile save(CompanyProfile companyProfile) {
-        var entity = mapper.toEntity(companyProfile);
-
-        // Garante que a associação com User está correta
-        if (companyProfile.getUserId() != null) {
-            var userRef = userSpringRepository.getReferenceById(companyProfile.getUserId());
-            entity.setUser(userRef);
+        if (companyProfile.getUserId() == null) {
+            throw new IllegalArgumentException("userId não pode ser null ao salvar CompanyProfile");
         }
 
-        // Sanity check
+        var userRef = userSpringRepository.getReferenceById(companyProfile.getUserId());
+        var existing = findExisting(companyProfile);
+        CompanyProfileJpaEntity entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            mapper.applyToExisting(companyProfile, entity);
+        } else {
+            entity = mapper.toEntity(companyProfile);
+        }
+        entity.setUser(userRef);
         if (entity.getUser() == null) {
             throw new IllegalStateException("CompanyProfile deve ter um User associado");
         }
 
-        var savedEntity = springRepository.save(entity);
-        return mapper.toDomain(savedEntity);
+        return mapper.toDomain(springRepository.save(entity));
+    }
+
+    private Optional<CompanyProfileJpaEntity> findExisting(CompanyProfile companyProfile) {
+        if (companyProfile.getId() != null) {
+            var byId = springRepository.findById(companyProfile.getId());
+            if (byId.isPresent()) {
+                return byId;
+            }
+        }
+        return springRepository.findByUserId(companyProfile.getUserId());
     }
 
     @Override

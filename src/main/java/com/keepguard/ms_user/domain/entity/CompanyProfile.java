@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public final class CompanyProfile implements UserProfile {
 
+    private final UUID id;
     private final UUID userId;
     private UUID companyId; // Referência lógica ao ms-company
     private String legalNameSnapshot;
@@ -22,11 +23,12 @@ public final class CompanyProfile implements UserProfile {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
-    private CompanyProfile(UUID userId, UUID companyId, String legalNameSnapshot, String cnpjSnapshot,
+    private CompanyProfile(UUID id, UUID userId, UUID companyId, String legalNameSnapshot, String cnpjSnapshot,
                          String stateRegistrationSnapshot, String municipalRegistrationSnapshot,
                          String representativeName, String representativeCpf,
                          OffsetDateTime createdAt, OffsetDateTime updatedAt) {
-        this.userId = userId; // Será definido posteriormente pelas strategies
+        this.id = id;
+        this.userId = userId;
         this.companyId = Objects.requireNonNull(companyId, "companyId é obrigatório");
         this.legalNameSnapshot = legalNameSnapshot;
         this.cnpjSnapshot = validateCnpj(cnpjSnapshot);
@@ -41,6 +43,7 @@ public final class CompanyProfile implements UserProfile {
     // Construtor para desserialização Jackson
     @JsonCreator
     private CompanyProfile(
+            @JsonProperty("id") UUID id,
             @JsonProperty("userId") UUID userId,
             @JsonProperty("companyId") UUID companyId,
             @JsonProperty("legalNameSnapshot") String legalNameSnapshot,
@@ -54,6 +57,7 @@ public final class CompanyProfile implements UserProfile {
             @JsonProperty("formattedCnpj") String ignoredFormattedCnpj,
             @JsonProperty("formattedRepresentativeCpf") String ignoredFormattedRepresentativeCpf
     ) {
+        this.id = id;
         this.userId = userId;
         this.companyId = companyId;
         this.legalNameSnapshot = legalNameSnapshot;
@@ -67,15 +71,15 @@ public final class CompanyProfile implements UserProfile {
     }
 
     public static CompanyProfile create(UUID userId, UUID companyId) {
-        return new CompanyProfile(userId, companyId, null, null, null, null, null, null,
+        return new CompanyProfile(null, userId, companyId, null, null, null, null, null, null,
                 OffsetDateTime.now(), OffsetDateTime.now());
     }
 
-    public static CompanyProfile of(UUID userId, UUID companyId, String legalNameSnapshot, String cnpjSnapshot,
+    public static CompanyProfile of(UUID id, UUID userId, UUID companyId, String legalNameSnapshot, String cnpjSnapshot,
                                   String stateRegistrationSnapshot, String municipalRegistrationSnapshot,
                                   String representativeName, String representativeCpf,
                                   OffsetDateTime createdAt, OffsetDateTime updatedAt) {
-        return new CompanyProfile(userId, companyId, legalNameSnapshot, cnpjSnapshot,
+        return new CompanyProfile(id, userId, companyId, legalNameSnapshot, cnpjSnapshot,
                 stateRegistrationSnapshot, municipalRegistrationSnapshot, representativeName, representativeCpf,
                 createdAt, updatedAt);
     }
@@ -103,6 +107,7 @@ public final class CompanyProfile implements UserProfile {
     }
 
     // Getters
+    public UUID getId() { return id; }
     public UUID getUserId() { return userId; }
     public UUID getCompanyId() { return companyId; }
     public String getLegalNameSnapshot() { return legalNameSnapshot; }
@@ -197,7 +202,8 @@ public final class CompanyProfile implements UserProfile {
     @Override
     public String toString() {
         return "CompanyProfile{" +
-                "userId=" + userId +
+                "id=" + id +
+                ", userId=" + userId +
                 ", companyId=" + companyId +
                 ", legalNameSnapshot='" + legalNameSnapshot + '\'' +
                 ", cnpjSnapshot='" + cnpjSnapshot + '\'' +

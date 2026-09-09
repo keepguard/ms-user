@@ -16,6 +16,7 @@ import java.util.UUID;
 
 public final class PersonProfile implements UserProfile {
 
+    private final UUID id;
     private final UUID userId;
     private String fullName;
     private String cpf;
@@ -39,12 +40,13 @@ public final class PersonProfile implements UserProfile {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
-    private PersonProfile(UUID userId, String fullName, String cpf, String rg, String rgIssuer, String rgState,
+    private PersonProfile(UUID id, UUID userId, String fullName, String cpf, String rg, String rgIssuer, String rgState,
                         LocalDate dateOfBirth, GenderEnum gender, MaritalStatusEnum maritalStatus,
                         String nationality, String birthCountry, String birthState, String birthCity,
                         String motherName, String fatherName, boolean pep, KycStatusEnum kycStatus,
                         KycLevelEnum kycLevel, String occupation, IncomeRangeEnum incomeRange,
                         OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+        this.id = id;
         this.userId = userId;
         this.fullName = validateFullName(fullName);
         this.cpf = validateCpf(cpf);
@@ -72,6 +74,7 @@ public final class PersonProfile implements UserProfile {
     // Construtor para desserialização Jackson
     @JsonCreator
     private PersonProfile(
+            @JsonProperty("id") UUID id,
             @JsonProperty("userId") UUID userId,
             @JsonProperty("fullName") String fullName,
             @JsonProperty("cpf") String cpf,
@@ -98,6 +101,7 @@ public final class PersonProfile implements UserProfile {
             @JsonProperty("ofLegalAge") Boolean ignoredOfLegalAge,
             @JsonProperty("formattedCpf") String ignoredFormattedCpf
     ) {
+        this.id = id;
         this.userId = userId;
         this.fullName = fullName;
         this.cpf = cpf;
@@ -123,19 +127,19 @@ public final class PersonProfile implements UserProfile {
     }
 
     public static PersonProfile create(UUID userId, String fullName, String cpf, LocalDate dateOfBirth) {
-        return new PersonProfile(userId, fullName, cpf, null, null, null, dateOfBirth,
+        return new PersonProfile(null, userId, fullName, cpf, null, null, null, dateOfBirth,
                 null, null, null, null, null, null, null, null, false,
                 KycStatusEnum.NOT_STARTED, KycLevelEnum.BASIC, null, null,
                 OffsetDateTime.now(), OffsetDateTime.now());
     }
 
-    public static PersonProfile of(UUID userId, String fullName, String cpf, String rg, String rgIssuer, String rgState,
+    public static PersonProfile of(UUID id, UUID userId, String fullName, String cpf, String rg, String rgIssuer, String rgState,
                                  LocalDate dateOfBirth, GenderEnum gender, MaritalStatusEnum maritalStatus,
                                  String nationality, String birthCountry, String birthState, String birthCity,
                                  String motherName, String fatherName, boolean pep, KycStatusEnum kycStatus,
                                  KycLevelEnum kycLevel, String occupation, IncomeRangeEnum incomeRange,
                                  OffsetDateTime createdAt, OffsetDateTime updatedAt) {
-        return new PersonProfile(userId, fullName, cpf, rg, rgIssuer, rgState, dateOfBirth,
+        return new PersonProfile(id, userId, fullName, cpf, rg, rgIssuer, rgState, dateOfBirth,
                 gender, maritalStatus, nationality, birthCountry, birthState, birthCity,
                 motherName, fatherName, pep, kycStatus, kycLevel, occupation, incomeRange,
                 createdAt, updatedAt);
@@ -185,6 +189,7 @@ public final class PersonProfile implements UserProfile {
     }
 
     // Getters
+    public UUID getId() { return id; }
     public UUID getUserId() { return userId; }
     public String getFullName() { return fullName; }
     public String getCpf() { return cpf; }
@@ -344,7 +349,8 @@ public final class PersonProfile implements UserProfile {
     @Override
     public String toString() {
         return "PersonProfile{" +
-                "userId=" + userId +
+                "id=" + id +
+                ", userId=" + userId +
                 ", fullName='" + fullName + '\'' +
                 ", cpf='" + cpf + '\'' +
                 ", dateOfBirth=" + dateOfBirth +

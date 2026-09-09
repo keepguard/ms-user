@@ -46,6 +46,7 @@ public class UserApplicationMapper {
         }
         return PersonProfile.of(
             null,
+            null,
             command.fullName(),
             command.cpf(),
             command.rg(),
@@ -75,6 +76,7 @@ public class UserApplicationMapper {
             return null;
         }
         return CompanyProfile.of(
+            null,
             null,
             command.companyId(),
             command.legalNameSnapshot(),

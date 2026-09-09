@@ -18,7 +18,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_person_profile")
+@Table(
+        name = "user_person_profile",
+        uniqueConstraints = @UniqueConstraint(name = "uk_user_person_profile_user_id", columnNames = "user_id")
+)
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor

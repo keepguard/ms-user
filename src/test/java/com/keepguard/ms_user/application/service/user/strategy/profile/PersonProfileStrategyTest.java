@@ -60,6 +60,7 @@ class PersonProfileStrategyTest {
         );
 
         personProfile = PersonProfile.of(
+                null,
                 userId,
                 "Rafael Soares",
                 null, // cpf
@@ -110,6 +111,7 @@ class PersonProfileStrategyTest {
     void shouldAcceptPersonProfileWithoutDisplayHandle() {
         // Given
         PersonProfile profileWithoutHandle = PersonProfile.of(
+                null,
                 userId,
                 "Rafael Soares",
                 null, // cpf

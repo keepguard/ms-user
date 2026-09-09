@@ -39,6 +39,7 @@ public class PersonProfileStrategy implements ProfileStrategy {
             // Criar novo PersonProfile com o userId correto
             var now = OffsetDateTime.now();
             var newPersonProfile = PersonProfile.of(
+                null,
                 user.getId(),
                 personProfile.getFullName(),
                 personProfile.getCpf(),

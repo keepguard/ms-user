@@ -13,6 +13,7 @@ public class CompanyProfileJpaMapper {
         }
 
         return CompanyProfile.of(
+            entity.getId(),
             entity.getUserId(),
             entity.getCompanyId(),
             entity.getLegalNameSnapshot(),
@@ -31,8 +32,8 @@ public class CompanyProfileJpaMapper {
             return null;
         }
 
-        // Mapper não seta relacionamento - responsabilidade do Adapter
         return CompanyProfileJpaEntity.builder()
+            .id(domain.getId())
             .userId(domain.getUserId())
             .companyId(domain.getCompanyId())
             .legalNameSnapshot(domain.getLegalNameSnapshot())
@@ -44,5 +45,16 @@ public class CompanyProfileJpaMapper {
             .createdAt(domain.getCreatedAt())
             .updatedAt(domain.getUpdatedAt())
             .build();
+    }
+
+    public void applyToExisting(CompanyProfile domain, CompanyProfileJpaEntity existing) {
+        existing.setCompanyId(domain.getCompanyId());
+        existing.setLegalNameSnapshot(domain.getLegalNameSnapshot());
+        existing.setCnpjSnapshot(domain.getCnpjSnapshot());
+        existing.setStateRegistrationSnapshot(domain.getStateRegistrationSnapshot());
+        existing.setMunicipalRegistrationSnapshot(domain.getMunicipalRegistrationSnapshot());
+        existing.setRepresentativeName(domain.getRepresentativeName());
+        existing.setRepresentativeCpf(domain.getRepresentativeCpf());
+        existing.setUpdatedAt(domain.getUpdatedAt());
     }
 }
