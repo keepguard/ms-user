@@ -31,6 +31,11 @@ public class UserUseCaseService implements UserPort {
     }
 
     @Override
+    public UserDetailsViewDTO patchPersonDocument(UserPatchPersonDocumentCommandDTO command) {
+        return userCommandService.patchPersonDocument(command);
+    }
+
+    @Override
     public void delete(UserDeleteCommandDTO command) {
         userCommandService.delete(command);
     }

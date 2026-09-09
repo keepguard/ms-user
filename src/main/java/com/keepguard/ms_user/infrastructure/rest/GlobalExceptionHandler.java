@@ -8,6 +8,7 @@ import com.keepguard.ms_user.application.service.exception.AlreadyExistsExceptio
 import com.keepguard.ms_user.application.service.exception.NotFoundException;
 import com.keepguard.ms_user.application.service.exception.CommandOperationException;
 import com.keepguard.ms_user.application.service.exception.QueryOperationException;
+import com.keepguard.ms_user.application.service.exception.UnprocessableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,9 +53,25 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.CONFLICT.value());
         body.put("error", "Conflict");
         body.put("message", ex.getMessage());
+        body.put("errorCode", ex.getErrorCode());
         body.put("path", getCurrentPath());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(UnprocessableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnprocessableException(UnprocessableException ex) {
+        log.warn("Dados não processáveis: {}", ex.getMessage());
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        body.put("error", "Unprocessable Entity");
+        body.put("message", ex.getMessage());
+        body.put("errorCode", ex.getErrorCode());
+        body.put("path", getCurrentPath());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
     }
 
     @ExceptionHandler(ValidationException.class)

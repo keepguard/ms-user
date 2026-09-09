@@ -119,6 +119,23 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/users/{id}/person-document")
+    @PublicEndpoint("Endpoint interno para first-write de CPF (BFF / ClusterIP)")
+    @Operation(summary = "Gravar CPF (first-write)", description = "Define o CPF do perfil de pessoa física uma única vez")
+    @MetricsEndpoint(endpoint = "user_patch_person_document")
+    public ResponseEntity<UserResponseDTO> patchPersonDocument(
+            @PathVariable UUID id,
+            @Valid @RequestBody PersonDocumentPatchRequestDTO request,
+            @Parameter(description = "UUID da empresa", required = true)
+            @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
+
+        log.info("Atualizando documento da pessoa: application={}, id={}", companyId, id);
+        var command = mapper.toPatchPersonDocumentCommand(request, id, companyId);
+        var view = userPort.patchPersonDocument(command);
+        var response = mapper.toResponseDTO(view);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/users/{id}")
     @PublicEndpoint("Endpoint público para deleção de usuários (compensação de SAGA)")
     @Operation(summary = "Deletar usuário", description = "Remove um usuário do sistema")

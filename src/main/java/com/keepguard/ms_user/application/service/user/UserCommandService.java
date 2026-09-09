@@ -10,6 +10,7 @@ import com.keepguard.ms_user.application.port.out.persistence.UserRepositoryPort
 import com.keepguard.ms_user.application.service.user.strategy.profile.ProfileStrategyFactory;
 import com.keepguard.ms_user.application.service.exception.AlreadyExistsException;
 import com.keepguard.ms_user.application.service.exception.NotFoundException;
+import com.keepguard.ms_user.application.service.exception.UnprocessableException;
 import com.keepguard.ms_user.domain.entity.User;
 import com.keepguard.ms_user.domain.enums.UserStatusEnum;
 import com.keepguard.ms_user.domain.util.DisplayHandleGenerator;
@@ -202,6 +203,67 @@ public class UserCommandService {
 
         log.info("Usuário atualizado com sucesso: {} - {}", userSaved.getId(), userSaved.getEmail());
         return userView;
+    }
+
+    @LogOperation(
+        operation = "UPDATE_USER",
+        description = "Atualizando documento da pessoa",
+        audit = true,
+        auditAction = "UPDATE",
+        auditEntityType = "USER"
+    )
+    @Transactional
+    public UserDetailsViewDTO patchPersonDocument(UserPatchPersonDocumentCommandDTO command) {
+        log.info("Atualizando documento da pessoa: id={}, companyId={}", command.id(), command.companyId());
+
+        var user = userRepositoryPort.findByIdAndCompanyId(command.id(), command.companyId())
+                .orElseThrow(() -> new NotFoundException(
+                        "Usuário não encontrado: " + command.id(),
+                        "USER_NOT_FOUND",
+                        Map.of("userId", command.id())));
+
+        var profile = personProfileRepositoryPort.findByUserId(user.getId())
+                .orElseThrow(() -> new NotFoundException(
+                        "Usuário não encontrado: " + command.id(),
+                        "USER_NOT_FOUND",
+                        Map.of("userId", command.id())));
+
+        String existingCpf = profile.getCpf() == null ? "" : profile.getCpf().replaceAll("[^0-9]", "");
+        if (existingCpf.length() == 11) {
+            metricsPort.incrementCounter("user_business_errors_total",
+                    Map.of("error_code", "PAYER_DOCUMENT_IMMUTABLE", "operation", "patch_person_document"));
+            throw new AlreadyExistsException(
+                    "Documento do pagador já está cadastrado",
+                    "PAYER_DOCUMENT_IMMUTABLE",
+                    Map.of("userId", user.getId().toString()));
+        }
+
+        try {
+            profile.setCpf(command.cpf());
+        } catch (ValidationException ex) {
+            throw new UnprocessableException(
+                    ex.getMessage(),
+                    "PAYER_DOCUMENT_INVALID",
+                    Map.of("userId", user.getId().toString()));
+        }
+
+        String cleanedCpf = profile.getCpf() == null ? "" : profile.getCpf();
+        if (cleanedCpf.length() != 11) {
+            throw new UnprocessableException(
+                    "CPF deve conter exatamente 11 dígitos",
+                    "PAYER_DOCUMENT_INVALID",
+                    Map.of("userId", user.getId().toString()));
+        }
+
+        assertCpfAvailable(cleanedCpf, user.getCompanyId(), user.getId());
+        personProfileRepositoryPort.save(profile);
+        userCachePort.removeUserFromCache(user);
+
+        metricsPort.incrementCounter("user_updated_total",
+                Map.of("entity_id", user.getId().toString()));
+
+        log.info("Documento da pessoa atualizado: {}", user.getId());
+        return userApplicationMapper.toDetailsView(user, profile);
     }
 
     @LogOperation(
@@ -562,10 +624,17 @@ public class UserCommandService {
     }
 
     private void assertCpfAvailable(com.keepguard.ms_user.application.dto.profile.PersonProfileCommandDTO personProfile, UUID companyId, UUID excludeUserId) {
-        if (personProfile == null || personProfile.cpf() == null || personProfile.cpf().trim().isEmpty()) {
+        if (personProfile == null) {
             return;
         }
-        String cleanedCpf = personProfile.cpf().replaceAll("[^0-9]", "");
+        assertCpfAvailable(personProfile.cpf(), companyId, excludeUserId);
+    }
+
+    private void assertCpfAvailable(String cpf, UUID companyId, UUID excludeUserId) {
+        if (cpf == null || cpf.trim().isEmpty()) {
+            return;
+        }
+        String cleanedCpf = cpf.replaceAll("[^0-9]", "");
         if (personProfileRepositoryPort.existsByCpfAndCompanyId(cleanedCpf, companyId, excludeUserId)) {
             metricsPort.incrementCounter("user_business_errors_total",
                 Map.of("error_code", "CPF_ALREADY_EXISTS", "operation", excludeUserId == null ? "create" : "update"));

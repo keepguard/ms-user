@@ -112,6 +112,11 @@ public class UserAdapterMapper {
         return new UserDeleteCommandDTO(id, companyId);
     }
 
+    public UserPatchPersonDocumentCommandDTO toPatchPersonDocumentCommand(
+            PersonDocumentPatchRequestDTO request, UUID id, UUID companyId) {
+        return new UserPatchPersonDocumentCommandDTO(id, companyId, request.cpf());
+    }
+
     public UserStatusChangeCommandDTO toStatusChangeCommand(UUID id, String reason, UUID companyId) {
         return new UserStatusChangeCommandDTO(id, companyId, reason);
     }

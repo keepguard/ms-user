@@ -2,6 +2,7 @@ package com.keepguard.ms_user.application.service.user;
 
 import com.keepguard.ms_user.application.dto.user.UserCreateCommandDTO;
 import com.keepguard.ms_user.application.dto.user.UserDetailsViewDTO;
+import com.keepguard.ms_user.application.dto.user.UserPatchPersonDocumentCommandDTO;
 import com.keepguard.ms_user.application.dto.user.UserUpdateCommandDTO;
 import com.keepguard.ms_user.application.mapper.UserApplicationMapper;
 import com.keepguard.ms_user.application.port.out.cache.UserCachePort;
@@ -9,8 +10,11 @@ import com.keepguard.ms_user.application.port.out.metrics.MetricsPort;
 import com.keepguard.ms_user.application.port.out.persistence.PersonProfileRepositoryPort;
 import com.keepguard.ms_user.application.port.out.persistence.UserRepositoryPort;
 import com.keepguard.ms_user.application.service.exception.AlreadyExistsException;
+import com.keepguard.ms_user.application.service.exception.NotFoundException;
+import com.keepguard.ms_user.application.service.exception.UnprocessableException;
 import com.keepguard.ms_user.application.service.user.strategy.profile.ProfileStrategy;
 import com.keepguard.ms_user.application.service.user.strategy.profile.ProfileStrategyFactory;
+import com.keepguard.ms_user.domain.entity.PersonProfile;
 import com.keepguard.ms_user.domain.entity.User;
 import com.keepguard.ms_user.test.builder.UserTestBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -158,6 +162,115 @@ class UserCommandServiceTest {
         verify(userRepositoryPort, never()).existsByPhoneE164AndCompanyId(anyString(), any(), any());
         verify(userRepositoryPort).save(user);
     }
+
+    @Test
+    @DisplayName("Deve gravar CPF na primeira escrita")
+    void shouldFirstWriteCpfOnPersonDocument() {
+        User person = UserTestBuilder.builder().asPerson().asActive().buildDomainWithId();
+        PersonProfile profile = PersonProfile.create(person.getId(), "Nome Completo", null, null);
+        UserPatchPersonDocumentCommandDTO command = new UserPatchPersonDocumentCommandDTO(
+                person.getId(), person.getCompanyId(), VALID_CPF);
+
+        when(userRepositoryPort.findByIdAndCompanyId(person.getId(), person.getCompanyId()))
+                .thenReturn(Optional.of(person));
+        when(personProfileRepositoryPort.findByUserId(person.getId())).thenReturn(Optional.of(profile));
+        when(personProfileRepositoryPort.existsByCpfAndCompanyId(VALID_CPF, person.getCompanyId(), person.getId()))
+                .thenReturn(false);
+        when(personProfileRepositoryPort.save(profile)).thenReturn(profile);
+        when(userApplicationMapper.toDetailsView(person, profile)).thenReturn(detailsView);
+
+        UserDetailsViewDTO result = userCommandService.patchPersonDocument(command);
+
+        assertThat(result).isEqualTo(detailsView);
+        assertThat(profile.getCpf()).isEqualTo(VALID_CPF);
+        verify(personProfileRepositoryPort).save(profile);
+        verify(userCachePort).removeUserFromCache(person);
+    }
+
+    @Test
+    @DisplayName("Deve recusar troca de CPF já gravado")
+    void shouldRejectImmutablePersonDocument() {
+        User person = UserTestBuilder.builder().asPerson().asActive().buildDomainWithId();
+        PersonProfile profile = PersonProfile.create(person.getId(), "Nome Completo", VALID_CPF, null);
+        UserPatchPersonDocumentCommandDTO command = new UserPatchPersonDocumentCommandDTO(
+                person.getId(), person.getCompanyId(), "39053344705");
+
+        when(userRepositoryPort.findByIdAndCompanyId(person.getId(), person.getCompanyId()))
+                .thenReturn(Optional.of(person));
+        when(personProfileRepositoryPort.findByUserId(person.getId())).thenReturn(Optional.of(profile));
+
+        assertThatThrownBy(() -> userCommandService.patchPersonDocument(command))
+                .isInstanceOf(AlreadyExistsException.class)
+                .extracting("errorCode")
+                .isEqualTo("PAYER_DOCUMENT_IMMUTABLE");
+
+        verify(personProfileRepositoryPort, never()).save(any());
+        verify(userCachePort, never()).removeUserFromCache(any());
+    }
+
+    @Test
+    @DisplayName("Deve recusar CPF já usado por outro usuário da company")
+    void shouldRejectCpfAlreadyUsedInCompany() {
+        User person = UserTestBuilder.builder().asPerson().asActive().buildDomainWithId();
+        PersonProfile profile = PersonProfile.create(person.getId(), "Nome Completo", null, null);
+        UserPatchPersonDocumentCommandDTO command = new UserPatchPersonDocumentCommandDTO(
+                person.getId(), person.getCompanyId(), VALID_CPF);
+
+        when(userRepositoryPort.findByIdAndCompanyId(person.getId(), person.getCompanyId()))
+                .thenReturn(Optional.of(person));
+        when(personProfileRepositoryPort.findByUserId(person.getId())).thenReturn(Optional.of(profile));
+        when(personProfileRepositoryPort.existsByCpfAndCompanyId(VALID_CPF, person.getCompanyId(), person.getId()))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> userCommandService.patchPersonDocument(command))
+                .isInstanceOf(AlreadyExistsException.class)
+                .extracting("errorCode")
+                .isEqualTo("CPF_ALREADY_EXISTS");
+
+        verify(personProfileRepositoryPort, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve recusar CPF com checksum inválido")
+    void shouldRejectInvalidCpfChecksum() {
+        User person = UserTestBuilder.builder().asPerson().asActive().buildDomainWithId();
+        PersonProfile profile = PersonProfile.create(person.getId(), "Nome Completo", null, null);
+        UserPatchPersonDocumentCommandDTO command = new UserPatchPersonDocumentCommandDTO(
+                person.getId(), person.getCompanyId(), "52998224726");
+
+        when(userRepositoryPort.findByIdAndCompanyId(person.getId(), person.getCompanyId()))
+                .thenReturn(Optional.of(person));
+        when(personProfileRepositoryPort.findByUserId(person.getId())).thenReturn(Optional.of(profile));
+
+        assertThatThrownBy(() -> userCommandService.patchPersonDocument(command))
+                .isInstanceOf(UnprocessableException.class)
+                .extracting("errorCode")
+                .isEqualTo("PAYER_DOCUMENT_INVALID");
+
+        verify(personProfileRepositoryPort, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 quando o usuário não pertence à company")
+    void shouldReturnNotFoundWhenUserIsFromAnotherCompany() {
+        User person = UserTestBuilder.builder().asPerson().asActive().buildDomainWithId();
+        UUID otherCompany = UUID.randomUUID();
+        UserPatchPersonDocumentCommandDTO command = new UserPatchPersonDocumentCommandDTO(
+                person.getId(), otherCompany, VALID_CPF);
+
+        when(userRepositoryPort.findByIdAndCompanyId(person.getId(), otherCompany))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userCommandService.patchPersonDocument(command))
+                .isInstanceOf(NotFoundException.class)
+                .extracting("errorCode")
+                .isEqualTo("USER_NOT_FOUND");
+
+        verify(personProfileRepositoryPort, never()).save(any());
+        verify(personProfileRepositoryPort, never()).findByUserId(any());
+    }
+
+    private static final String VALID_CPF = "52998224725";
 
     private UserUpdateCommandDTO updateCommand(Optional<String> email, Optional<String> phone) {
         return new UserUpdateCommandDTO(

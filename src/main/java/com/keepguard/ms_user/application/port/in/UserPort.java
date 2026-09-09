@@ -13,6 +13,8 @@ public interface UserPort {
 
     UserDetailsViewDTO update(UserUpdateCommandDTO command);
 
+    UserDetailsViewDTO patchPersonDocument(UserPatchPersonDocumentCommandDTO command);
+
     void delete(UserDeleteCommandDTO command);
 
     UserDetailsViewDTO activate(UserStatusChangeCommandDTO command);
