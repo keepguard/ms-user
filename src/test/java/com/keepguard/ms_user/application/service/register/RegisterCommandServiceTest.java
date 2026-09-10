@@ -549,5 +549,15 @@ class RegisterCommandServiceTest {
                 .hasMessage("Falha ao salvar sessão de registro no cache")
                 .hasCauseInstanceOf(com.fasterxml.jackson.core.JsonProcessingException.class);
     }
+
+    @Test
+    @DisplayName("Deve mascarar email corretamente para proteção de PII em logs")
+    void shouldMaskEmailProperly() {
+        assertThat(RegisterCommandService.maskEmail("rafael@keepguard.com")).isEqualTo("r***@keepguard.com");
+        assertThat(RegisterCommandService.maskEmail("user@domain.com")).isEqualTo("u***@domain.com");
+        assertThat(RegisterCommandService.maskEmail("a@domain.com")).isEqualTo("***@domain.com");
+        assertThat(RegisterCommandService.maskEmail(null)).isEqualTo("");
+        assertThat(RegisterCommandService.maskEmail("   ")).isEqualTo("");
+    }
 }
 

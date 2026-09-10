@@ -209,6 +209,15 @@ public final class User {
         this.updatedAt = OffsetDateTime.now();
     }
 
+    public void anonymize() {
+        this.email = "anon_" + this.id + "@deleted.keepguard.local";
+        this.phoneE164 = null;
+        this.avatarUrl = null;
+        this.displayHandle = null;
+        this.status = UserStatusEnum.DELETED;
+        this.updatedAt = OffsetDateTime.now();
+    }
+
     public boolean isActive() {
         return UserStatusEnum.ACTIVE.equals(this.status);
     }

@@ -55,7 +55,7 @@ public record PersonRequestDTO(
     @Past(message = "Data de nascimento deve ser no passado")
     LocalDate dateOfBirth,
 
-    @Schema(description = "Gênero", example = "MALE")
+    @Schema(description = "Gênero (opcional — coletado exclusivamente para fins de KYC e prevenção à fraude, Art. 11, II, 'g' da LGPD)", example = "MALE", nullable = true)
     GenderEnum gender,
 
     @Schema(description = "Estado civil", example = "SINGLE")
@@ -81,12 +81,12 @@ public record PersonRequestDTO(
     @JsonProperty("birth_city")
     String birthCity,
 
-    @Schema(description = "Nome da mãe", example = "Maria da Silva")
+    @Schema(description = "Nome da mãe (opcional — coletado exclusivamente para fins de KYC e prevenção à fraude, Art. 11, II, 'g' da LGPD)", example = "Maria da Silva", nullable = true)
     @Size(max = 200, message = "Nome da mãe deve ter no máximo 200 caracteres")
     @JsonProperty("mother_name")
     String motherName,
 
-    @Schema(description = "Nome do pai", example = "José da Silva")
+    @Schema(description = "Nome do pai (opcional — coletado exclusivamente para fins de KYC e prevenção à fraude, Art. 11, II, 'g' da LGPD)", example = "José da Silva", nullable = true)
     @Size(max = 200, message = "Nome do pai deve ter no máximo 200 caracteres")
     @JsonProperty("father_name")
     String fatherName,

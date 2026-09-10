@@ -5,7 +5,9 @@ public enum UserStatusEnum {
     INACTIVE("Inativo"),
     PENDING("Pendente"),
     BLOCKED("Bloqueado"),
-    SUSPENDED("Suspenso");
+    SUSPENDED("Suspenso"),
+    DELETED("Deletado"),
+    ANONYMIZED("Anonimizado");
 
     private final String description;
 

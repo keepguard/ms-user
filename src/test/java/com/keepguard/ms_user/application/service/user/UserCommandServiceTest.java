@@ -57,6 +57,8 @@ class UserCommandServiceTest {
     private PersonProfileRepositoryPort personProfileRepositoryPort;
     @Mock
     private ProfileStrategy profileStrategy;
+    @Mock
+    private com.keepguard.ms_user.infrastructure.messaging.UserErasureEventPublisher userErasureEventPublisher;
 
     @InjectMocks
     private UserCommandService userCommandService;
@@ -300,5 +302,30 @@ class UserCommandServiceTest {
                 Optional.empty(),
                 Optional.empty()
         );
+    }
+
+    @Test
+    @DisplayName("Deve anonimizar usuário e publicar user.erasure.requested ao deletar")
+    void shouldAnonymizeUserAndPublishErasureRequestedOnDelete() {
+        // Given
+        when(userRepositoryPort.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepositoryPort.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        com.keepguard.ms_user.application.dto.user.UserDeleteCommandDTO deleteCommand =
+                new com.keepguard.ms_user.application.dto.user.UserDeleteCommandDTO(user.getId(), user.getCompanyId());
+
+        // When
+        userCommandService.delete(deleteCommand);
+
+        // Then
+        assertThat(user.getStatus()).isEqualTo(com.keepguard.ms_user.domain.enums.UserStatusEnum.DELETED);
+        assertThat(user.getEmail()).startsWith("anon_");
+        assertThat(user.getEmail()).endsWith("@deleted.keepguard.local");
+        assertThat(user.getPhoneE164()).isNull();
+        assertThat(user.getAvatarUrl()).isNull();
+        verify(userRepositoryPort).save(user);
+        verify(userCachePort).removeUserFromCache(user);
+        verify(userErasureEventPublisher).publishErasureRequested(any());
+        verify(metricsPort).incrementCounter(eq("user_deleted_total"), any());
     }
 }

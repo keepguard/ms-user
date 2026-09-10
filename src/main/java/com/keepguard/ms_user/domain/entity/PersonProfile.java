@@ -284,6 +284,22 @@ public final class PersonProfile implements UserProfile {
         this.updatedAt = OffsetDateTime.now();
     }
 
+    public void anonymize() {
+        this.fullName = "TITULAR ANONIMIZADO";
+        this.cpf = null;
+        this.rg = null;
+        this.rgIssuer = null;
+        this.rgState = null;
+        this.motherName = null;
+        this.fatherName = null;
+        this.occupation = null;
+        this.birthCity = null;
+        this.birthState = null;
+        this.birthCountry = null;
+        this.nationality = null;
+        this.updatedAt = OffsetDateTime.now();
+    }
+
     public void setPep(boolean pep) {
         this.pep = pep;
         this.updatedAt = OffsetDateTime.now();

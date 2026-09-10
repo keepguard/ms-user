@@ -37,6 +37,7 @@ public class UserCommandService {
     private final UserApplicationMapper userApplicationMapper;
     private final MetricsPort metricsPort;
     private final com.keepguard.ms_user.application.port.out.persistence.PersonProfileRepositoryPort personProfileRepositoryPort;
+    private final com.keepguard.ms_user.infrastructure.messaging.UserErasureEventPublisher userErasureEventPublisher;
 
 
     @LogOperation(
@@ -268,31 +269,43 @@ public class UserCommandService {
 
     @LogOperation(
         operation = "DELETE_USER",
-        description = "Removendo usuário: {id}",
+        description = "Anonimizando e removendo dados cadastrais do titular: {command.id}",
         audit = true,
         auditAction = "DELETE",
         auditEntityType = "USER"
     )
     @Transactional
     public void delete(UserDeleteCommandDTO command) {
-        log.info("Deletando usuário: {}, companyId: {}", command.id(), command.companyId());
+        log.info("Processando exclusão e anonimização de usuário (Art. 18 LGPD): {}, companyId: {}", command.id(), command.companyId());
 
         var user = userRepositoryPort.findById(command.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado: " + command.id(), "USER_NOT_FOUND", Map.of("userId", command.id())));
 
-        // Usar Strategy Pattern para remover perfil apropriado
-        deleteUserProfile(user);
+        // Anonimizar perfil de pessoa física
+        personProfileRepositoryPort.findByUserId(user.getId()).ifPresent(profile -> {
+            profile.anonymize();
+            personProfileRepositoryPort.save(profile);
+            log.info("Perfil de pessoa física anonimizado com sucesso para titular: {}", user.getId());
+        });
+
+        // Anonimizar dados em users
+        user.anonymize();
+        userRepositoryPort.save(user);
 
         // Remover do cache
         userCachePort.removeUserFromCache(user);
 
-        // Deletar do banco
-        userRepositoryPort.deleteById(command.id());
+        // Disparar evento de exclusão para microsserviços satélites
+        userErasureEventPublisher.publishErasureRequested(new com.keepguard.ms_user.application.dto.events.UserErasureEventDTO(
+                user.getId(),
+                user.getCompanyId(),
+                java.time.OffsetDateTime.now()
+        ));
 
         metricsPort.incrementCounter("user_deleted_total",
-            Map.of("entity_id", command.id().toString()));
+            Map.of("status", "SUCCESS"));
 
-        log.info("Usuário deletado com sucesso: {}", command.id());
+        log.info("Titular anonimizado com sucesso e saga disparada: {}", command.id());
     }
 
 
