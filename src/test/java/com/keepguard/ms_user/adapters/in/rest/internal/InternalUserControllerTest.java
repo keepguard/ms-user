@@ -1,13 +1,12 @@
 package com.keepguard.ms_user.adapters.in.rest.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.keepguard.lib_security.context.SecurityContext;
 import com.keepguard.ms_user.adapters.in.rest.user.dto.response.PersonResponseDTO;
 import com.keepguard.ms_user.adapters.in.rest.user.dto.response.UserResponseDTO;
 import com.keepguard.ms_user.adapters.in.rest.user.mapper.UserAdapterMapper;
 import com.keepguard.ms_user.application.port.in.UserPort;
 import com.keepguard.ms_user.application.dto.user.UserDetailsViewDTO;
-import com.keepguard.ms_user.application.service.exception.NotFoundException;
-import com.keepguard.ms_user.domain.entity.PersonProfile;
 import com.keepguard.ms_user.domain.enums.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -31,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Testes unitários para InternalUserController
- * Testa os endpoints internos sem autenticação JWT
+ * Testa os endpoints internos protegidos por ROLE_SYSTEM / ROLE_ADMIN
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Internal User Controller Tests")
@@ -46,6 +44,9 @@ class InternalUserControllerTest {
     
     @Mock
     private UserAdapterMapper mapper;
+
+    @Mock
+    private SecurityContext securityContext;
     
     @InjectMocks
     private InternalUserController controller;
@@ -58,7 +59,6 @@ class InternalUserControllerTest {
     void setUp() {
         userId = UUID.randomUUID();
         codeUser = UUID.randomUUID();
-        companyId = UUID.randomUUID();
         companyId = UUID.fromString("4f74e125-c90d-442d-910b-5ea70b02e5e9");
         
         objectMapper = new ObjectMapper();
@@ -68,12 +68,13 @@ class InternalUserControllerTest {
     // === TESTES GET BY ID ===
     
     @Test
-    @DisplayName("Deve buscar usuário por ID com sucesso")
+    @DisplayName("Deve buscar usuário por ID com sucesso para ROLE_SYSTEM")
     void shouldGetUserByIdSuccessfully() throws Exception {
         // Given
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
+        when(securityContext.hasRole("ROLE_SYSTEM")).thenReturn(true);
         when(mapper.toGetByIdQuery(any(), any())).thenReturn(null);
         when(userPort.getById(any())).thenReturn(view);
         when(mapper.toGetByIdResponseDTO(any())).thenReturn(response);
@@ -90,37 +91,27 @@ class InternalUserControllerTest {
     }
     
     @Test
-    @DisplayName("Deve usar X-Tenant-Id padrão quando não fornecido")
-    void shouldUseDefaultTenantIdWhenNotProvided() throws Exception {
-        // Given
-        var view = buildUserDetailsView();
-        var response = buildUserResponse();
-        
-        when(mapper.toGetByIdQuery(any(), any())).thenReturn(null);
-        when(userPort.getById(any())).thenReturn(view);
-        when(mapper.toGetByIdResponseDTO(any())).thenReturn(response);
-        
-        // When & Then
+    @DisplayName("Deve retornar 403 Forbidden quando não possuir ROLE_SYSTEM nem ROLE_ADMIN no getById")
+    void shouldReturn403WhenNotSystemOrAdminOnGetById() throws Exception {
+        when(securityContext.hasRole("ROLE_SYSTEM")).thenReturn(false);
+        when(securityContext.hasRole("ROLE_ADMIN")).thenReturn(false);
+
         mockMvc.perform(get("/internal/v1/users/{id}", userId)
                 .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isForbidden());
     }
-    
-    // Test de exceção comentado - GlobalExceptionHandler não está no contexto de teste
-    // @Test
-    // @DisplayName("Deve retornar 404 quando usuário não existe (por ID)")
-    // void shouldReturn404WhenUserNotFoundById() throws Exception {}
     
     // === TESTES GET BY CODE_USER ===
     
     @Test
-    @DisplayName("Deve buscar usuário por codeUser com sucesso")
+    @DisplayName("Deve buscar usuário por codeUser com sucesso para ROLE_SYSTEM")
     void shouldGetUserByCodeUserSuccessfully() throws Exception {
         // Given
         var view = buildUserDetailsView();
         var response = buildUserResponse();
         
+        when(securityContext.hasRole("ROLE_SYSTEM")).thenReturn(true);
         when(mapper.toGetByCodeUserQuery(any(), any())).thenReturn(null);
         when(userPort.getByCodeUser(any())).thenReturn(view);
         when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
@@ -138,38 +129,24 @@ class InternalUserControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar 403 Forbidden quando não possuir ROLE_SYSTEM nem ROLE_ADMIN no getByCodeUser")
+    void shouldReturn403WhenNotSystemOrAdminOnGetByCodeUser() throws Exception {
+        when(securityContext.hasRole("ROLE_SYSTEM")).thenReturn(false);
+        when(securityContext.hasRole("ROLE_ADMIN")).thenReturn(false);
+
+        mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
+                .header("X-Company-Id", companyId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("Deve recusar busca por codeUser sem X-Company-Id")
     void shouldRejectGetUserByCodeUserWithoutCompanyId() throws Exception {
         mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
-                .header("X-Company-Id", companyId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
-    
-    @Test
-    @DisplayName("Deve buscar usuário por codeUser sem X-Tenant-Id header")
-    void shouldGetUserByCodeUserWithoutTenantId() throws Exception {
-        // Given
-        var view = buildUserDetailsView();
-        var response = buildUserResponse();
-        
-        when(mapper.toGetByCodeUserQuery(any(), any())).thenReturn(null);
-        when(userPort.getByCodeUser(any())).thenReturn(view);
-        when(mapper.toGetByCodeUserResponseDTO(any())).thenReturn(response);
-        
-        // When & Then
-        mockMvc.perform(get("/internal/v1/users/code/{codeUser}", codeUser)
-                .header("X-Company-Id", companyId.toString())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.personProfile.full_name").value("Test User"))
-                .andExpect(jsonPath("$.display_handle").value("test.user"));
-    }
-    
-    // Test de exceção comentado - GlobalExceptionHandler não está no contexto de teste
-    // @Test
-    // @DisplayName("Deve retornar 404 quando usuário não existe (por codeUser)")
-    // void shouldReturn404WhenUserNotFoundByCodeUser() throws Exception {}
     
     private UserDetailsViewDTO buildUserDetailsView() {
         return new UserDetailsViewDTO(
@@ -183,8 +160,8 @@ class InternalUserControllerTest {
                 "pt-BR",
                 "America/Sao_Paulo",
                 null,
-                "test.user", // displayHandle (agora em user)
-                null, // personProfile não precisa para teste de controller
+                "test.user",
+                null,
                 null,
                 OffsetDateTime.now(),
                 OffsetDateTime.now()

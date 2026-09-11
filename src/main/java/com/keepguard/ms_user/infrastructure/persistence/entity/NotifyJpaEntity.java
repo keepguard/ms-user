@@ -48,6 +48,7 @@ public class NotifyJpaEntity implements Persistable<UUID> {
                            boolean notifyWhatsapp, boolean notifyPush,
                            OffsetDateTime createdAt, OffsetDateTime updatedAt, Long version) {
         this(userId, notifyEmail, notifySms, notifyWhatsapp, notifyPush, createdAt, updatedAt);
+        this.version = version;
     }
 
     @Override

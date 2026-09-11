@@ -156,7 +156,7 @@ public class UserController {
     @GetMapping("/companies/{companyId}/users")
     @Operation(summary = "Buscar usuários por empresa", description = "Busca usuários de uma empresa específica com filtros e paginação")
     public ResponseEntity<PageResultDTO<UserResponseDTO>> searchByCompany(
-            @PathVariable String pathCompanyId,
+            @PathVariable("companyId") String pathCompanyId,
             @Valid @ModelAttribute UserSearchRequestDTO searchRequest,
             @Parameter(description = "UUID da empresa", required = true)
             @RequestHeader(value = "X-Company-Id", required = true) UUID companyId) {
